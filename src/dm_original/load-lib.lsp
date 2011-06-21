@@ -1,3 +1,4 @@
+;; File used for testing the lisp environment
 
 (load "package-dm.lsp")
 (load "lib-core/infixmath.lsp")
