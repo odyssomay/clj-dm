@@ -1,4 +1,5 @@
 (ns director-musices.core
+  (:gen-class)
   (:use (director-musices.gui rulepalette score)
         (Hafni arrow)
         (Hafni.swing action component layout menu view)))
