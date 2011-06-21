@@ -2,9 +2,6 @@
   :description "FIXME: write description"
   :disable-deps-clean true
   :main director-musices.core
-;  :aot [director-musices.glue]
-;  :extra-classpath-dirs ["abc4j/lib/abc4j.jar"]
-;  :library-path ["lib/" "abc4j/lib/"]
   :dependencies [[org.clojure/clojure "1.2.1"]
                  [org.clojure/tools.logging "0.1.2"]
                  [hafni "1.0.5-SNAPSHOT"]
