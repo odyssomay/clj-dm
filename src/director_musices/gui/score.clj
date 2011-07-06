@@ -48,11 +48,6 @@
   (tune->score-abc4j
     (track->tune-abc4j track)))
 
-;(def *test-tracks* (load-score "test2.mus"))
-
-;(def *test-track*-abc4j
-;  (track->abc4j (first *test-tracks*)))
-
 ;; Arrows
 
 (def update-score-panel
@@ -80,9 +75,14 @@
 
 ;; test
 
-(use 'Hafni.swing.view)
-(defn show-test-track []
-  (frame :size 400 200
-         :content (scroll-pane *test-track*-abc4j)
-         :dont_exit_on_close))
+;(def *test-tracks* (load-score "test2.mus"))
+
+;(def *test-track*-abc4j
+;  (track->abc4j (first *test-tracks*)))
+
+;(use 'Hafni.swing.view)
+;(defn show-test-track []
+;  (frame :size 400 200
+;         :content (scroll-pane *test-track*-abc4j)
+;         :dont_exit_on_close))
 
