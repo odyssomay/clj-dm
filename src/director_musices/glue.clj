@@ -9,8 +9,10 @@
   (load-abcl "src" "dm_original" "package-dm.lsp"))
 
 (defn load-core []
+  (load-abcl "src" "dm_original" "lib-core" "scoreobjects.lsp")
   (load-dir-abcl
-    [] "src" "dm_original" "lib-core")
+    ["scoreobjects.lsp"]
+    "src" "dm_original" "lib-core")
   (load-abcl "src" "dm_original" "init.lsp"))
 
 (defn load-rules []
