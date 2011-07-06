@@ -1,17 +1,6 @@
 (ns director-musices.rulepalette
   (:use (director-musices glue)))
 
-;(defn in-package [s] )
-
-;(defn set-dm-var [s content] [(keyword s) content])
-
-;(use 'clojure.pprint)
-
-;(defn string->rulepalette2 [string]
-;  (->> (load-string (str "'(" string ")"))
-       ;(remove #(= (first %) 'in-package))
-;       (some #(= (second %) 'all-rules)
-       
 (defn string->rulepalette [string]
   (->> (load-string (str "(let [set-dm-var (fn [s content]
                                              [(keyword s) content])
@@ -56,8 +45,8 @@
 
 ;; Tests
 
-(def *test-rulepalette*
-  (path->rulepalette "src/rulepalettes/default2.pal"))
+;(def *test-rulepalette*
+;  (path->rulepalette "src/rulepalettes/default2.pal"))
 
-(defn test-rulepalette-string []
-  (= *test-rulepalette* (string->rulepalette (rulepalette->string *test-rulepalette*))))
+;(defn test-rulepalette-string []
+;  (= *test-rulepalette* (string->rulepalette (rulepalette->string *test-rulepalette*))))
