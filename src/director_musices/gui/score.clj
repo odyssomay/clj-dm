@@ -48,10 +48,10 @@
   (tune->score-abc4j
     (track->tune-abc4j track)))
 
-(def *test-tracks* (load-score "test2.mus"))
+;(def *test-tracks* (load-score "test2.mus"))
 
-(def *test-track*-abc4j
-  (track->abc4j (first *test-tracks*)))
+;(def *test-track*-abc4j
+;  (track->abc4j (first *test-tracks*)))
 
 ;; Arrows
 
