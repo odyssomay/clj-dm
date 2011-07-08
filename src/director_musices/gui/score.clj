@@ -1,7 +1,7 @@
 (ns director-musices.gui.score
   (:use (director-musices glue load-mus)
         (director-musices.gui track)
-        (Hafni arrow)
+        clj-arrow.arrow
         (Hafni.swing component dialog view)))
 
 (def *current-score* (atom nil))
@@ -20,7 +20,7 @@
   (apply str
          (map track->string score)))
 
-(defn load-score [path]
+(defn path->score [path]
   (let [mus (load-mus (load-string (str "'[" 
                                         (slurp path) 
                                         "]")))]
@@ -61,7 +61,7 @@
         (arr :path) >>>
         (arr (fn [path]
                (set-score 
-                 (load-score path))
+                 (path->score path))
                (load-active-score-from-file path)
                path)) >>>
         update-score-panel))
@@ -71,7 +71,6 @@
         (arr :path) >>>
         (arr (fn [path]
                (save-score @*current-score* path))))) 
-
 
 ;; test
 

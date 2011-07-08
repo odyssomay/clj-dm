@@ -59,10 +59,17 @@
 (defn str->abcl [s]
   (eval-abcl (str "\"" s "\"")))
 
+(use 'clojure.pprint)
+
 (defn load-active-score [string]
   (init-dm)
+;  (eval-abcl 
+;    (str "(in-package :dm)
+;          (read-score-from-string \"" string 
+;         "\")
+;          (init-music-score)")))
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "read-active-score-from-string") (str->abcl string))
+  (.execute (abcl-f "DM" "read-score-from-string") (str->abcl string))
   (eval-abcl "(init-music-score)"))
 
 (defn load-active-score-from-file [path]
@@ -76,7 +83,7 @@
 
 (defn apply-rules [rulelist-string sync-rule]
   (init-dm)
-  (eval-abcl "(in-package :dm)")
-  (eval-abcl (str "(rule-apply-list-sync '(" 
+  (eval-abcl (str "(in-package :dm)
+                  (rule-apply-list-sync '(" 
                   rulelist-string ") '" sync-rule ")")) )
 

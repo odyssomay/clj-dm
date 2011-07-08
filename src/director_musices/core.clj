@@ -1,7 +1,7 @@
 (ns director-musices.core
   (:gen-class)
-  (:use (director-musices.gui rulepalette score)
-        (Hafni arrow)
+  (:use clj-arrow.arrow
+        (director-musices.gui rulepalette score)
         (Hafni.swing action component layout menu view)))
 
 (defn init-main-area []
@@ -37,5 +37,5 @@
   (let [fr (frame :title "Director Musices"
                   :content (init-main-area)
                   :menu_bar (init-menu-bar)
-                  :size 300 200)]
+                  :size 400 300)]
     nil))

@@ -1,7 +1,8 @@
 (ns director-musices.gui.rulepalette
   (:use (director-musices rulepalette)
         (director-musices.gui score)
-        (Hafni arrow utils)
+        clj-arrow.arrow
+        (Hafni utils)
         (Hafni.swing component dialog layout text view)))
 
 (def *current-rulepalette* (atom nil))

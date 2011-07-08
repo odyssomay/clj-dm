@@ -30,3 +30,49 @@
   (let ((str (make-string-output-stream)))
     (print-to-file *active-score* str)
     (get-output-stream-string str)))
+
+(defun read-score-from-string (string)
+   (let ((inlist)
+         (score (make-instance 'score :score-filename "no name"))
+         (track)
+         (old-format-p nil))
+      (with-input-from-string (ifile string)
+        (setq inlist (read ifile nil))
+
+        (cond
+         ((symbolp inlist)  ;first symbol
+          (case  inlist
+            (mono-track (setq track (make-instance 'mono-track)))
+            (voice-track (setq track (make-instance 'voice-track)))
+            (t (setq old-format-p t)   ;old format
+               (setq track (make-instance 'mono-track :trackname (string inlist)))) )
+          (loop             ;the rest
+            (setq inlist (read ifile nil))
+            (cond ((not inlist)       ;end of file
+                   (add-one-track score track)
+                   (return) )
+                  ((keywordp inlist)      ;track var
+                   (cond ((slot-exists-p track (read-from-string (string inlist)))
+                          (setf (slot-value track (read-from-string (string inlist)))
+                            (case inlist
+                              (:synth (make-synth (read ifile nil)))
+                              (t (read ifile nil))) ))
+                         (t (read ifile nil)
+                            (warn "not a track variable: ~A" inlist))))
+                  ((symbolp inlist)      ;new track
+                   (add-one-track score track)
+                   (case  inlist
+                     (mono-track (setq track (make-instance 'mono-track)))
+                     (voice-track (setq track (make-instance 'voice-track)))
+                     (t (setq track (make-instance 'mono-track :trackname (string inlist))))  ;old format
+                     ))
+                  ((listp inlist)              ;if list new tone
+                   (add-one-segment track (make-instance 'segment :var-list (list-to-alist inlist))))
+                  (t (error "Not expected in file: ~A" inlist)) )))
+         (t (error "Not expected in file: ~A" inlist)) )
+                 )
+      (setq *active-score* score)
+     (if old-format-p (get-track-par))
+     (recreate-time-shapes)
+;      (if (get-dm-var 'verbose-i/o) (print-ll  "Active score loaded from " fpath))
+      score))
