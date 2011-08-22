@@ -70,18 +70,39 @@
        :no-parameters? (.isSelected cb)})))
 
 (declare rule-display)
-(defn rule-display* [rp-display [rule-name & [k & args]]]
+
+(defn rule-navigation [rp-display]
   (let [up (ssw/label :icon (resource "icons/up_alt.png"))
-        no-parameters? (not (number? k))]
+        down (ssw/label :icon (resource "icons/down_alt.png"))
+        rmv (ssw/label :icon (resource "icons/remove.png"))]
     (ssw/listen up :mouse-clicked
-      (fn [_]
-        (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
+      (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
+    (ssw/listen down :mouse-clicked
+      (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
+    (ssw/listen rmv :mouse-clicked 
+      (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))
+    [up down rmv]))
+
+(defn rule-parameter-display [no-parameters? k args]
+  (if no-parameters?
+    ["" "" ""]
+    (let [t (ssw/text :text k :columns 5)
+          s (ssw/slider :min (* -5 slider-precision) :max (* 5 slider-precision) 
+                        :value (* k slider-precision) :snap-to-ticks? false)]
+      (.addActionListener t
+        (reify java.awt.event.ActionListener
+          (actionPerformed [_ _] (.setValue s (* (read-string (.getText t)) slider-precision)))))
+      (.addChangeListener s
+        (reify javax.swing.event.ChangeListener
+          (stateChanged [_ _] (.setText t (str (double (/ (.getValue s) slider-precision)))))))
+      [t s
+       (ssw/text :text (apply str (interpose " " args)) :columns 30)])))
+
+(defn rule-display* [rp-display [rule-name & [k & args]]]
+  (let [[up down rmv] (rule-navigation rp-display)
+        no-parameters? (not (number? k))]
     (concat 
-      [up
-       (let [l (ssw/label :icon (resource "icons/down_alt.png"))]
-         (ssw/listen l :mouse-clicked
-           (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
-         l)
+      [up down
        (ssw/checkbox :selected? true)
        (let [l (ssw/label :text (str rule-name))]
          (ssw/listen l :mouse-clicked 
@@ -98,25 +119,8 @@
                                  (add-rule-at rp-display line (rule-display rp-display [nm 0.0])))
                                (.setText l nm)))))))
          l)]
-       (if no-parameters?
-         ["" "" ""]
-         (let [t (ssw/text :text k :columns 5)
-               s (ssw/slider :min (* -5 slider-precision) :max (* 5 slider-precision) :value (* k slider-precision)
-                      :snap-to-ticks? false 
-                      ;:minor-tick-spacing 10 :major-tick-spacing 50 :paint-labels? true
-                      )]
-           (.addActionListener t
-             (reify java.awt.event.ActionListener
-               (actionPerformed [_ _] (.setValue s (* (read-string (.getText t)) slider-precision)))))
-           (.addChangeListener s
-             (reify javax.swing.event.ChangeListener
-               (stateChanged [_ _] (.setText t (str (double (/ (.getValue s) slider-precision)))))))
-           [t s
-            (ssw/text :text (apply str (interpose " " args)) :columns 30)]))
-      [(let [l (ssw/label :icon (resource "icons/delete.png"))]
-         (ssw/listen l :mouse-clicked 
-           (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))
-         l)])))
+      (rule-parameter-display no-parameters? k args)
+      [rmv])))
 
 (defn rule-display [rp-display rule]
   (let [rules (remove nil? (rule-display* rp-display rule))]
