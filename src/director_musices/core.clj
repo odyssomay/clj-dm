@@ -7,6 +7,13 @@
 (def main-area 
   (javax.swing.JDesktopPane.))
 
+(defn add-to-main-area [ifr]
+  (when ifr
+    (.pack ifr)
+    (.setVisible ifr true)
+    (.add main-area ifr)
+    (.moveToFront main-area ifr)))
+
 (defn init-main-area []
   (ssw/border-panel :north player-panel :south *score-panel* :center *rulepalette-panel*))
 
@@ -15,12 +22,7 @@
     :text "rulepalette"
     :items
     [(ssw/action :name "Load rulepalette"
-                 :handler (comp (fn [ifr]
-                                  (when ifr 
-                                     (.pack ifr) 
-                                     (.setVisible ifr true) 
-                                     (.add main-area ifr)
-                                     (.moveToFront main-area ifr))) choose-and-open-rulepalette))]))
+                 :handler (comp add-to-main-area choose-and-open-rulepalette))]))
 
 (defn init-score-menu []
   (ssw/menu 

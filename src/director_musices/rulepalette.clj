@@ -28,14 +28,14 @@
 
 (defn panel->rules [panel]
   (apply str
-         (map (fn [[ch l k args]]
+         (map (fn [[_ _ ch l _ k args _]]
                 (if (.isSelected ch)
                   (str \( (.getText l) " " 
                        (condp = (class k)
                          javax.swing.JSlider (double (/ (.getValue k) slider-precision))
-                         (.getText k)) " " 
+                         nil) " " 
                        (.getText args) ")\n")))
-              (partition 4 (.getComponents panel)))))
+              (partition components-per-line (.getComponents panel)))))
 
 (defn get-line-index-starting-with [{:keys [rule-panel]} up]
   (/ 
@@ -71,16 +71,17 @@
 
 (declare rule-display)
 (defn rule-display* [rp-display [rule-name & [k & args]]]
-  (let [up-action (ssw/action :icon (resource "icons/up_alt.png"))
-        up (ssw/button :action up-action)
+  (let [up (ssw/label :icon (resource "icons/up_alt.png"))
         no-parameters? (not (number? k))]
-    (ssw/config! up-action :handler 
+    (ssw/listen up :mouse-clicked
       (fn [_]
         (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
     (concat 
       [up
-       (ssw/action :icon (resource "icons/down_alt.png")
-                   :handler (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
+       (let [l (ssw/label :icon (resource "icons/down_alt.png"))]
+         (ssw/listen l :mouse-clicked
+           (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
+         l)
        (ssw/checkbox :selected? true)
        (let [l (ssw/label :text (str rule-name))]
          (ssw/listen l :mouse-clicked 
@@ -90,11 +91,11 @@
                            (if no-p? 
                              (let [line (get-line-index-starting-with rp-display up)]
                                (remove-rule-at rp-display line)
-                               (add-rule-at rp-display line (rule-display [nm 'T])))
+                               (add-rule-at rp-display line (rule-display rp-display [nm 'T])))
                              (if no-parameters?
                                (let [line (get-line-index-starting-with rp-display up)]
                                  (remove-rule-at rp-display line)
-                                 (add-rule-at rp-display line (rule-display [nm 0.0])))
+                                 (add-rule-at rp-display line (rule-display rp-display [nm 0.0])))
                                (.setText l nm)))))))
          l)]
        (if no-parameters?
@@ -112,8 +113,10 @@
                (stateChanged [_ _] (.setText t (str (double (/ (.getValue s) slider-precision)))))))
            [t s
             (ssw/text :text (apply str (interpose " " args)) :columns 30)]))
-      [(ssw/action :icon (resource "icons/delete.png")
-                   :handler (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))])))
+      [(let [l (ssw/label :icon (resource "icons/delete.png"))]
+         (ssw/listen l :mouse-clicked 
+           (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))
+         l)])))
 
 (defn rule-display [rp-display rule]
   (let [rules (remove nil? (rule-display* rp-display rule))]
@@ -122,7 +125,7 @@
 (defn rulepalette-window [rulepalette]
   (let [syncrule-field (ssw/text :columns 10 :text "melodic-sync")
         rules (atom [])
-        rule-panel (ssw-mig/mig-panel)
+        rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1" "" ""])
         rulepalette-panel (ssw/border-panel :center (ssw/scrollable rule-panel)
                             :south (ssw/flow-panel :items ["Sync rule" syncrule-field]))
         rp-display {:syncrule-field syncrule-field
