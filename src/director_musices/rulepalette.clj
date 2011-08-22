@@ -8,21 +8,6 @@
              [chooser :as ssw-chooser]
              [mig :as ssw-mig]]))
 
-(def *syncrule-field*
-  (ssw/text :columns 10 :text "melodic-sync"))
-
-(def *rule-panel* 
-  (ssw-mig/mig-panel))
-
-(def *rules*
-  (atom []))
-(add-watch *rules* nil (fn [_ _ _ items]
-                         (ssw/config! *rule-panel* :items items)))
-
-(def *rulepalette-panel* 
-  (ssw/border-panel :center (ssw/scrollable *rule-panel*)
-                    :south (ssw/flow-panel :items ["Sync rule" *syncrule-field*])))
-
 ;; loading
 
 (defn string->rulepalette [string]
@@ -52,29 +37,29 @@
                        (.getText args) ")\n")))
               (partition 4 (.getComponents panel)))))
 
-(defn get-line-index-starting-with [up]
+(defn get-line-index-starting-with [{:keys [rule-panel]} up]
   (/ 
-    (find-i up (.getComponents *rule-panel*))
+    (find-i up (.getComponents rule-panel))
     components-per-line))
 
-(defn get-rule-at [line]
-  (take components-per-line (drop (* line components-per-line) @*rules*)))
+(defn get-rule-at [{:keys [rules]} line]
+  (take components-per-line (drop (* line components-per-line) @rules)))
 
-(defn add-rule-at [line rule]
-  (swap! *rules* (fn [coll]
-                   (let [i (* components-per-line line)]
-                     (concat (take i coll) rule (drop i coll))))))
+(defn add-rule-at [{:keys [rules]} line rule]
+  (swap! rules (fn [coll]
+                 (let [i (* components-per-line line)]
+                   (concat (take i coll) rule (drop i coll))))))
 
-(defn remove-rule-at [line]
-  (swap! *rules* (fn [coll]
-                   (let [rules (partition 7 coll)]
-                     (concat (take (* components-per-line line) coll)
-                             (drop (* components-per-line (inc line)) coll))))))
+(defn remove-rule-at [{:keys [rules]} line]
+  (swap! rules (fn [coll]
+                 (let [rules (partition 7 coll)]
+                   (concat (take (* components-per-line line) coll)
+                           (drop (* components-per-line (inc line)) coll))))))
 
-(defn move-rule [line offset]
-  (let [rule (get-rule-at line)]
-    (remove-rule-at line)
-    (add-rule-at (+ line offset) rule)))
+(defn move-rule [rp-display line offset]
+  (let [rule (get-rule-at rp-display line)]
+    (remove-rule-at rp-display line)
+    (add-rule-at rp-display (+ line offset) rule)))
 
 (defn rule-name-dialog [& [previous-name previous-no-parameters?]]
   (let [tf (ssw/text :text previous-name :columns 20)
@@ -85,17 +70,17 @@
        :no-parameters? (.isSelected cb)})))
 
 (declare rule-display)
-(defn rule-display* [[rule-name & [k & args]]]
+(defn rule-display* [rp-display [rule-name & [k & args]]]
   (let [up-action (ssw/action :icon (resource "icons/up_alt.png"))
         up (ssw/button :action up-action)
         no-parameters? (not (number? k))]
     (ssw/config! up-action :handler 
       (fn [_]
-        (move-rule (get-line-index-starting-with up) -1)))
+        (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
     (concat 
       [up
        (ssw/action :icon (resource "icons/down_alt.png")
-                   :handler (fn [_] (move-rule (get-line-index-starting-with up) 1)))
+                   :handler (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
        (ssw/checkbox :selected? true)
        (let [l (ssw/label :text (str rule-name))]
          (ssw/listen l :mouse-clicked 
@@ -103,13 +88,13 @@
                        (if (== (.getClickCount e) 2)
                          (if-let [{nm :name no-p? :no-parameters?} (rule-name-dialog (.getText l) no-parameters?)]
                            (if no-p? 
-                             (let [line (get-line-index-starting-with up)]
-                               (remove-rule-at line)
-                               (add-rule-at line (rule-display [nm 'T])))
+                             (let [line (get-line-index-starting-with rp-display up)]
+                               (remove-rule-at rp-display line)
+                               (add-rule-at rp-display line (rule-display [nm 'T])))
                              (if no-parameters?
-                               (let [line (get-line-index-starting-with up)]
-                                 (remove-rule-at line)
-                                 (add-rule-at line (rule-display [nm 0.0])))
+                               (let [line (get-line-index-starting-with rp-display up)]
+                                 (remove-rule-at rp-display line)
+                                 (add-rule-at rp-display line (rule-display [nm 0.0])))
                                (.setText l nm)))))))
          l)]
        (if no-parameters?
@@ -128,29 +113,34 @@
            [t s
             (ssw/text :text (apply str (interpose " " args)) :columns 30)]))
       [(ssw/action :icon (resource "icons/delete.png")
-                   :handler (fn [_] (remove-rule-at (get-line-index-starting-with up))))])))
+                   :handler (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))])))
 
-(defn rule-display [args]
-  (let [rules (remove nil? (rule-display* args))]
+(defn rule-display [rp-display rule]
+  (let [rules (remove nil? (rule-display* rp-display rule))]
     (concat (map vector (butlast rules)) [[(last rules) "wrap"]])))
 
-(defn rulepalette-display [rulepalette]
-  (apply concat (map rule-display (:all-rules rulepalette))))
-; (reduce (fn [prev next]
-;           (let [rules (rule-display next)]
-;             (concat prev (map vector (butlast rules)) [[(last rules) "wrap"]])))
-;         []
-;         (:all-rules rulepalette)))
+(defn rulepalette-window [rulepalette]
+  (let [syncrule-field (ssw/text :columns 10 :text "melodic-sync")
+        rules (atom [])
+        rule-panel (ssw-mig/mig-panel)
+        rulepalette-panel (ssw/border-panel :center (ssw/scrollable rule-panel)
+                            :south (ssw/flow-panel :items ["Sync rule" syncrule-field]))
+        rp-display {:syncrule-field syncrule-field
+                    :rules rules
+                    :rule-panel rule-panel
+                    :rulepalette-panel rulepalette-panel}
+        ifr (javax.swing.JInternalFrame. "" true true true true)]
+    (add-watch rules "panel updater" (fn [_ _ old-items items]
+      (ssw/config! rule-panel :items items)
+      (if (not (== (count old-items) (count items)))
+        (.pack ifr))))
+    (reset! rules (apply concat (map (partial rule-display rp-display) (:all-rules rulepalette))))
+    (.setContentPane ifr rulepalette-panel)
+    ifr))
 
 ;; actions
 
-(defn apply-current-rulepalette [& _] 
-  (apply-rules (panel->rules *rule-panel*) (.getText *syncrule-field*)))
-
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn (fn [_ f] 
-                                         (reset! *rules* (rulepalette-display (path->rulepalette (.getCanonicalPath f)))))))
-
-(defn choose-and-save-rulepalette [& _]
-  )
+                                         (rulepalette-window (path->rulepalette (.getCanonicalPath f))))))
 

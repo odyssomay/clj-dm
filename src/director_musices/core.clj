@@ -4,6 +4,9 @@
         (director-musices.gui score))
   (:require [seesaw.core :as ssw]))
 
+(def main-area 
+  (javax.swing.JDesktopPane.))
+
 (defn init-main-area []
   (ssw/border-panel :north player-panel :south *score-panel* :center *rulepalette-panel*))
 
@@ -12,13 +15,12 @@
     :text "rulepalette"
     :items
     [(ssw/action :name "Load rulepalette"
-                 :handler choose-and-open-rulepalette)
-     (ssw/action :name "Save rulepalette"
-                 :handler choose-and-save-rulepalette)
-     :separator
-     (ssw/action :name "Apply rulepalette"
-                 :handler apply-current-rulepalette)
-     ]))
+                 :handler (comp (fn [ifr]
+                                  (when ifr 
+                                     (.pack ifr) 
+                                     (.setVisible ifr true) 
+                                     (.add main-area ifr)
+                                     (.moveToFront main-area ifr))) choose-and-open-rulepalette))]))
 
 (defn init-score-menu []
   (ssw/menu 
@@ -36,7 +38,7 @@
 (defn -main [& args]
   (let [fr (ssw/frame 
              :title "Director Musices"
-             :content (init-main-area)
+             :content main-area
              :menubar (init-menu-bar)
              :size [400 :by 300])]
     (ssw/show! fr)
