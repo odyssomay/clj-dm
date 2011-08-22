@@ -74,7 +74,7 @@
 (defn rule-navigation [rp-display]
   (let [up (ssw/label :icon (resource "icons/up_alt.png"))
         down (ssw/label :icon (resource "icons/down_alt.png"))
-        rmv (ssw/label :icon (resource "icons/remove.png"))]
+        rmv (ssw/label :icon (resource "icons/delete.png"))]
     (ssw/listen up :mouse-clicked
       (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
     (ssw/listen down :mouse-clicked
@@ -129,9 +129,14 @@
 (defn rulepalette-window [rulepalette]
   (let [syncrule-field (ssw/text :columns 10 :text "melodic-sync")
         rules (atom [])
-        rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1" "" ""])
+        rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
         rulepalette-panel (ssw/border-panel :center (ssw/scrollable rule-panel)
-                            :south (ssw/flow-panel :items ["Sync rule" syncrule-field]))
+                            :south (ssw/flow-panel 
+                                     :items [(ssw/action :name "Apply rulepalette"
+                                                         :handler (fn [_]
+                                                                    (apply-rules (panel->rules rule-panel) (.getText syncrule-field))))
+                                             (ssw/action :name "Reset and apply rulepalette") 
+                                             "Sync rule" syncrule-field]))
         rp-display {:syncrule-field syncrule-field
                     :rules rules
                     :rule-panel rule-panel

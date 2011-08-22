@@ -14,9 +14,6 @@
     (.add main-area ifr)
     (.moveToFront main-area ifr)))
 
-(defn init-main-area []
-  (ssw/border-panel :north player-panel :south *score-panel* :center *rulepalette-panel*))
-
 (defn init-rulepalette-menu []
   (ssw/menu 
     :text "rulepalette"
@@ -40,7 +37,7 @@
 (defn -main [& args]
   (let [fr (ssw/frame 
              :title "Director Musices"
-             :content main-area
+             :content (ssw/border-panel :north player-panel :center main-area)
              :menubar (init-menu-bar)
              :size [400 :by 300])]
     (ssw/show! fr)
