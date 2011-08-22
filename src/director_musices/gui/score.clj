@@ -2,11 +2,12 @@
   (:use (director-musices glue load-mus)
         (director-musices.gui track)
         clj-arrow.arrow
-        (Hafni.swing component dialog view)))
+        (Hafni.swing component dialog view))
+  (:require [seesaw.core :as ssw]))
 
 (def *current-score* (atom nil))
 
-(def *score-panel* (panel))
+(def *score-panel* (javax.swing.JPanel.))
 
 (defn set-score [score]
   (swap! *current-score* (constantly score)))
@@ -50,11 +51,9 @@
 
 ;; Arrows
 
-(def update-score-panel
-  (>>> (arr (fn [path]
-              [(label :text (str "Currently loaded score: " 
-                                 (last (.split path "/"))))]))
-       (input-arr *score-panel* :content)))
+(defn update-score-panel [path]
+  (ssw/config! *score-panel* 
+    :items [(ssw/label :text (str "Currently loaded score: " (last (.split path "/"))))]))
   
 (def choose-and-open-score 
   (flow (arr open-file) >>>

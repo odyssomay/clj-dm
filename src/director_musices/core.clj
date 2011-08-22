@@ -1,41 +1,43 @@
 (ns director-musices.core
   (:gen-class)
-  (:use clj-arrow.arrow
-        (director-musices.gui rulepalette score)
-        (Hafni.swing action component layout menu view)))
+  (:use (director-musices rulepalette player)
+        (director-musices.gui score))
+  (:require [seesaw.core :as ssw]))
 
 (defn init-main-area []
-  (border-layout :north *score-panel* :center *rulepalette-panel*))
+  (ssw/border-panel :north player-panel :south *score-panel* :center *rulepalette-panel*))
 
 (defn init-rulepalette-menu []
-  (menu "rulepalette"
-        :content 
-        [(comp-and-events (menu-item :text "Load rulepalette")
-                          :act choose-and-open-rulepalette)
-         (comp-and-events (menu-item :text "Save rulepalette")
-                          :act choose-and-save-rulepalette)
-         []
-         (comp-and-events (menu-item :text "Apply rulepalette")
-                          :act apply-current-rulepalette)
-        ]))
+  (ssw/menu 
+    :text "rulepalette"
+    :items
+    [(ssw/action :name "Load rulepalette"
+                 :handler choose-and-open-rulepalette)
+     (ssw/action :name "Save rulepalette"
+                 :handler choose-and-save-rulepalette)
+     :separator
+     (ssw/action :name "Apply rulepalette"
+                 :handler apply-current-rulepalette)
+     ]))
 
 (defn init-score-menu []
-  (menu "score"
-        :content
-        [(comp-and-events (menu-item :text "Load score")
-                          :act choose-and-open-score)
-         (comp-and-events (menu-item :text "Save score")
-                          :act choose-and-save-score)]))
+  (ssw/menu 
+    :text "score"
+    :items
+    [(ssw/action :name "Load score"
+                 :handler choose-and-open-score)
+     (ssw/action :name "Save score"
+                 :handler choose-and-save-score)]))
 
 (defn init-menu-bar []
-  (let [mb (menu-bar :content [(init-rulepalette-menu)
-                               (init-score-menu)
-                               ])]
-    mb))
+  (ssw/menubar :items [(init-rulepalette-menu)
+                       (init-score-menu)]))
 
 (defn -main [& args]
-  (let [fr (frame :title "Director Musices"
-                  :content (init-main-area)
-                  :menu_bar (init-menu-bar)
-                  :size 400 300)]
+  (let [fr (ssw/frame 
+             :title "Director Musices"
+             :content (init-main-area)
+             :menubar (init-menu-bar)
+             :size [400 :by 300])]
+    (ssw/show! fr)
     nil))

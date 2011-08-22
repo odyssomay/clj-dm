@@ -1,26 +1,28 @@
 (ns director-musices.glue
   (:use clojure.java.io
-        (director-musices interpreter)
-        (Hafni.swing component layout text view)))
+        (director-musices interpreter)))
 
-(def *dm-init?* (atom nil))
+(def dm-init? (atom nil))
 
 (defn load-package-dm []
-  (load-abcl "src" "dm_original" "package-dm.lsp"))
+  (load-abcl "dm:package-dm.lsp"))
 
 (defn load-core []
-  (load-abcl "src" "dm_original" "lib-core" "scoreobjects.lsp")
-  (load-dir-abcl
-    ["scoreobjects.lsp"]
-    "src" "dm_original" "lib-core")
-  (load-abcl "src" "dm_original" "init.lsp"))
+  (load-multiple-abcl
+    "dm:lib-core:"
+    ["scoreobjects.lsp" "basicmacros.lsp"  "infixmath.lsp"    "musicio.lsp"     "rulemacros.lsp" "parallelrulemacros.lsp" 
+     "dm-objects.lsp"   "initconvert.lsp"  "rule-groups.lsp"  "syntobjects.lsp" "shapeobjects.lsp"
+     "midifileoutput.lsp" "playlist.lsp" "midibasic-lw.lsp"])
+  (load-abcl "dm:init.lsp"))
 
 (defn load-rules []
-  (load-dir-in-abcl
+  (load-multiple-abcl
+    "dm:rules:"
     ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
      "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
-     "phrasearch.lsp"]
-    "src" "dm_original" "rules"))
+     "phrasearch.lsp" "SyncOnMel.lsp"
+     ]))
+
 (comment 
 (defn init-dm []
   (when-not @*dm-init?*
@@ -50,27 +52,27 @@
 )
 
 (defn init-dm []
-  (when-not @*dm-init?*
+  (when-not @dm-init?
     (load-package-dm)
     (load-core)
     (load-rules)
-    (swap! *dm-init?* (constantly true))))
+    (swap! dm-init? (constantly true))))
 
 (defn str->abcl [s]
   (eval-abcl (str "\"" s "\"")))
 
-(use 'clojure.pprint)
+;(use 'clojure.pprint)
 
 (defn load-active-score [string]
   (init-dm)
-;  (eval-abcl 
-;    (str "(in-package :dm)
-;          (read-score-from-string \"" string 
-;         "\")
-;          (init-music-score)")))
-  (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "read-score-from-string") (str->abcl string))
-  (eval-abcl "(init-music-score)"))
+  (eval-abcl 
+    (str "(in-package :dm)
+          (read-score-from-string \"" string 
+         "\")
+          (init-music-score)")))
+;  (eval-abcl "(in-package :dm)")
+;  (.execute (abcl-f "DM" "read-score-from-string") (str->abcl string))
+;  (eval-abcl "(init-music-score)"))
 
 (defn load-active-score-from-file [path]
   (init-dm)
@@ -87,3 +89,7 @@
                   (rule-apply-list-sync '(" 
                   rulelist-string ") '" sync-rule ")")) )
 
+(defn save-midi-to-path [path]
+  (init-dm)
+  (eval-abcl (str "(in-package :dm)
+                  (save-performance-midifile1-fpath \"" path "\")")))

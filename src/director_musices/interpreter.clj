@@ -1,20 +1,40 @@
 (ns director-musices.interpreter
-  (:use (Hafni.swing utils)))
-
-;; BASIC
+  (:use (director-musices [utils :only [log]])
+        [clojure.java.io :only [copy file resource]]))
 
 (def *interpreter*
   (do (org.armedbear.lisp.Interpreter/createInstance)
       (org.armedbear.lisp.Interpreter/getInstance)))
 
 (defn eval-abcl [s]
-  (.eval *interpreter* s))
+  (.eval *interpreter* 
+    (str "(let ((forms '(" s ")))
+            (loop for form in (butlast forms)
+                  do (eval form))
+            (eval (first (last forms))))")))
 
-(defn load-abcl [& dirs]
-  (if-not (= (first (last dirs)) \.) ; do not load hidden files
-    (do (eval-abcl (str "(load \"" (.getPath (apply file dirs)) "\")"))
-        (println "loaded file:" (last dirs)))
-    (println "omitted hidden file:" (last dirs))))
+;(defn eval-abcl [s]
+;  (try 
+;    (.eval *interpreter* s)
+;    (catch Exception e
+;      (println "abcl form eval failed:" s "\n" e)
+;      (.printStackTrace e))))
+
+(defn load-abcl [f]
+  (try 
+    (println f)
+;    (-> (with-open [s1 (.openStream (resource (.replaceAll f ":" "/")))
+;                    s2 (java.io.StringWriter.)]
+;          (copy s1 s2)
+;          (.toString s2))
+;        eval-abcl)
+    (eval-abcl (str "(load \"" 
+                    (.getCanonicalPath (apply file (.split f ":")))
+                    ;(.getCanonicalPath (resource (.replaceAll f ":" "/")))
+                    "\")"))
+    (log :trace (str "loaded " f))
+    (catch Exception e
+      (log :error e (str "failed loading " f)))))
 
 (defn import-abcl [package]
   (eval-abcl (str "(import " package ")")))
@@ -41,7 +61,6 @@
       (map #(apply load-abcl (concat dirs [%]))
            including))))
 
-;; TEST
-
-(defn call-test-glue []
-  (.execute (abcl-f "DM" "TEST")))
+(defn load-multiple-abcl [prefix fs]
+  (doseq [f fs]
+    (load-abcl (str prefix f))))

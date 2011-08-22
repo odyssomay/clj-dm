@@ -76,3 +76,8 @@
      (recreate-time-shapes)
 ;      (if (get-dm-var 'verbose-i/o) (print-ll  "Active score loaded from " fpath))
       score))
+
+(defun get-midi-from-score ()
+  (let ((str (make-string-output-stream)))
+    (save-performance-midifile1-stream str)
+    (get-output-stream-string str)))
