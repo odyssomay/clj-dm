@@ -1,6 +1,7 @@
 (ns director-musices.glue
   (:use clojure.java.io
-        (director-musices interpreter)))
+        (director-musices interpreter))
+  (:require [seesaw.core :as ssw]))
 
 (def dm-init? (atom nil))
 
@@ -23,40 +24,17 @@
      "phrasearch.lsp" "SyncOnMel.lsp"
      ]))
 
-(comment 
-(defn init-dm []
-  (when-not @*dm-init?*
-    (let [text_area (text-area)]
-      (.setUpdatePolicy (.getCaret (component text_area)) javax.swing.text.DefaultCaret/ALWAYS_UPDATE)
-      (frame :content (border-layout :north (label :text "Loading lisp environment")
-                                     :center (scroll-pane text_area)) 
-             :size 300 200 :dont_exit_on_close)
-      (with-open [out-writer 
-                  (proxy [java.io.Writer] []
-                    (write ([input offset length] 
-                            (if (string? input)
-                              (.write this (subs input offset (+ offset length)))))
-                           ([input]
-                            (if (number? input)
-                              ((input-arr text_area :append) (str (char input)))
-                              ((input-arr text_area :append) (str input)))
-                            (.setCaretPosition (component text_area) (.getLength (.getDocument (component text_area)))))
-                           )
-                    (flush [] )
-                    (close [] ))]
-        (binding [*out* out-writer]
-          (load-package-dm)
-          (load-core)
-          (load-rules)
-          (swap! *dm-init?* (constantly true)))))))
-)
-
 (defn init-dm []
   (when-not @dm-init?
-    (load-package-dm)
-    (load-core)
-    (load-rules)
-    (swap! dm-init? (constantly true))))
+    (let [d (ssw/frame :content (ssw/border-panel :north (ssw/label :text "Loading lisp environment" :border 10)
+                                                  :center (ssw/progress-bar :indeterminate? true :border 10)))]
+      (ssw/pack! d)
+      (ssw/show! d)
+      (load-package-dm)
+      (load-core)
+      (load-rules)
+      (swap! dm-init? (constantly true))
+      (ssw/dispose! d))))
 
 (defn str->abcl [s]
   (eval-abcl (str "\"" s "\"")))
