@@ -18,3 +18,5 @@
                         raw_tracks)]
     (vec opt_tracks)))
 
+(defn load-mus-from-path [path]
+  (load-mus (load-string (str "'[" (slurp path) "]"))))

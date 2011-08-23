@@ -1,7 +1,8 @@
 (ns director-musices.core
   (:gen-class)
-  (:use (director-musices rulepalette player)
-        (director-musices.gui score))
+  (:use (director-musices rulepalette player score)
+;        (director-musices.gui score)
+        )
   (:require [seesaw.core :as ssw]))
 
 (def main-area 
@@ -37,7 +38,8 @@
 (defn -main [& args]
   (let [fr (ssw/frame 
              :title "Director Musices"
-             :content (ssw/border-panel :north player-panel :center main-area)
+             :content (ssw/border-panel :north player-panel :center (ssw/top-bottom-split (ssw/scrollable score-panel)
+                                                                                          main-area))
              :menubar (init-menu-bar)
              :size [400 :by 300])]
     (ssw/show! fr)
