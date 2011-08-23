@@ -3,11 +3,12 @@
         [clojure.java.io :only [copy file resource]]))
 
 (def *interpreter*
-  (do (org.armedbear.lisp.Interpreter/createInstance)
-      (org.armedbear.lisp.Interpreter/getInstance)))
+  (future 
+    (do (org.armedbear.lisp.Interpreter/createInstance)
+        (org.armedbear.lisp.Interpreter/getInstance))))
 
 (defn eval-abcl [s]
-  (.eval *interpreter* 
+  (.eval @*interpreter* 
     (str "(let ((forms '(" s ")))
             (loop for form in (butlast forms)
                   do (eval form))
