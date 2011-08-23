@@ -6,34 +6,30 @@
              [core :as ssw]
              [chooser :as ssw-chooser]]))
 
-(def current-score (atom nil))
-
 (def score-panel (ssw/vertical-panel))
 
-;(def current-score-component (score-component 
-
-(defn set-score [score]
-  (swap! current-score (constantly score)))
-
-(defn update-score-panel [path]
-  (ssw/config! score-panel
-    :items [;(ssw/label :text (str "Currently loaded score: " (last (.split path "/"))))
-            (score-component 
-              (for [{n :n :as note} (:notes (first @current-score))]
-                               (if n
-                                 (assoc note :pitch (first n)
-                                             :length (* 4 (second n)))
-                                 note))
-              :clef \G :scale-x 1.5 ;:scale 2
-              )
-            ]))
+(defn update-score-panel [path score]
+  (let [s (ssw/slider :min -20 :max 20)
+        sc (score-component 
+             (for [{n :n :as note} (:notes (first score))]
+               (if n
+                 (assoc note :pitch (first n)
+                        :length (* 4 (second n)))
+                 note))
+             :clef \G :scale-x 3 ;:scale 2
+             )]
+    (ssw/listen s :change (fn [& _] (.setScale sc (.getValue s))))
+    (ssw/config! score-panel :items
+      [(ssw/horizontal-panel :items [s])
+       sc])))
   
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
-                  (load-active-score-from-file (.getCanonicalPath f))
-                  (set-score (load-mus-from-path (.getCanonicalPath f)))
-                  (update-score-panel (.getCanonicalPath f)))))
+                  (let [path (.getCanonicalPath f)]
+                    (load-active-score-from-file path)
+                    ;(set-score (load-mus-from-path path))
+                    (update-score-panel path (load-mus-from-path path))))))
 
 (defn choose-and-save-score [& _] )
 
