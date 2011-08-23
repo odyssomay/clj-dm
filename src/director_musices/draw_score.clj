@@ -35,12 +35,12 @@
      (case (first (:pitch note))
        \C 0, \D 1, \E 2, \F 3
        \G 4, \A 5, \B 6)
-     (* 7 (read-string (str (last (:pitch note)))))))
+     (* 7 (- (read-string (str (last (:pitch note)))) 4))))
 
 (defn get-y-offset [note]
   (* (get-height note) (/ line-separation 2)))
 
-(defn- draw-lines [g {:keys [scale]}]
+(defn- draw-lines [g]
   (let [bounds (.getClipBounds g)
         gc (.create g)]
     (.setColor gc java.awt.Color/gray)
@@ -140,30 +140,35 @@
      (+ (if clef 35 0) 10
         (get-total-note-x-offset (count notes) notes))))
 
-(defprotocol score-property-protocol
+(defprotocol scoreProperties
   (setScale [this scale] )
   (setScaleX [this scale-x]))
 
 (defn score-component [notes & {:as opts}] 
   (let [{:keys [scale scale-x clef default-distance title] :as options} 
         (merge {:scale 1 :scale-x 1 :default-distance 20} opts)
-        
+        scale-atom (atom scale)
+        scale-x-atom (atom scale-x)
         notes (map (fn [note] (if (contains? note :distance)
                                 note (assoc note :distance (* default-distance (:length note))))) notes)
         heights (remove nil? (map #(if (:pitch %)
                                        (get-y-offset %)) notes))
-        lowest (min (apply min heights) -10)
+        lowest (- (min (apply min heights) 0) 30)
         highest (max (apply max heights) (* 5 line-separation))
         height (- highest lowest ;(Math/abs highest) (Math/abs lowest) ;(* 5 line-separation)
                   )]
-    (proxy [javax.swing.JComponent javax.swing.Scrollable] []
+    (proxy [javax.swing.JComponent javax.swing.Scrollable 
+            director_musices.draw_score.scoreProperties] []
       (paintComponent [g]
-        (let [gc (.create g)]
+        (let [gc (.create g)
+              scale @scale-atom
+              scale-x @scale-x-atom
+              options (merge options {:scale scale :scale-x scale-x})]
           (ssw-graphics/anti-alias gc)
           ;(.translate gc 0 20)
           (.scale gc scale scale)
           (.translate gc 0 (- lowest))
-          (draw-lines gc options)
+          (draw-lines gc)
           (when clef
             (.translate gc 5 0)
             (draw-clef gc clef)
@@ -179,7 +184,13 @@
       (getScrollableBlockIncrement [_ _ _] 500)
       (getScrollableTracksViewportHeight [] false)
       (getScrollableTracksViewportWidth [] false)
-      (getScrollableUnitIncrement [_ _ _] 500))))
+      (getScrollableUnitIncrement [_ _ _] 500)
+      ; scoreProperties
+      (setScale [this scale] )
+                ;(reset! scale-atom scale))
+      (setScaleX [this scale-x] 
+;                 (reset! scale-x-atom scale-x)
+                 ))))
 
 ;; GRAPHS
 
