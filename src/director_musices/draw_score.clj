@@ -51,7 +51,10 @@
 (defn transform-for-note [g note] 
   (if (:rest note)
     (condp >= (:length note)
-      1/2 (do (.translate g 0 10))
+      1/4 (do (.translate g 0 2)
+              (.scale g 1.15 1.15))
+      1/2 (do (.translate g 0 8)
+              (.scale g 1.15 1.15))
       1 (do (.translate g 0 4))
       2 (do (.translate g (double (/ (:distance note) 2)) (double line-separation))
             (.scale g 0.3 0.25)) 
@@ -82,7 +85,7 @@
   (when (or (= length 3)
             (and (= (class length) clojure.lang.Ratio)
                  (= 3 (numerator length))))
-    (.drawOval g 10 3 1 1)))
+    (.drawOval g 10 3 1.5 1.5)))
 
 (defn draw-note [g note {:keys [scale]}]
   (let [img
@@ -147,23 +150,22 @@
 (defn score-component [notes & {:as opts}] 
   (let [{:keys [scale scale-x clef default-distance title] :as options} 
         (merge {:scale 1 :scale-x 1 :default-distance 20} opts)
-        scale-atom (atom scale)
-        scale-x-atom (atom scale-x)
+        options-atom (atom options)
         notes (map (fn [note] (if (contains? note :distance)
                                 note (assoc note :distance (* default-distance (:length note))))) notes)
         heights (remove nil? (map #(if (:pitch %)
                                        (get-y-offset %)) notes))
         lowest (- (min (apply min heights) 0) 30)
-        highest (max (apply max heights) (* 5 line-separation))
+        highest (+ (max (apply max heights) (* 5 line-separation)) 10)
         height (- highest lowest ;(Math/abs highest) (Math/abs lowest) ;(* 5 line-separation)
                   )]
     (proxy [javax.swing.JComponent javax.swing.Scrollable 
             director_musices.draw_score.scoreProperties] []
       (paintComponent [g]
         (let [gc (.create g)
-              scale @scale-atom
-              scale-x @scale-x-atom
-              options (merge options {:scale scale :scale-x scale-x})]
+              options @options-atom
+              scale (:scale options)
+              scale-x (:scale-x options)]
           (ssw-graphics/anti-alias gc)
           ;(.translate gc 0 20)
           (.scale gc scale scale)
@@ -186,11 +188,8 @@
       (getScrollableTracksViewportWidth [] false)
       (getScrollableUnitIncrement [_ _ _] 500)
       ; scoreProperties
-      (setScale [this scale] )
-                ;(reset! scale-atom scale))
-      (setScaleX [this scale-x] 
-;                 (reset! scale-x-atom scale-x)
-                 ))))
+      (setScale [scale] (swap! options-atom assoc :scale scale))
+      (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x)))))
 
 ;; GRAPHS
 
@@ -239,12 +238,12 @@
 
 (defn show-test-component []
 ;  (init-svg)
-  (let [test-score2 [{:length 1/2 :rest true   :bar true}
-                    {:length 3/4   :pitch "A#0" :bar true} 
-                    {:length 1   :pitch "A0"  :rest true}
-                    {:length 2   :pitch "Db0"} 
-                    {:length 1   :pitch "A0"  :bar true}]
-        test-score
+  (let [test-score [{:length 1/4  :rest true   :bar true}
+                    {:length 1/2 :rest true   :pitch "A#4" :bar true} 
+                    {:length 1   :pitch "A4"  :rest true}
+                    {:length 2   :pitch "Db4"} 
+                    {:length 1   :pitch "A4"  :bar true}]
+        test-score2
         '(
          {:length 3, :pitch nil, :bar 1, :n (nil 3/4), :rest t, :meter (3 4), :mm 90} 
 ;         {:length 3, :pitch nil, :bar 2, :n (nil 3/4), :phrase-start (4 5 6 7), :rest t} 
@@ -265,14 +264,16 @@
          {:length 1, :pitch "F#4", :n (F#4 1/4)} 
          {:length 1, :pitch "F#4", :bar 17, :n (F#4 1/4), :phrase-end (4 5 6 7)} 
 ;         {:length 1, :pitch nil, :n (nil 1/4), :rest t} {:length 1, :pitch nil, :n (nil 1/4), :rest t}
-         )]
+         )
+        sc (score-component test-score :clef \G)]
+    (.setScale sc 2)
+    (.setScaleX sc 5)
     (ssw/show! (ssw/frame 
                  :size [500 :by 200]
                  :content 
                  (ssw/vertical-panel
                    :items [
-                           (ssw/scrollable
-                             (score-component test-score :scale 2 :scale-x 2 :clef \C))
+                           (ssw/scrollable sc)
                            ;(ssw/scrollable
                              (score-graph-component test-score :distance :scale 2 :scale-x 2 :clef \C :title "blablablablablablablabla");)
                            ])))))
