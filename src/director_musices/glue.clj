@@ -1,6 +1,7 @@
 (ns director-musices.glue
   (:use clojure.java.io
-        (director-musices interpreter))
+        (director-musices interpreter
+          [utils :only [with-indeterminate-progress]]))
   (:require [seesaw.core :as ssw]))
 
 (def dm-init? (atom nil))
@@ -21,20 +22,15 @@
     "dm:rules:"
     ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
      "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
-     "phrasearch.lsp" "SyncOnMel.lsp"
-     ]))
+     "phrasearch.lsp" "SyncOnMel.lsp"]))
 
 (defn init-dm []
   (when-not @dm-init?
-    (let [d (ssw/frame :content (ssw/border-panel :north (ssw/label :text "Loading lisp environment" :border 10)
-                                                  :center (ssw/progress-bar :indeterminate? true :border 10)))]
-      (ssw/pack! d)
-      (ssw/show! d)
+    (with-indeterminate-progress "Loading lisp environment"
       (load-package-dm)
       (load-core)
       (load-rules)
-      (swap! dm-init? (constantly true))
-      (ssw/dispose! d))))
+      (swap! dm-init? (constantly true)))))
 
 (defn str->abcl [s]
   (eval-abcl (str "\"" s "\"")))
@@ -45,7 +41,7 @@
   (init-dm)
   (eval-abcl 
     (str "(in-package :dm)
-          (read-score-from-string \"" string 
+          (read-active-score-from-string \"" string 
          "\")
           (init-music-score)")))
 ;  (eval-abcl "(in-package :dm)")
