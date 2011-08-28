@@ -31,7 +31,7 @@
 
 ;; TESTING
 
-(read-active-score-from-file "../../test2.mus")
+(read-active-score-from-file "../test2.mus")
 
 (defvar test-rulelist
   '(
