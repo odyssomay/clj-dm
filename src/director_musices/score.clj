@@ -1,8 +1,9 @@
 (ns director-musices.score
-  (:use (director-musices [glue :only [load-active-score-from-file]]
+  (:use (director-musices [glue :only [load-active-score-from-file get-active-score]]
                           [interpreter :only [eval-abcl]]
                           [load-mus :only [load-mus-from-path]]
-                          [draw-score :only [score-component score-graph-component]]))
+                          [draw-score :only [score-component score-graph-component]]
+                          [utils :only [new-file-dialog]]))
   (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]
@@ -94,7 +95,7 @@
              (convert-track (get-track 0)) :clef \G)
         show-graph (ssw/action :name "graph"
                      :handler (fn [_]
-                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr] :to-string #(subs (str %) 1))]
+                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl] :to-string #(subs (str %) 1))]
                                   (let [c (score-graph-component choice sc)]
                                     (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
                                                                                :handler 
@@ -125,5 +126,7 @@
                     ;(set-score (load-mus-from-path path))
                     (update-score-panel path (load-mus-from-path path))))))
 
-(defn choose-and-save-score [& _] )
+(defn choose-and-save-score [& _]
+  (if-let [f (new-file-dialog)]
+    (spit f (get-active-score))))
 
