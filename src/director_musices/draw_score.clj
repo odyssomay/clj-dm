@@ -218,8 +218,8 @@
             note+1 (nth notes (inc i) nil)]
         (if note+1
           (.drawLine gcx 
-            0 (* scale-y (- (get note property)))
-            (* (get-relative-x-offset (inc i) notes) scale-x) (* scale-y (- (get note+1 property)))))
+            0 (* scale-y (- (get note property 0)))
+            (* (get-relative-x-offset (inc i) notes) scale-x) (* scale-y (- (get note+1 property 0)))))
         ;(.drawString gcx (str (get note property)) (double 3) (double (- (get note property))))
         ))))
 
