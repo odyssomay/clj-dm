@@ -2,7 +2,7 @@
   (:use [director-musices
          [glue :only [apply-rules]]
          [score :only [reload-score-panel]]
-         [utils :only [find-i new-file-dialog]]]
+         [utils :only [find-i new-file-dialog with-indeterminate-progress]]]
         [clojure.java.io :only [resource]])
   (:require [seesaw
              [core :as ssw]
@@ -53,9 +53,8 @@
 
 (defn remove-rule-at [{:keys [rules]} line]
   (swap! rules (fn [coll]
-                 (let [rules (partition 7 coll)]
-                   (concat (take (* components-per-line line) coll)
-                           (drop (* components-per-line (inc line)) coll))))))
+                 (concat (take (* components-per-line line) coll)
+                         (drop (* components-per-line (inc line)) coll)))))
 
 (defn move-rule [rp-display line offset]
   (let [rule (get-rule-at rp-display line)]
@@ -135,39 +134,53 @@
       (.setVisible (last cs) visibility))))
 
 (defn rulepalette-window [rulepalette]
-  (let [syncrule-field (ssw/text :columns 10 :text "melodic-sync")
-        rules (atom [])
+  (let [rules (atom [])
         rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
         editable? (ssw/checkbox :text "editable?")
-        rulepalette-panel (ssw/border-panel :center (ssw/scrollable rule-panel)
-                            :south (ssw/flow-panel 
-                                     :items [(ssw/action :name "Apply"
-                                                         :handler (fn [_]
-                                                                    (apply-rules (panel->rules rule-panel) (.getText syncrule-field))
-                                                                    (reload-score-panel)))
-                                             (ssw/action :name "Reset and apply") 
-                                             "Sync rule" syncrule-field
-                                             editable?
-                                             (ssw/action :name "save" :handler (fn [_]
-                                                                                 (if-let [f (new-file-dialog rule-panel)]
-                                                                                   (spit f
-                                                                                     (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
-                                                                                           (panel->rules rule-panel)
-                                                                                          "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")))))
-                                             ]))
-        rp-display {:syncrule-field syncrule-field
+        rp-display {;:syncrule-field syncrule-field
+                    :syncrule (atom "melodic-sync")
                     :rules rules
                     :rule-panel rule-panel
-                    :rulepalette-panel rulepalette-panel}
+                    ;:rulepalette-panel rulepalette-panel
+                    }
+        add-new-rule (ssw/action 
+                       :icon (resource "icons/add.png")
+                       :handler (fn [_] 
+                                  (when-let [{nm :name np? :no-parameters?} (rule-name-dialog "" false)]
+                                    (add-rule-at rp-display 0 (rule-display rp-display [nm (if np? 'T 0.0)]))
+                                    (set-editable rule-panel (.isSelected editable?)))))
         ifr (javax.swing.JInternalFrame. "" true true true true)]
+    (.setJMenuBar ifr
+      (ssw/menubar :items
+        [(ssw/menu :text "file" :items 
+           [(ssw/action :name "save rulepalette" :handler 
+              (fn [_]
+                (if-let [f (new-file-dialog rule-panel)]
+                  (spit f
+                    (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
+                         (panel->rules rule-panel)
+                         "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")))))])
+         (ssw/menu :text "apply" :items 
+           [(ssw/action :name "apply"
+              :handler (fn [_]
+                         (with-indeterminate-progress "applying rules"
+                           (apply-rules (panel->rules rule-panel) @(:syncrule rp-display))
+                           (reload-score-panel))))
+            (ssw/action :name "reset and apply")])
+         (ssw/menu :text "config" :items 
+           [editable?
+            (ssw/action :name "Sync rule"
+              :handler (fn [_]
+                         (if-let [in (ssw/input "Choose sync rule" :choices ["melodic-sync" "no-sync" "bar-sync"])]
+                           (reset! (:syncrule rp-display) in))))])]))
     (add-watch rules "panel updater" (fn [_ _ old-items items]
-      (ssw/config! rule-panel :items items)
+      (ssw/config! rule-panel :items (concat items [[add-new-rule "span"]]))
       (if (not (== (count old-items) (count items)))
         (.pack ifr))))
     (reset! rules (apply concat (map (partial rule-display rp-display) (:all-rules rulepalette))))
     (ssw/listen editable? :selection (fn [& _] (set-editable rule-panel (.isSelected editable?))))
     (set-editable rule-panel false)
-    (.setContentPane ifr rulepalette-panel)
+    (.setContentPane ifr rule-panel)
     (.setResizable ifr false)
     ifr))
 
