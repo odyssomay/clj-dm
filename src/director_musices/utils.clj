@@ -4,7 +4,6 @@
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]]))
-                     
 
 (defn find-i
   "Find the index of value in coll"
@@ -45,3 +44,11 @@
     (.setResizable dialog false)
     (when (-> dialog ssw/pack! ssw/show!)
       (file (.getText dir) (.getText filename)))))
+
+(defmacro with-indeterminate-progress [message & body]
+  `(let [d# (ssw/frame :content (ssw/border-panel :north (ssw/label :text ~message :border 10)
+                                                  :center (ssw/progress-bar :indeterminate? true :border 10)))]
+     (ssw/pack! d#)
+     (ssw/show! d#)
+     ~@body
+     (ssw/dispose! d#)))
