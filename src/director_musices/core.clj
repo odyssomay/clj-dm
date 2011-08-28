@@ -35,7 +35,7 @@
   (ssw/menubar :items [(init-rulepalette-menu)
                        (init-score-menu)]))
 
-(defn -main [& args]
+(defn director-musices [& args]
   (let [fr (ssw/frame 
              :title "Director Musices"
              :content (ssw/border-panel :north player-panel :center (ssw/top-bottom-split (ssw/scrollable score-panel)
