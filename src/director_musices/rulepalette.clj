@@ -149,44 +149,46 @@
                                   (when-let [{nm :name np? :no-parameters?} (rule-name-dialog "" false)]
                                     (add-rule-at rp-display 0 (rule-display rp-display [nm (if np? 'T 0.0)]))
                                     (set-editable rule-panel (.isSelected editable?)))))
-        ifr (javax.swing.JInternalFrame. "" true true true true)]
-    (.setJMenuBar ifr
-      (ssw/menubar :items
-        [(ssw/menu :text "file" :items 
-           [(ssw/action :name "save rulepalette" :handler 
-              (fn [_]
-                (if-let [f (new-file-dialog rule-panel)]
-                  (spit f
-                    (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
-                         (panel->rules rule-panel)
-                         "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")))))])
-         (ssw/menu :text "apply" :items 
-           [(ssw/action :name "apply"
-              :handler (fn [_]
-                         (with-indeterminate-progress "applying rules"
-                           (apply-rules (panel->rules rule-panel) @(:syncrule rp-display))
-                           (reload-score-panel))))
-            (ssw/action :name "reset and apply")])
-         (ssw/menu :text "config" :items 
-           [editable?
-            (ssw/action :name "Sync rule"
-              :handler (fn [_]
-                         (if-let [in (ssw/input "Choose sync rule" :choices ["melodic-sync" "no-sync" "bar-sync"])]
-                           (reset! (:syncrule rp-display) in))))])]))
+;        ifr (javax.swing.JInternalFrame. "" true true true true)
+        menu (ssw/menubar :items
+                          [(ssw/menu :text "file" :items 
+                                     [(ssw/action :name "save rulepalette" :handler 
+                                                  (fn [_]
+                                                    (if-let [f (new-file-dialog rule-panel)]
+                                                      (spit f
+                                                            (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
+                                                                 (panel->rules rule-panel)
+                                                                 "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")))))])
+                           (ssw/menu :text "apply" :items 
+                                     [(ssw/action :name "apply"
+                                                  :handler (fn [_]
+                                                             (with-indeterminate-progress "applying rules"
+                                                                                          (apply-rules (panel->rules rule-panel) @(:syncrule rp-display))
+                                                                                          (reload-score-panel))))
+                                      (ssw/action :name "reset and apply")])
+                           (ssw/menu :text "config" :items 
+                                     [editable?
+                                      (ssw/action :name "Sync rule"
+                                                  :handler (fn [_]
+                                                             (if-let [in (ssw/input "Choose sync rule" :choices ["melodic-sync" "no-sync" "bar-sync"])]
+                                                               (reset! (:syncrule rp-display) in))))])])]
     (add-watch rules "panel updater" (fn [_ _ old-items items]
       (ssw/config! rule-panel :items (concat items [[add-new-rule "span"]]))
-      (if (not (== (count old-items) (count items)))
-        (.pack ifr))))
+;      (if (not (== (count old-items) (count items)))
+ ;       (.pack ifr)
+;        )
+                                       ))
     (reset! rules (apply concat (map (partial rule-display rp-display) (:all-rules rulepalette))))
     (ssw/listen editable? :selection (fn [& _] (set-editable rule-panel (.isSelected editable?))))
     (set-editable rule-panel false)
-    (.setContentPane ifr rule-panel)
-    (.setResizable ifr false)
-    ifr))
+;    (.setContentPane ifr rule-panel)
+;    (.setResizable ifr false)
+    {:content (ssw/border-panel :north menu :center rule-panel)}))
 
 ;; actions
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
-    (fn [_ f] (rulepalette-window (path->rulepalette (.getCanonicalPath f))))))
+    (fn [_ f] (assoc (rulepalette-window (path->rulepalette (.getCanonicalPath f)))
+                     :title (.getName f) ))))
 

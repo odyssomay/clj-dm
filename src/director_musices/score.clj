@@ -2,7 +2,7 @@
   (:use (director-musices [glue :only [load-active-score-from-file get-active-score]]
                           [interpreter :only [eval-abcl]]
                           [load-mus :only [load-mus-from-path]]
-                          [draw-score :only [score-component score-graph-component]]
+                          [draw-score :only [score-component score-graph-component get-note-for-x]]
                           [utils :only [new-file-dialog]]))
   (:require [seesaw 
              [core :as ssw]
@@ -74,7 +74,8 @@
 
 ;; score gui
 
-(def score-panel (ssw-mig/mig-panel))
+;(def score-panel (ssw-mig/mig-panel))
+(def score-panel (ssw/tabbed-panel :placement :left))
 
 (defn convert-track [track]
   (for [{:keys [dr ndr n] :as note} track]
@@ -87,44 +88,46 @@
 
 (def score-panel-reloader (atom nil))
 
-(defn update-score-panel [path score]
-  (let [tracks (ssw/combobox :model (range (count score)))
+(defn score-view [id]
+  (let [view (ssw-mig/mig-panel)
         scale (ssw/slider :min 0 :max 500)
         scale-x (ssw/slider :min 0 :max 500)
         sc (score-component 
-             (convert-track (get-track 0)) :clef \G)
+             (convert-track (get-track id)) :clef \G)
         show-graph (ssw/action :name "graph"
-                     :handler (fn [_]
-                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl] :to-string #(subs (str %) 1))]
-                                  (let [c (score-graph-component choice sc)]
-                                    (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
-                                                                               :handler 
-                                                                               (fn [_] (.remove score-panel c)
-                                                                                       (.revalidate score-panel)))]))
-                                    (.add score-panel c "span")))))]
-    (ssw/listen tracks :selection 
-      (fn [_] (.setNotes sc (convert-track (get-track (.getSelectedItem tracks))))))
+;                     :handler (fn [_]
+;                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl] :to-string #(subs (str %) 1))]
+;                                  (let [c (score-graph-component choice sc)]
+;                                    (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
+;                                                                               :handler 
+;                                                                               (fn [_] (.remove score-panel c)
+;                                                                                       (.revalidate score-panel)))]))
+;                                    (.add score-panel c "span"))))
+                               )]
+    (ssw/listen sc :mouse-clicked (fn [evt] (println (get-note-for-x (.getX evt) sc))))
     (ssw/listen scale :change (fn [& _] (.setScale sc (/ (.getValue scale) 100))))
     (ssw/listen scale-x :change (fn [& _] (.setScaleX sc (/ (.getValue scale-x) 100))))
     (.setValue scale 100)
     (.setValue scale-x 300)
-    (reset! score-panel-reloader #(.setSelectedItem tracks (.getSelectedItem tracks)))
-    (ssw/config! score-panel :items
-      [["track"] [tracks]
-       ["scale"] [scale] ["scale length"] [scale-x] [show-graph "wrap"]
-       [sc "span"]])))
+    (ssw/config! view :items
+      [["scale"] [scale] ["scale length"] [scale-x] [show-graph "wrap"]
+       [sc "span"]])
+    view))
 
-(defn reload-score-panel []
-  (if @score-panel-reloader
-    (@score-panel-reloader)))
-  
+(defn update-score-panel [score]
+  (let [views (for [i (range (count score))]
+                {:title i :content (score-view i)})]
+    (ssw/config! score-panel :tabs views)))
+
+(defn reload-score-panel [] )
+
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
                   (let [path (.getCanonicalPath f)]
                     (load-active-score-from-file path)
                     ;(set-score (load-mus-from-path path))
-                    (update-score-panel path (load-mus-from-path path))))))
+                    (update-score-panel (load-mus-from-path path))))))
 
 (defn choose-and-save-score [& _]
   (if-let [f (new-file-dialog)]
