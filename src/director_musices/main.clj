@@ -1,4 +1,4 @@
-(ns 'director-musices.main
+(ns director-musices.main
   (:gen-class))
 
 (defn -main [& args]
