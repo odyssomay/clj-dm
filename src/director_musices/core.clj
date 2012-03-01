@@ -5,32 +5,45 @@
         )
   (:require [seesaw.core :as ssw]))
 
-(def rulepalettes (atom []))
-(def rulepalette-container (ssw/tabbed-panel))
-
-(defn add-rulepalette [c]
-  (swap! rulepalettes conj c)
-  (ssw/config! rulepalette-container :tabs @rulepalettes))
-
-(defn init-rulepalette-menu []
-  (ssw/menu 
-    :text "rulepalette"
-    :items
-    [(ssw/action :name "Load rulepalette"
-                 :handler (comp add-rulepalette choose-and-open-rulepalette))]))
-
-(defn init-score-menu []
-  (ssw/menu 
-    :text "score"
-    :items
-    [(ssw/action :name "Load score"
+(def file-menu
+  (ssw/menu
+    :text "File"
+    :items 
+    [(ssw/action :name "Open Score"
                  :handler choose-and-open-score)
-     (ssw/action :name "Save score"
-                 :handler choose-and-save-score)]))
+     (ssw/action :name "Save Score"
+                 :handler choose-and-save-score)
+     (ssw/action :name "Save Performance")
+     (ssw/separator)
+     (ssw/action :name "Open Rulepalette"
+                 :handler choose-and-open-rulepalette)
+     (ssw/action :name "Save Rulepalette")
+     (ssw/separator)
+     (ssw/action :name "Quit")
+     ]))
+
+(def apply-menu
+  (ssw/menu
+    :text "Apply"
+    :items
+    [(ssw/action :name "Current Rulepalette"
+                 :handler apply-current-rulepalette)
+     (ssw/action :name "All Rulepalettes"
+                 :handler apply-all-rulepalettes)
+     (ssw/checkbox :text "Reset on Apply")
+     ]))
+
+(def help-menu
+  (ssw/menu
+    :text "Help"
+    :items 
+    [(ssw/action :name "About")]))
 
 (defn init-menu-bar []
-  (ssw/menubar :items [(init-rulepalette-menu)
-                       (init-score-menu)]))
+  (ssw/menubar :items [file-menu
+                       apply-menu
+                       help-menu
+                       ]))
 
 (defn director-musices [& args]
   (let [fr (ssw/frame 
@@ -38,8 +51,9 @@
              :content (ssw/border-panel :north player-panel :center (ssw/top-bottom-split (ssw/scrollable score-panel)
                                                                                           rulepalette-container))
              :menubar (init-menu-bar)
-             :size [400 :by 300]
-             :on-close :exit
+             :size [800 :by 600]
+;             :on-close :exit
              )]
     (ssw/show! fr)
     nil))
+
