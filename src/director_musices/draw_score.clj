@@ -31,6 +31,15 @@
   (if-let [offset (reduce + (map :distance (take i notes)))]
     offset 0))
 
+(defn abs [x] (if (< x 0) (- x ) x))
+
+(defn get-note-for-x [x sc] 
+  (let [options @(.getOptionsAtom sc)
+        x (* (/ 1 (* (:scale options) (:scale-x options)))
+             (- x (+ (if (:clef options) 35 0) 10)))
+        note-distances (reductions + (concat [0] (map :distance (:notes options))))]
+    (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
+
 (defn get-height [note]
   (- 9 
      (case (first (:pitch note))
@@ -51,7 +60,7 @@
 
 (defn transform-for-note [g note {:keys [scale-x]}] 
   (if (:rest note)
-    (condp >= (:length note)
+    (condp <= (:length note)
       1/4 (do (.translate g 0 2)
               (.scale g 1.15 1.15))
       1/2 (do (.translate g 0 8)
@@ -110,22 +119,20 @@
           nil)
         ;(.drawLine g 0 0 0 20)
         (let [gc (.create g)]
+          (.translate gc (double 0) (double (get-y-offset note)))
           (draw-accidental gc note)
           (draw-dots gc note)
           (transform-for-note gc note options)
           (.render (.getDiagram svg-universe (.toURI (resource (str "score/" img ".svg")))) gc))))))
 
 (defn draw-notes [g notes {:keys [scale-x] :or {scale-x 1} :as options}]
-  (let [gcx (.create g)]
+  (let [gc (.create g)]
     (doseq [i (range (count notes))]
-      (.translate gcx (double (* (get-relative-x-offset i notes) scale-x)) (double 0))
-      (let [note (nth notes i)
-            gcy (.create gcx)]
+      (.translate gc (double (* (get-relative-x-offset i notes) scale-x)) (double 0))
+      (let [note (nth notes i)]
         (if (:bar note)
-          (draw-bar gcy))
-        (if-not (:rest note)
-          (.translate gcy (double 0) (double (get-y-offset note))))
-        (draw-note gcy note options)))))
+          (draw-bar gc))
+        (draw-note gc note options)))))
 
 (defn draw-clef [g clef]
   (let [gc (.create g)]
@@ -153,6 +160,53 @@
   (setScaleX [this scale-x])
   (setNotes [this notes])
   (getOptionsAtom [this]))
+
+(defn note-component [note options-atom]
+  (let [get-notes #(:notes @options-atom)
+        get-heights (fn [] (remove nil? (map #(if (:pitch %)
+                                                  (get-y-offset %)) (get-notes))))
+        get-lowest (fn [] (- (apply min (cons 0 (get-heights))) 30))
+        get-highest (fn [] (+ (apply max (cons (* 5 line-separation) (get-heights))) 10))
+        get-height (fn [] (- (get-highest) (get-lowest)))
+        c (proxy [javax.swing.JComponent] []
+            (paintComponent [g]
+              (let [gc (.create g)
+                    options @options-atom
+                    scale (:scale options)
+                    scale-x (:scale-x options)
+                    notes (:notes @options-atom)]
+                (ssw-graphics/anti-alias gc)
+                (.scale gc scale scale)
+                (.translate gc 0 (- (get-lowest)))
+                (draw-lines gc)
+                (draw-note gc note @options-atom)
+                ))
+            (getPreferredSize [] 
+              (let [options @options-atom]
+                (java.awt.Dimension. 
+                  (* (:distance note) (:scale options) (:scale-x options))
+                  ;(get-score-component-width (get-notes) @options-atom)
+                  (* (:scale @options-atom) (get-height)))))
+            )]
+    c))
+
+(defn score-component2 [notes & {:keys [default-distance] :or {default-distance 20} :as opts}] 
+  (let [options-atom (atom (merge {:scale 1 :scale-x 1 :default-distance 20
+                                   :notes (get-notes-distance notes default-distance)} opts))
+        note-components (map #(note-component % options-atom) (:notes @options-atom))
+        ;c (ssw/horizontal-panel :items note-components)
+        c (proxy [javax.swing.JPanel director_musices.draw_score.scoreProperties] []
+            (setScale [scale] (swap! options-atom assoc :scale scale))
+            (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x))
+            (setNotes [notes] (println "setNotes(notes) not implemented :("))
+            (getOptionsAtom [] options-atom))
+        ]
+    (.setLayout c (javax.swing.BoxLayout. c javax.swing.BoxLayout/X_AXIS))
+    (doseq [n note-components]
+      (.add c n))
+    (add-watch options-atom (gensym) (fn [& _] (.revalidate c) (.repaint c)))
+    c
+    ))
 
 (defn score-component [notes & {:keys [default-distance] :or {default-distance 20} :as opts}] 
   (let [options-atom (atom (merge {:scale 1 :scale-x 1 :default-distance 20

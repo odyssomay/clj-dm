@@ -93,7 +93,7 @@
         scale (ssw/slider :min 0 :max 500)
         scale-x (ssw/slider :min 0 :max 500)
         sc (score-component 
-             (convert-track (get-track id)) :clef \G)
+             (convert-track (get-track id)) :clef \G )
         show-graph (ssw/action :name "graph"
 ;                     :handler (fn [_]
 ;                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl] :to-string #(subs (str %) 1))]
@@ -104,7 +104,12 @@
 ;                                                                                       (.revalidate score-panel)))]))
 ;                                    (.add score-panel c "span"))))
                                )]
-    (ssw/listen sc :mouse-clicked (fn [evt] (println (get-note-for-x (.getX evt) sc))))
+    (ssw/listen sc :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
+                                                  ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
+                                                                              "," ",\n")
+                                                               :multi-line? true)]
+                                              (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                                                                     :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
     (ssw/listen scale :change (fn [& _] (.setScale sc (/ (.getValue scale) 100))))
     (ssw/listen scale-x :change (fn [& _] (.setScaleX sc (/ (.getValue scale-x) 100))))
     (.setValue scale 100)
