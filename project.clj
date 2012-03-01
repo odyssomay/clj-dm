@@ -1,5 +1,5 @@
 (defproject 
-  director-musices "1.0.0-SNAPSHOT"
+  director-musices "1"
   :description "FIXME: write description"
   :disable-deps-clean true
   :resources-path "resources"
