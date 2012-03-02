@@ -276,15 +276,26 @@
     (doseq [i (range (count notes))]
       (.translate gcx (double (* (get-relative-x-offset i notes) scale-x)) (double 0))
       (let [note (nth notes i)
-            note+1 (nth notes (inc i) nil)]
-        (if note+1
-          (.drawLine gcx 
-            0 (* scale-y (- (get note property 0)))
-            (* (get-relative-x-offset (inc i) notes) scale-x) (* scale-y (- (get note+1 property 0)))))
+            note+1 (nth notes (inc i) nil)
+            y (* scale-y (- (get note property 0)))
+            ]
+          (.fillOval gcx -2 (- y 2) 4 4)
+        (when note+1
+          (let [y (* scale-y (- (get note property 0)))]
+            (.drawLine gcx 
+                       0 y
+                       (* (get-relative-x-offset (inc i) notes) scale-x) (* scale-y (- (get note+1 property 0))))))
         ;(.drawString gcx (str (get note property)) (double 3) (double (- (get note property))))
         ))))
 
 ;(defn draw-coordinate-system [g property-max property-min]
+
+
+(defn draw-graph-height-lines [g width height]
+  (let [gc (.create g)]
+    (.setColor gc (java.awt.Color. 200 200 200))
+    (doseq [h (range 0 height 5)]
+      (.drawLine gc 0 (- h) width (- h)))))
 
 (defn score-graph-component [property score-component & {:as graph-opts}]
   (let [options-atom (.getOptionsAtom score-component)
@@ -308,23 +319,26 @@
                     scale (:scale options)
                     clef (:clef options)
                     graph-options @graph-options-atom
-                    scale-y (get-scale-y)]
+                    scale-y (get-scale-y)
+                    scaled-width (* scale (:scale-x options) (get-width))
+                    ]
                 (ssw-graphics/anti-alias gc)
-                (.drawString gc (:title graph-options) 10 15)
                 (.scale gc scale scale)
-                ;(.translate gc 0.0 (double (* scale-y height)))
-                (.translate gc 0.0 (double (* scale-y (get-property-max))))
-                (let [b (.getClipBounds g)]
-                  (.drawLine gc (.x b) 0 (+ (.x b) (.width b)) 0))
+                (.translate gc 0.0 (double (+ (* scale-y (get-property-max)) 5)))
+                (draw-graph-height-lines gc scaled-width (get-property-max))
+                (.drawLine gc 0 0 scaled-width 0)
+                (let [gcc (.create gc)]
+                  (.scale gcc 1.2 1.2)
+                  (.drawString gcc (:title graph-options) 10 -5))
                 (.translate gc (double (if clef 45 10)) 0.0)
-                (.drawLine gc -5 0 -5 (- (- (get-property-max)) 5))
-                (.drawLine gc -5 0 -5 (+ (- (get-property-min)) 5))
+                ;(.drawLine gc -5 0 -5 (- (- (get-property-max)) 5))
+                ;(.drawLine gc -5 0 -5 (+ (- (get-property-min)) 5))
                 (draw-note-property-graph gc notes property scale-y options)
                 ))
             (getPreferredSize []
               (java.awt.Dimension. 
                 (.width (.getPreferredSize score-component))
-                (* (:scale @options-atom) (get-scale-y) (+ 12 (get-height)))))
+                (* (:scale @options-atom) (+ 10 (* (get-scale-y) (get-property-max)))))); (+ 12 (get-height)))))
             ; scrollable
             (getPreferredScrollableViewportSize [] (.getPreferredSize this))
             (getScrollableBlockIncrement [_ _ _] 500)
