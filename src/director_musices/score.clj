@@ -90,8 +90,8 @@
 
 (defn score-view [id]
   (let [view (ssw-mig/mig-panel)
-        scale (ssw/slider :min 0 :max 500)
-        scale-x (ssw/slider :min 0 :max 500)
+        scale (ssw/slider :min 1 :max 500)
+        scale-x (ssw/slider :min 1 :max 500)
         sc (score-component 
              (convert-track (get-track id)) :clef \G )
         show-graph (ssw/action :name "graph"
@@ -129,6 +129,7 @@
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
+                  (.removeAll score-panel)
                   (let [path (.getCanonicalPath f)]
                     (load-active-score-from-file path)
                     ;(set-score (load-mus-from-path path))
