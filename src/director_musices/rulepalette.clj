@@ -24,6 +24,13 @@
 
 ;; Display
 
+(def rulepalettes (atom []))
+(def rulepalette-container (ssw/tabbed-panel))
+
+(defn add-rulepalette [c]
+  (swap! rulepalettes conj c)
+  (ssw/config! rulepalette-container :tabs @rulepalettes))
+
 (def components-per-line 8)
 (def slider-precision 1000)
 
@@ -56,10 +63,10 @@
                  (concat (take (* components-per-line line) coll)
                          (drop (* components-per-line (inc line)) coll)))))
 
-(defn move-rule [rp-display line offset]
-  (let [rule (get-rule-at rp-display line)]
-    (remove-rule-at rp-display line)
-    (add-rule-at rp-display (+ line offset) rule)))
+(defn move-rule [rp-obj line offset]
+  (let [rule (get-rule-at rp-obj line)]
+    (remove-rule-at rp-obj line)
+    (add-rule-at rp-obj (+ line offset) rule)))
 
 (defn rule-name-dialog [& [previous-name previous-no-parameters?]]
   (let [tf (ssw/text :text previous-name :columns 20)
@@ -71,16 +78,16 @@
 
 (declare rule-display)
 
-(defn rule-navigation [rp-display]
+(defn rule-navigation [rp-obj]
   (let [up (ssw/label :icon (resource "icons/up_alt.png"))
         down (ssw/label :icon (resource "icons/down_alt.png"))
         rmv (ssw/label :icon (resource "icons/delete.png"))]
     (ssw/listen up :mouse-clicked
-      (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) -1)))
+      (fn [_] (move-rule rp-obj (get-line-index-starting-with rp-obj up) -1)))
     (ssw/listen down :mouse-clicked
-      (fn [_] (move-rule rp-display (get-line-index-starting-with rp-display up) 1)))
+      (fn [_] (move-rule rp-obj (get-line-index-starting-with rp-obj up) 1)))
     (ssw/listen rmv :mouse-clicked 
-      (fn [_] (remove-rule-at rp-display (get-line-index-starting-with rp-display up))))
+      (fn [_] (remove-rule-at rp-obj (get-line-index-starting-with rp-obj up))))
     [up down rmv]))
 
 (defn rule-parameter-display [no-parameters? k args]
@@ -98,8 +105,8 @@
       [t s
        (ssw/text :text (apply str (interpose " " args)) :columns 30)])))
 
-(defn rule-display* [rp-display [rule-name & [k & args]]]
-  (let [[up down rmv] (rule-navigation rp-display)
+(defn rule-display* [rp-obj [rule-name & [k & args]]]
+  (let [[up down rmv] (rule-navigation rp-obj)
         no-parameters? (not (number? k))]
     (concat 
       [up down
@@ -108,22 +115,22 @@
          (ssw/listen l :mouse-clicked 
                      (fn [e]
                        (if (== (.getClickCount e) 2)
-                         (if-let [{nm :name no-p? :no-parameters?} (rule-name-dialog (.getText l) no-parameters?)]
-                           (if no-p? 
-                             (let [line (get-line-index-starting-with rp-display up)]
-                               (remove-rule-at rp-display line)
-                               (add-rule-at rp-display line (rule-display rp-display [nm 'T])))
+                         (if-let [{nm :name np? :no-parameters?} (rule-name-dialog (.getText l) no-parameters?)]
+                           (if np? 
+                             (let [line (get-line-index-starting-with rp-obj up)]
+                               (remove-rule-at rp-obj line)
+                               (add-rule-at rp-obj line (rule-display rp-obj [nm 'T])))
                              (if no-parameters?
-                               (let [line (get-line-index-starting-with rp-display up)]
-                                 (remove-rule-at rp-display line)
-                                 (add-rule-at rp-display line (rule-display rp-display [nm 0.0])))
+                               (let [line (get-line-index-starting-with rp-obj up)]
+                                 (remove-rule-at rp-obj line)
+                                 (add-rule-at rp-obj line (rule-display rp-obj [nm 0.0])))
                                (.setText l nm)))))))
          l)]
       (rule-parameter-display no-parameters? k args)
       [rmv])))
 
-(defn rule-display [rp-display rule]
-  (let [rules (remove nil? (rule-display* rp-display rule))]
+(defn rule-display [rp-obj rule]
+  (let [rules (remove nil? (rule-display* rp-obj rule))]
     (concat (map vector (butlast rules)) [[(last rules) "wrap"]])))
 
 (defn set-editable [panel editable?]
@@ -133,62 +140,61 @@
       (.setVisible (second cs) visibility)
       (.setVisible (last cs) visibility))))
 
-(defn rulepalette-window [rulepalette]
+(defn rulepalette-view [rulepalette]
   (let [rules (atom [])
         rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
         editable? (ssw/checkbox :text "editable?")
-        rp-display {;:syncrule-field syncrule-field
-                    :syncrule (atom "melodic-sync")
-                    :rules rules
-                    :rule-panel rule-panel
-                    ;:rulepalette-panel rulepalette-panel
-                    }
+        syncrule-select (ssw/combobox :model ["melodic-sync" "no-sync" "bar-sync"])
+        rp-obj {:syncrule (atom "melodic-sync")
+                :rules rules
+                :rule-panel rule-panel
+                :content (ssw/scrollable rule-panel)
+                }
         add-new-rule (ssw/action 
                        :icon (resource "icons/add.png")
                        :handler (fn [_] 
                                   (when-let [{nm :name np? :no-parameters?} (rule-name-dialog "" false)]
-                                    (add-rule-at rp-display 0 (rule-display rp-display [nm (if np? 'T 0.0)]))
-                                    (set-editable rule-panel (.isSelected editable?)))))
-;        ifr (javax.swing.JInternalFrame. "" true true true true)
-        menu (ssw/menubar :items
-                          [(ssw/menu :text "file" :items 
-                                     [(ssw/action :name "save rulepalette" :handler 
-                                                  (fn [_]
-                                                    (if-let [f (new-file-dialog rule-panel)]
-                                                      (spit f
-                                                            (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
-                                                                 (panel->rules rule-panel)
-                                                                 "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")))))])
-                           (ssw/menu :text "apply" :items 
-                                     [(ssw/action :name "apply"
-                                                  :handler (fn [_]
-                                                             (with-indeterminate-progress "applying rules"
-                                                                                          (apply-rules (panel->rules rule-panel) @(:syncrule rp-display))
-                                                                                          (reload-score-panel))))
-                                      (ssw/action :name "reset and apply")])
-                           (ssw/menu :text "config" :items 
-                                     [editable?
-                                      (ssw/action :name "Sync rule"
-                                                  :handler (fn [_]
-                                                             (if-let [in (ssw/input "Choose sync rule" :choices ["melodic-sync" "no-sync" "bar-sync"])]
-                                                               (reset! (:syncrule rp-display) in))))])])]
+                                    (add-rule-at rp-obj 0 (rule-display rp-obj [nm (if np? 'T 0.0)]))
+                                    (set-editable rule-panel (.isSelected editable?)))))]
     (add-watch rules "panel updater" (fn [_ _ old-items items]
-      (ssw/config! rule-panel :items (concat items [[add-new-rule "span"]]))
-;      (if (not (== (count old-items) (count items)))
- ;       (.pack ifr)
-;        )
-                                       ))
-    (reset! rules (apply concat (map (partial rule-display rp-display) (:all-rules rulepalette))))
+      (ssw/config! rule-panel :items (concat items [[(ssw/horizontal-panel :items [add-new-rule editable? syncrule-select]) "span"]]))))
+    (reset! rules (apply concat (map (partial rule-display rp-obj) (:all-rules rulepalette))))
     (ssw/listen editable? :selection (fn [& _] (set-editable rule-panel (.isSelected editable?))))
+    (ssw/listen syncrule-select :selection (fn [& _] (let [selection "melodic-sync"]
+                                                       (reset! (:syncrule rp-obj) selection))))
     (set-editable rule-panel false)
-;    (.setContentPane ifr rule-panel)
-;    (.setResizable ifr false)
-    {:content (ssw/border-panel :north menu :center rule-panel)}))
+    rp-obj))
 
 ;; actions
 
+(def reset-on-apply (atom false))
+(defn set-reset-on-apply [new-value]
+  (swap! reset-on-apply (constantly new-value)))
+
+(defn save-rp-obj [{:keys [rule-panel]}]
+  (if-let [f (new-file-dialog rule-panel)]
+    (spit f
+          (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
+               (panel->rules rule-panel)
+               "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))"))))
+
+(defn apply-rp-obj [{:keys [syncrule rule-panel]}]
+  (with-indeterminate-progress "applying rules"
+    (apply-rules (panel->rules rule-panel) @syncrule)
+    (reload-score-panel)))
+
+(defn apply-current-rulepalette [& _]
+  (let [rp-obj (nth @rulepalettes (.getSelectedIndex rulepalette-container) {})]
+    (apply-rp-obj rp-obj)))
+
+(defn apply-all-rulepalettes [& _]
+  (doseq [rp-obj @rulepalettes]
+    (apply-rp-obj rp-obj)))
+
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
-    (fn [_ f] (assoc (rulepalette-window (path->rulepalette (.getCanonicalPath f)))
-                     :title (.getName f) ))))
+    (fn [_ f] 
+      (add-rulepalette 
+        (assoc (rulepalette-view (path->rulepalette (.getCanonicalPath f)))
+               :title (.getName f))))))
 
