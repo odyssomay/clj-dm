@@ -30,7 +30,9 @@
                  :handler apply-current-rulepalette)
      (ssw/action :name "All Rulepalettes"
                  :handler apply-all-rulepalettes)
-     (ssw/checkbox :text "Reset on Apply")
+     (let [cb (ssw/checkbox :text "Reset on Apply")]
+       (ssw/listen cb :selection (fn [& _] (set-reset-on-apply (.isSelected cb))))
+       cb)
      ]))
 
 (def help-menu
