@@ -95,14 +95,14 @@
         sc (score-component 
              (convert-track (get-track id)) :clef \G )
         show-graph (ssw/action :name "graph"
-;                     :handler (fn [_]
-;                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl] :to-string #(subs (str %) 1))]
-;                                  (let [c (score-graph-component choice sc)]
-;                                    (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
-;                                                                               :handler 
-;                                                                               (fn [_] (.remove score-panel c)
-;                                                                                       (.revalidate score-panel)))]))
-;                                    (.add score-panel c "span"))))
+                     :handler (fn [_]
+                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))]
+                                  (let [c (score-graph-component choice sc)]
+                                    (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
+                                                                               :handler 
+                                                                               (fn [_] (.remove score-panel c)
+                                                                                       (.revalidate score-panel)))]))
+                                    (.add view c "span"))))
                                )]
     (ssw/listen sc :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
                                                   ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
@@ -121,7 +121,7 @@
 
 (defn update-score-panel [score]
   (let [views (for [i (range (count score))]
-                {:title i :content (score-view i)})]
+                {:title i :content (ssw/scrollable (score-view i))})]
     (ssw/config! score-panel :tabs views)))
 
 (defn reload-score-panel [] )
