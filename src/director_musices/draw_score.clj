@@ -8,8 +8,7 @@
 
 (def line-separation 7)
 
-(def svg-universe
-  (com.kitfox.svg.SVGUniverse.))
+(def svg-universe (com.kitfox.svg.SVGUniverse.))
 
 (defn init-svg []
   (doseq [id ["BlackNotehead" "whole" "quarter"]]
@@ -61,15 +60,16 @@
 (defn transform-for-note [g note {:keys [scale-x]}] 
   (if (:rest note)
     (condp <= (:length note)
-      1/4 (do (.translate g 0 2)
-              (.scale g 1.15 1.15))
+      4   (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (+ line-separation 4.5))
+              (.scale g 0.3 0.25))
+      2   (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (double line-separation))
+              (.scale g 0.3 0.25)) 
+      1   (do (.translate g 0 4))
       1/2 (do (.translate g 0 8)
               (.scale g 1.15 1.15))
-      1 (do (.translate g 0 4))
-      2 (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (double line-separation))
-            (.scale g 0.3 0.25)) 
-      4 (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (+ line-separation 4.5))
-            (.scale g 0.3 0.25)))
+      1/4 (do (.translate g 0 2)
+              (.scale g 1.15 1.15))
+      )
     (cond
       (= (:length note) 4) (do (.translate g 0.0 0.2) (.scale g 1.05 1.05)) 
       :else (do (.scale g 0.28 0.28) (.translate g 0 -74))
@@ -97,6 +97,14 @@
                  (= 3 (numerator length))))
     (.drawOval g 10 3 1.5 1.5)))
 
+(defn draw-note-help-lines [g height]
+  (if (< height 0)
+    nil
+    (if (> height 8)
+      (doseq [h (range 10 (+ height 2) 2)]
+        (let [y (* h (/ line-separation 2))]
+          (.drawLine g -1 y 9 y))))))
+
 (defn draw-note [g note {:keys [scale] :as options}]
   (let [img
         (some (fn [[length id]]
@@ -113,13 +121,10 @@
       (do (transform-for-note gc note options)
           (draw-svg gc (str "score/" img "_rest.svg")))
       (let [height (get-height note)]
-        (if (and (or (< height 0)
-                     (> height 7))
-                 (odd? height))
-          nil)
-        ;(.drawLine g 0 0 0 20)
-        (let [gc (.create g)]
-          (.translate gc (double 0) (double (get-y-offset note)))
+        (let [gc (.create g)
+              y-offset (get-y-offset note)]
+          (draw-note-help-lines gc height)
+          (.translate gc (double 0) (double y-offset))
           (draw-accidental gc note)
           (draw-dots gc note)
           (transform-for-note gc note options)
