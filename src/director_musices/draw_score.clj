@@ -98,12 +98,14 @@
     (.drawOval g 10 3 1.5 1.5)))
 
 (defn draw-note-help-lines [g height]
-  (if (< height 0)
-    nil
-    (if (> height 8)
-      (doseq [h (range 10 (+ height 2) 2)]
-        (let [y (* h (/ line-separation 2))]
-          (.drawLine g -1 y 9 y))))))
+  (let [upper? (< height 0)
+        lower? (> height 8)]
+    (if (or upper? lower?)
+      (doseq [h (range (if upper? 2 10)  
+                       (+ (java.lang.Math/abs height) (if lower? 2 0)) 
+                       2)]
+        (let [y (* h (/ line-separation 2) (if upper? -1 1))]
+          (.drawLine g -1.5 y 9 y))))))
 
 (defn draw-note [g note {:keys [scale] :as options}]
   (let [img
