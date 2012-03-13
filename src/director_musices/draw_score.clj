@@ -235,7 +235,7 @@
                 (ssw-graphics/anti-alias gc)
                 ;(.translate gc 0 20)
                 (.scale gc scale scale)
-                (.translate gc 0 (- (get-lowest)))
+                (.translate gc (double 0.0) (double (- (get-lowest))))
                 (draw-lines gc)
                 (when-let [clef (:clef options)]
                   (.translate gc 5 0)

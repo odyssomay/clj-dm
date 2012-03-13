@@ -4,7 +4,7 @@
   :disable-deps-clean true
   :resources-path "resources"
   :main director-musices.main
-  :dependencies [[org.clojure/clojure "1.2.1"]
+  :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.1.2"]
                  [seesaw "1.1.0"]
                  [com.miglayout/miglayout "3.7.4"]
@@ -13,5 +13,5 @@
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]]
-  :dev-dependencies [[com.stuartsierra/lazytest "1.1.2"]]
+;  :dev-dependencies [[com.stuartsierra/lazytest "1.1.2"]]
   )

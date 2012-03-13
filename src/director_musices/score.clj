@@ -12,7 +12,7 @@
 ;; score object
 
 (defn value->clj [v]
-  (case v 
+  (condp = v 
     'T true
     'NIL nil
     v))
