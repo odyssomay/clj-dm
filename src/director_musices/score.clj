@@ -75,7 +75,7 @@
 ;; score gui
 
 ;(def score-panel (ssw-mig/mig-panel))
-(def score-panel (ssw/tabbed-panel :placement :left))
+(def score-panel (ssw/horizontal-panel))
 
 (defn convert-track [track]
   (for [{:keys [dr ndr n] :as note} track]
@@ -90,10 +90,10 @@
 
 (defn score-view [id]
   (let [view (ssw-mig/mig-panel)
-        scale (ssw/slider :min 1 :max 500)
-        scale-x (ssw/slider :min 1 :max 500)
         sc (score-component 
              (convert-track (get-track id)) :clef \G )
+        mouse-position-x-start (atom 0)
+        initial-scale-x (atom 1)
         show-graph (ssw/action :name "graph"
                      :handler (fn [_]
                                 (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))]
@@ -104,25 +104,43 @@
                                                                                        (.revalidate score-panel)))]))
                                     (.add view c "span"))))
                                )]
-    (ssw/listen sc :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
-                                                  ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
-                                                                              "," ",\n")
-                                                               :multi-line? true)]
-                                              (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                                                                     :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
-    (ssw/listen scale :change (fn [& _] (.setScale sc (/ (.getValue scale) 100))))
-    (ssw/listen scale-x :change (fn [& _] (.setScaleX sc (/ (.getValue scale-x) 100))))
-    (.setValue scale 100)
-    (.setValue scale-x 300)
-    (ssw/config! view :items
-      [["scale"] [scale] ["scale length"] [scale-x] [show-graph "wrap"]
-       [sc "span"]])
-    view))
+    (ssw/listen sc 
+                :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
+                                               ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
+                                                                                          "," ",\n")
+                                                            :multi-line? true)]
+                                           (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta))))))))
+                :mouse-pressed (fn [e] (reset! mouse-position-x-start (.getX e))
+                                 (reset! initial-scale-x (:scale-x @(.getOptionsAtom sc))))
+                :mouse-dragged (fn [e] (.setScaleX sc (* @initial-scale-x (/ (.getX e) @mouse-position-x-start))))
+                )
+    sc))
 
-(defn update-score-panel [score]
-  (let [views (for [i (range (count score))]
-                {:title i :content (ssw/scrollable (score-view i))})]
-    (ssw/config! score-panel :tabs views)))
+(defn update-score-panel 
+  ([parent-split score i]
+   (let [view (score-view i)]
+     (if (= (inc i) (count score))
+       (do (.addPropertyChangeListener parent-split 
+                                       (reify java.beans.PropertyChangeListener
+                                         (propertyChange [this e]
+                                           (if (= (.getPropertyName e) "dividerLocation")
+                                             (.setScaleFromHeight view (- (.getHeight parent-split) (.getNewValue e) 10))
+                                             ))))
+         view)
+       (let [split (ssw/top-bottom-split view nil :border 0)
+             bottom (update-score-panel split score (inc i))]
+         (.setBottomComponent split bottom)
+         (.addPropertyChangeListener split
+                                     (reify java.beans.PropertyChangeListener
+                                       (propertyChange [this e]
+                                         (if (= (.getPropertyName e) "dividerLocation")
+                                           (.setScaleFromHeight view (.getNewValue e))))))
+         (.setDividerSize split 3)
+         (.setResizeWeight split (/ (inc i) (count score)))
+         split))))
+  ([score]
+   (ssw/config! score-panel :items [(ssw/scrollable (update-score-panel nil score 0))])))
 
 (defn reload-score-panel [] )
 
@@ -133,7 +151,8 @@
                   (let [path (.getCanonicalPath f)]
                     (load-active-score-from-file path)
                     ;(set-score (load-mus-from-path path))
-                    (update-score-panel (load-mus-from-path path))))))
+                    (update-score-panel (load-mus-from-path path))
+                    ))))
 
 (defn choose-and-save-score [& _]
   (if-let [f (new-file-dialog)]

@@ -165,6 +165,7 @@
 (defprotocol scoreProperties
   (setScale [this scale] )
   (setScaleX [this scale-x])
+  (setScaleFromHeight [this height])
   (setNotes [this notes])
   (getOptionsAtom [this]))
 
@@ -258,6 +259,8 @@
             ; scoreProperties
             (setScale [scale] (swap! options-atom assoc :scale scale))
             (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x))
+            (setScaleFromHeight [height]
+              (swap! options-atom assoc :scale (/ height (get-height))))
             (setNotes [notes] 
               (swap! options-atom assoc :notes 
                 (get-notes-distance notes (:default-distance @options-atom))))
