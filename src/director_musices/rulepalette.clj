@@ -2,7 +2,8 @@
   (:use [director-musices
          [glue :only [apply-rules]]
          [score :only [reload-score-panel]]
-         [utils :only [find-i new-file-dialog with-indeterminate-progress]]]
+         [utils :only [find-i new-file-dialog with-indeterminate-progress]]
+         [player :only [update-player]]]
         [clojure.java.io :only [resource]])
   (:require [seesaw
              [core :as ssw]
@@ -185,11 +186,13 @@
 
 (defn apply-current-rulepalette [& _]
   (let [rp-obj (nth @rulepalettes (.getSelectedIndex rulepalette-container) {})]
-    (apply-rp-obj rp-obj)))
+    (apply-rp-obj rp-obj))
+  (update-player))
 
 (defn apply-all-rulepalettes [& _]
   (doseq [rp-obj @rulepalettes]
-    (apply-rp-obj rp-obj)))
+    (apply-rp-obj rp-obj))
+  (update-player))
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 

@@ -3,7 +3,8 @@
                           [interpreter :only [eval-abcl]]
                           [load-mus :only [load-mus-from-path]]
                           [draw-score :only [score-component score-graph-component get-note-for-x]]
-                          [utils :only [new-file-dialog]]))
+                          [utils :only [new-file-dialog]]
+                          [player :only [update-player]]))
   (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]
@@ -169,6 +170,7 @@
                     (load-active-score-from-file path)
                     ;(set-score (load-mus-from-path path))
                     (update-score-panel (load-mus-from-path path))
+                    (update-player)
                     ))))
 
 (defn choose-and-save-score [& _]
