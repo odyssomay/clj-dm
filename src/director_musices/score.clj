@@ -1,10 +1,10 @@
 (ns director-musices.score
   (:use (director-musices [glue :only [load-active-score-from-file get-active-score]]
                           [interpreter :only [eval-abcl]]
-                          [load-mus :only [load-mus-from-path]]
                           [draw-score :only [score-component score-graph-component get-note-for-x]]
                           [utils :only [new-file-dialog]]
-                          [player :only [update-player]]))
+                          [player :only [update-player]])
+        [clojure.java.io :only [resource]])
   (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]
@@ -73,6 +73,22 @@
                          (keyword (.toUpperCase (name k)))
                          v))))
 
+(defn get-track-count []
+  (.javaInstance (eval-abcl "(length (track-list *active-score*))")))
+
+(defn get-track-property [id property]
+  (.javaInstance (eval-abcl (str "(" property " (nth " id " (track-list *active-score*)))"))))
+
+(defn set-track-property [id property value]
+  (let [type (case property
+               "trackname" :string
+               "instrument-type" :string
+               :native)
+        value (case type
+                :string (str "\"" value "\"")
+                :native (str value))]
+    (eval-abcl (str "(setf (" property " (nth " id " (track-list *active-score*))) " value ")"))))
+
 ;; score gui
 
 ;(def score-panel (ssw-mig/mig-panel))
@@ -108,46 +124,43 @@
     (ssw/listen sc 
                 :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
                                                ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
-                                                                                          "," ",\n")
+                                                                                          "," "\n")
                                                             :multi-line? true)]
                                            (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
                                                                   :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
     sc))
 
-(comment
-(defn update-score-panel 
-  ([parent-split score i]
-   (let [view (score-view i)]
-     (if (= (inc i) (count score))
-       (do (.addPropertyChangeListener parent-split 
-                                       (reify java.beans.PropertyChangeListener
-                                         (propertyChange [this e]
-                                           (if (= (.getPropertyName e) "dividerLocation")
-                                             (.setScaleFromHeight view (- (.getHeight parent-split) (.getNewValue e) 10))
-                                             ))))
-         view)
-       (let [split (ssw/top-bottom-split view nil :border 0)
-             bottom (update-score-panel split score (inc i))]
-         (.setBottomComponent split bottom)
-         (.addPropertyChangeListener split
-                                     (reify java.beans.PropertyChangeListener
-                                       (propertyChange [this e]
-                                         (if (= (.getPropertyName e) "dividerLocation")
-                                           (.setScaleFromHeight view (.getNewValue e))))))
-         (.setDividerSize split 3)
-         (.setResizeWeight split (/ (inc i) (count score)))
-         split))))
-  ([score]
-   (ssw/config! score-panel :items [(ssw/scrollable (update-score-panel nil score 0))])))
-)
+(defn track-options-dialog [track-id]
+  (let [p (ssw-mig/mig-panel)
+        items
+        (for [property ["trackname" "midi-channel"
+                        "midi-initial-volume" "midi-initial-program"
+                        "midi-bank-msb" "midi-bank-lsb"
+                        "midi-pan" "midi-reverb" 
+                        ;"synth" 
+                        "instrument-type"
+                        "track-delay"]]
+          [[(ssw/label :text property)] [(ssw/text :text (str (get-track-property track-id property))
+                                                   :columns 15) 
+                                         "wrap"]])]
+    (ssw/config! p :items (reduce concat items))
+    (-> (ssw/dialog :content p :option-type :ok-cancel
+                    :success-fn (fn [_] 
+                                  (doseq [item items]
+                                    (set-track-property track-id (.getText (ffirst item)) (.getText (first (second item)))))))
+      ssw/pack!
+      ssw/show!)
+    ))
 
-(defn update-score-panel [score]
+(defn update-score-panel []
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
         p (ssw-mig/mig-panel)
-        score-views (for [i (range (count score))]
-                      (let [view (score-view i)]
+        score-views (for [i (range (get-track-count))]
+                      (let [view (score-view i)
+                            options-label (ssw/label :icon (resource "icons/gear.png"))
+                            graph-label   (ssw/label :icon (resource "icons/stats.png"))]
                         (ssw/listen view                 
                                     :mouse-pressed (fn [e] 
                                                      (reset! mouse-position-x-start (.getX e))
@@ -155,7 +168,10 @@
                                     :mouse-dragged (fn [e] 
                                                      (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
                         (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX view scale-x)))
-                        [[(str "track " i)] [view "span"]]))]
+                        (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog i))) 
+                        [[options-label]
+                         [graph-label]
+                         [view "span"]]))]
     (ssw/config! p :items (reduce concat score-views))
     (ssw/config! score-panel :items [(ssw/scrollable p)])
     p))
@@ -169,11 +185,14 @@
                   (let [path (.getCanonicalPath f)]
                     (load-active-score-from-file path)
                     ;(set-score (load-mus-from-path path))
-                    (update-score-panel (load-mus-from-path path))
+                    (update-score-panel)
                     (update-player)
                     ))))
 
-(defn choose-and-save-score [& _]
+(defn choose-and-save-performance [& _]
   (if-let [f (new-file-dialog)]
     (spit f (get-active-score))))
+
+(defn choose-and-save-score [& _]
+  (choose-and-save-performance))
 
