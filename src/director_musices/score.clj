@@ -110,13 +110,10 @@
                                                                                           "," ",\n")
                                                             :multi-line? true)]
                                            (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta))))))))
-                :mouse-pressed (fn [e] (reset! mouse-position-x-start (.getX e))
-                                 (reset! initial-scale-x (:scale-x @(.getOptionsAtom sc))))
-                :mouse-dragged (fn [e] (.setScaleX sc (* @initial-scale-x (/ (.getX e) @mouse-position-x-start))))
-                )
+                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
     sc))
 
+(comment
 (defn update-score-panel 
   ([parent-split score i]
    (let [view (score-view i)]
@@ -141,6 +138,26 @@
          split))))
   ([score]
    (ssw/config! score-panel :items [(ssw/scrollable (update-score-panel nil score 0))])))
+)
+
+(defn update-score-panel [score]
+  (let [mouse-position-x-start (atom 0)
+        initial-scale-x (atom 1)
+        new-scale-x (atom 1)
+        p (ssw-mig/mig-panel)
+        score-views (for [i (range (count score))]
+                      (let [view (score-view i)]
+                        (ssw/listen view                 
+                                    :mouse-pressed (fn [e] 
+                                                     (reset! mouse-position-x-start (.getX e))
+                                                     (reset! initial-scale-x (:scale-x @(.getOptionsAtom view))))
+                                    :mouse-dragged (fn [e] 
+                                                     (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
+                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX view scale-x)))
+                        [[(str "track " i)] [view "span"]]))]
+    (ssw/config! p :items (reduce concat score-views))
+    (ssw/config! score-panel :items [(ssw/scrollable p)])
+    p))
 
 (defn reload-score-panel [] )
 
