@@ -13,7 +13,8 @@
                  :handler choose-and-open-score)
      (ssw/action :name "Save Score"
                  :handler choose-and-save-score)
-     (ssw/action :name "Save Performance")
+     (ssw/action :name "Save Performance"
+                 :handler choose-and-save-performance)
      (ssw/separator)
      (ssw/action :name "Open Rulepalette"
                  :handler choose-and-open-rulepalette)
