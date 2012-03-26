@@ -4,6 +4,7 @@
   :disable-deps-clean true
   :resources-path "resources"
   :main director-musices.main
+  :manifest ["SplashScreen-Image" "splash.gif"]
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.1.2"]
                  [seesaw "1.1.0"]
