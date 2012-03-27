@@ -101,34 +101,9 @@
         (assoc note :pitch (first n)
           :length (* 4 (second n)))
         note)
-      :dr/ndr (/ dr ndr))))
+      :dr/ndr (- (/ dr ndr) 1))))
 
 (def score-panel-reloader (atom nil))
-
-(defn score-view [id]
-  (let [view (ssw-mig/mig-panel)
-        sc (score-component 
-             (convert-track (get-track id)) :clef \G )
-        mouse-position-x-start (atom 0)
-        initial-scale-x (atom 1)
-        show-graph (ssw/action :name "graph"
-                     :handler (fn [_]
-                                (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))]
-                                  (let [c (score-graph-component choice sc)]
-                                    (ssw/config! c :popup (fn [_] [(ssw/action :name "remove graph" 
-                                                                               :handler 
-                                                                               (fn [_] (.remove score-panel c)
-                                                                                       (.revalidate score-panel)))]))
-                                    (.add view c "span"))))
-                               )]
-    (ssw/listen sc 
-                :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
-                                               ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
-                                                                                          "," "\n")
-                                                            :multi-line? true)]
-                                           (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
-    sc))
 
 (defn track-options-dialog [track-id]
   (let [p (ssw-mig/mig-panel)
@@ -152,31 +127,62 @@
       ssw/show!)
     ))
 
+(defn score-view [id]
+  (let [view (ssw-mig/mig-panel)
+        sc (score-component 
+             (convert-track (get-track id)) :clef \G )
+        options-label (ssw/label :icon (resource "icons/gear_small.png"))
+        graph-label   (ssw/label :icon (resource "icons/stats_small.png"))
+        ]
+    (ssw/listen sc 
+                :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
+                                               ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
+                                                                                          "," "\n")
+                                                            :multi-line? true)]
+                                           (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
+    (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id))) 
+    (ssw/listen graph-label :mouse-clicked
+                (fn [_]
+                  (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
+                    (let [c (score-graph-component choice sc :height 150)
+                          remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
+                      (ssw/listen remove-label :mouse-clicked
+                                  (fn [_] 
+                                    (.remove view remove-label)
+                                    (.remove view c)
+                                    (.revalidate view)))
+                      (.add view remove-label)
+                      (.add view c "span")
+                      (.revalidate view)))))
+    (ssw/config! view :items [[(ssw/vertical-panel :items [options-label graph-label])]
+                              [sc "span"]])
+    (add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (get-track id)))))
+    {:score-component sc :view view}))
+
 (defn update-score-panel []
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
         p (ssw-mig/mig-panel)
         score-views (for [i (range (get-track-count))]
-                      (let [view (score-view i)
-                            options-label (ssw/label :icon (resource "icons/gear.png"))
-                            graph-label   (ssw/label :icon (resource "icons/stats.png"))]
-                        (ssw/listen view                 
+                      (let [sv (score-view i)
+                            sc (:score-component sv)
+                            ]
+                        (ssw/listen sc 
                                     :mouse-pressed (fn [e] 
                                                      (reset! mouse-position-x-start (.getX e))
-                                                     (reset! initial-scale-x (:scale-x @(.getOptionsAtom view))))
+                                                     (reset! initial-scale-x (:scale-x @(.getOptionsAtom sc))))
                                     :mouse-dragged (fn [e] 
                                                      (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
-                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX view scale-x)))
-                        (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog i))) 
-                        [[options-label]
-                         [graph-label]
-                         [view "span"]]))]
+                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX sc scale-x)))
+                        [[(:view sv) "span"]]))]
     (ssw/config! p :items (reduce concat score-views))
     (ssw/config! score-panel :items [(ssw/scrollable p)])
     p))
 
-(defn reload-score-panel [] )
+(defn reload-score-panel [] 
+  (swap! score-panel-reloader not))
 
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
