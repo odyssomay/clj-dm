@@ -40,11 +40,13 @@
     (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
 
 (defn get-height [note]
-  (- 9 
-     (case (first (:pitch note))
-       \C 0, \D 1, \E 2, \F 3
-       \G 4, \A 5, \B 6)
-     (* 7 (- (read-string (str (last (:pitch note)))) 4))))
+  (let [p (:pitch note)
+        p (if (list? p) (first p) p)]
+    (- 9 
+       (case (first p)
+         \C 0, \D 1, \E 2, \F 3
+         \G 4, \A 5, \B 6)
+       (* 7 (- (read-string (str (last p))) 4)))))
 
 (defn get-y-offset [note]
   (* (get-height note) (/ line-separation 2)))
@@ -130,7 +132,10 @@
           (draw-accidental gc note)
           (draw-dots gc note)
           (transform-for-note gc note options)
-          (.render (.getDiagram svg-universe (.toURI (resource (str "score/" img ".svg")))) gc))))))
+          (try (.render (.getDiagram svg-universe (.toURI (resource (str "score/" img ".svg")))) gc)
+            (catch Exception e
+              ;(println "failed" img)
+              )))))))
 
 (defn draw-notes [g notes {:keys [scale-x] :or {scale-x 1} :as options}]
   (let [gc (.create g)]
@@ -294,11 +299,15 @@
 ;(defn draw-coordinate-system [g property-max property-min]
 
 
-(defn draw-graph-height-lines [g width height]
-  (let [gc (.create g)]
+(defn draw-graph-height-lines [g width scale-y value-max value-min]
+  (let [gc (.create g)
+        step (/ (max value-max (Math/abs value-min)) 10)]
     (.setColor gc (java.awt.Color. 200 200 200))
-    (doseq [h (range 0 height 5)]
-      (.drawLine gc 0 (- h) width (- h)))))
+    (doseq [h (range 0 (inc value-max) step)]
+      (.drawLine gc 0 (* scale-y (- h)) width (* scale-y (- h))))
+    (doseq [h (range 0 (inc (Math/abs value-min)) step)]
+      (.drawLine gc 0 (* scale-y h) width (* scale-y h)))
+    ))
 
 (defn score-graph-component [property score-component & {:as graph-opts}]
   (let [options-atom (.getOptionsAtom score-component)
@@ -323,12 +332,12 @@
                     clef (:clef options)
                     graph-options @graph-options-atom
                     scale-y (get-scale-y)
-                    scaled-width (* scale (:scale-x options) (get-width))
+                    scaled-width (* scale (get-width))
                     ]
                 (ssw-graphics/anti-alias gc)
                 (.scale gc scale scale)
                 (.translate gc 0.0 (double (+ (* scale-y (get-property-max)) 5)))
-                (draw-graph-height-lines gc scaled-width (get-property-max))
+                (draw-graph-height-lines gc scaled-width scale-y (get-property-max) (get-property-min))
                 (.drawLine gc 0 0 scaled-width 0)
                 (let [gcc (.create gc)]
                   (.scale gcc 1.2 1.2)
@@ -341,7 +350,7 @@
             (getPreferredSize []
               (java.awt.Dimension. 
                 (.width (.getPreferredSize score-component))
-                (* (:scale @options-atom) (+ 10 (* (get-scale-y) (get-property-max)))))); (+ 12 (get-height)))))
+                (* (:scale @options-atom) (+ 10 (* (get-scale-y) (get-height)))))); (+ 12 (get-height)))))
             ; scrollable
             (getPreferredScrollableViewportSize [] (.getPreferredSize this))
             (getScrollableBlockIncrement [_ _ _] 500)
