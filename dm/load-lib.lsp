@@ -49,9 +49,11 @@
     (FINAL-RITARD 1.0)
    ))
 
-(init-music-score)
+;(init-music-score)
 
-(rule-apply-list-sync test-rulelist 'no-sync)
+;(rule-apply-list-sync test-rulelist 'no-sync)
+
+(print (length (track-list *active-score*)))
 
 ;; Changed files:
 
