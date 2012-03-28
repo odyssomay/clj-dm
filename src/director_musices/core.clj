@@ -55,7 +55,7 @@
                                                                                           rulepalette-container))
              :menubar (init-menu-bar)
              :size [800 :by 600]
-;             :on-close :exit
+             :on-close :exit
              )]
     (ssw/show! fr)
     nil))
