@@ -41,7 +41,7 @@
 
 (defn get-height [note]
   (let [p (:pitch note)
-        p (if (list? p) (first p) p)]
+        p (if (list? p) (first p) p)] ; chord drawing quickfix
     (- 9 
        (case (first p)
          \C 0, \D 1, \E 2, \F 3
