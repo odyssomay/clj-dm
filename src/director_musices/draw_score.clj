@@ -296,18 +296,23 @@
         ;(.drawString gcx (str (get note property)) (double 3) (double (- (get note property))))
         ))))
 
-;(defn draw-coordinate-system [g property-max property-min]
-
-
 (defn draw-graph-height-lines [g width scale-y value-max value-min]
   (let [gc (.create g)
-        step (/ (max value-max (Math/abs value-min)) 10)]
+        gc-text (.create gc)
+        step (/ (max value-max (Math/abs value-min)) 10)
+        draw-height-line (fn [h height pre]
+                           (if (and (< h 9) (odd? h))
+                             (let [text (str pre (apply str (take 5 (str (* h step)))))]
+                               (.drawString gc-text text (float 40) (float (- (* (/ 1 0.8) height) 1)))))
+                           (.drawLine gc 0 height width height))
+        ]
     (.setColor gc (java.awt.Color. 200 200 200))
-    (doseq [h (range 0 (inc value-max) step)]
-      (.drawLine gc 0 (* scale-y (- h)) width (* scale-y (- h))))
-    (doseq [h (range 0 (inc (Math/abs value-min)) step)]
-      (.drawLine gc 0 (* scale-y h) width (* scale-y h)))
-    ))
+    (.setColor gc-text (java.awt.Color. 50 50 50))
+    (.scale gc-text 0.8 0.8)
+    (doseq [h (range 0 11)]
+      (let [height (* scale-y h step)]
+        (draw-height-line h (- height) "")
+        (draw-height-line h height "-")))))
 
 (defn score-graph-component [property score-component & {:as graph-opts}]
   (let [options-atom (.getOptionsAtom score-component)
@@ -339,9 +344,18 @@
                 (.translate gc 0.0 (double (+ (* scale-y (get-property-max)) 5)))
                 (draw-graph-height-lines gc scaled-width scale-y (get-property-max) (get-property-min))
                 (.drawLine gc 0 0 scaled-width 0)
-                (let [gcc (.create gc)]
+                (let [gcc (.create g)]
                   (.scale gcc 1.2 1.2)
-                  (.drawString gcc (:title graph-options) 10 -5))
+                  (.setColor gcc (java.awt.Color. 0 0 0))
+                  (let [text (:title graph-options)
+                        metrics (.getFontMetrics gcc)
+                        width (.stringWidth metrics text)
+                        height (.getHeight metrics)]
+                    ;(.fillRect gcc 5 (- -15 height) (+ 10 width) (+ 10 height))
+                    (.fillRect gcc 5 5 (+ 10 width) (+ 10 height))
+                    (.setColor gcc (java.awt.Color. 255 255 255))
+                    (.drawString gcc (:title graph-options) 10 (+ 10 height))
+                    ))
                 (.translate gc (double (if clef 45 10)) 0.0)
                 ;(.drawLine gc -5 0 -5 (- (- (get-property-max)) 5))
                 ;(.drawLine gc -5 0 -5 (+ (- (get-property-min)) 5))
