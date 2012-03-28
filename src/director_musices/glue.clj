@@ -60,6 +60,7 @@
 (defn apply-rules [rulelist-string sync-rule]
   (init-dm)
   (eval-abcl (str "(in-package :dm)
+                  (reset-music)
                   (rule-apply-list-sync '(" 
                   rulelist-string ") '" sync-rule ")")) )
 
