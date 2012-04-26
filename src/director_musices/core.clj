@@ -16,6 +16,9 @@
      (ssw/action :name "Save Performance"
                  :handler choose-and-save-performance)
      (ssw/separator)
+     (ssw/action :name "Import midifile"
+                 :handler choose-and-open-midi)
+     (ssw/separator)
      (ssw/action :name "Open Rulepalette"
                  :handler choose-and-open-rulepalette)
      (ssw/action :name "Save Rulepalette")

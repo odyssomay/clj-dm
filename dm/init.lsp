@@ -31,6 +31,26 @@
     (print-to-file *active-score* str)
     (get-output-stream-string str)))
 
+(defun filter-segment (segment)
+  (remove-if (lambda (p)
+			   (cond
+				 ((eq (car p) 'DR) nil)
+				 ((eq (car p) 'NDR) nil)
+				 ((eq (car p) 'N) nil)
+				 ((eq (car p) 'REST) nil)
+				 ((eq (car p) 'METER) nil)
+				 ((eq (car p) 'SL) nil)
+				 ((eq (car p) 'DOT) nil)
+				 ((eq (car p) 'MM) nil)
+				 ((eq (car p) 'KEY) nil)
+				 ((eq (car p) 'BAR) nil)
+				 (t t))) segment))
+
+(defun get-filtered-track (index)
+  (map 'list 
+	   (lambda (segment) (filter-segment (var-list segment))) 
+	   (segment-list (nth index (track-list *active-score*)))))
+
 (defun read-score-from-string (string)
    (let ((inlist)
          (score (make-instance 'score :score-filename "no name"))

@@ -14,7 +14,7 @@
     "dm:lib-core:"
     ["scoreobjects.lsp" "basicmacros.lsp"  "infixmath.lsp"    "musicio.lsp"     "rulemacros.lsp" "parallelrulemacros.lsp" 
      "dm-objects.lsp"   "initconvert.lsp"  "rule-groups.lsp"  "syntobjects.lsp" "shapeobjects.lsp"
-     "midifileoutput.lsp" "playlist.lsp" "midibasic-lw.lsp"])
+     "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"])
   (load-abcl "dm:init.lsp"))
 
 (defn load-rules []
@@ -54,6 +54,12 @@
   (.execute (abcl-f "DM" "read-active-score-from-file") (str->abcl path))
   (eval-abcl "(init-music-score)"))
 
+(defn load-active-score-from-midi-file [path]
+  (init-dm)
+  (eval-abcl "(in-package :dm)")
+  (.execute (abcl-f "DM" "load-midifile-fpath") (str->abcl path))
+  (eval-abcl "(init-music-score)"))
+
 (defn get-active-score []
   (.execute (abcl-f "DM" "get-active-score")))
 
@@ -66,5 +72,5 @@
 
 (defn save-midi-to-path [path]
   (init-dm)
-  (eval-abcl (str "(in-package :dm)
-                  (save-performance-midifile1-fpath \"" path "\")")))
+  (eval-abcl "(in-package :dm)")
+  (.execute (abcl-f "DM" "save-performance-midifile1-fpath") (str->abcl path)))

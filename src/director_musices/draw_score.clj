@@ -61,16 +61,18 @@
 
 (defn transform-for-note [g note {:keys [scale-x]}] 
   (if (:rest note)
-    (condp <= (:length note)
-      4   (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (+ line-separation 4.5))
-              (.scale g 0.3 0.25))
-      2   (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (double line-separation))
-              (.scale g 0.3 0.25)) 
-      1   (do (.translate g 0 4))
-      1/2 (do (.translate g 0 8)
-              (.scale g 1.15 1.15))
-      1/4 (do (.translate g 0 2)
-              (.scale g 1.15 1.15))
+    (condp <= (:nlength note)
+      1    (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (+ line-separation 4.5))
+               (.scale g 0.3 0.25))
+      1/2  (do (.translate g (double (* (/ (:distance note) 2) scale-x)) (double line-separation))
+               (.scale g 0.3 0.25)) 
+      1/4  (do (.translate g 0 4))
+      1/8  (do (.translate g 0 8)
+               (.scale g 1.15 1.15))
+      1/16 (do (.translate g 0 2)
+               (.scale g 1.15 1.15))
+      (do (.translate g 0 2)
+        (.scale g 1.15 1.15))
       )
     (cond
       (= (:length note) 4) (do (.translate g 0.0 0.2) (.scale g 1.05 1.05)) 
@@ -93,11 +95,15 @@
              (.translate gc -7 -6)
              (draw-svg gc "score/flat.svg"))))))
 
-(defn draw-dots [g {:keys [length]}]
-  (when (or (= length 3)
-            (and (= (class length) clojure.lang.Ratio)
-                 (= 3 (numerator length))))
-    (.drawOval g 10 3 1.5 1.5)))
+(defn draw-dots [g {:keys [dot]}]
+  (when dot
+    (.drawOval g 10 3 1.5 1.5)
+    (if (== dot 2)
+      (.drawOval g 14 3 1.5 1.5))))
+;  (when (or (= length 3)
+;            (and (= (class length) clojure.lang.Ratio)
+;                 (= 3 (numerator length))))
+;    (.drawOval g 10 3 1.5 1.5)))
 
 (defn draw-note-help-lines [g height]
   (let [upper? (< height 0)
@@ -109,17 +115,23 @@
         (let [y (* h (/ line-separation 2) (if upper? -1 1))]
           (.drawLine g -1.5 y 9 y))))))
 
+(defn hollow-non-exact-notes [g note]
+  (if (condp == (:nlength note)
+        1 false 1/2 false 1/4 false
+        1/8 false 1/16 false 1/32 false
+        true)
+    (.setComposite g (java.awt.AlphaComposite/getInstance java.awt.AlphaComposite/SRC_OVER 0.5))))
+
 (defn draw-note [g note {:keys [scale] :as options}]
   (let [img
-        (some (fn [[length id]]
-                (if (>= (:length note) length)
-                  id))
-              (partition 2 [4   "whole"
-                            2   "half"
-                            1   "quarter"
-                            1/2 "eighth"
-                            1/4 "sixteenth"
-                            1/8 "thirtysecond"]))
+        (condp <= (:nlength note)
+          1 "whole"
+          1/2 "half"
+          1/4 "quarter"
+          1/8 "eighth"
+          1/16 "sixteenth"
+          1/32 "thirtysecond"
+          "thirtysecond")
         gc (.create g)]
     (if (:rest note)
       (do (transform-for-note gc note options)
@@ -132,10 +144,8 @@
           (draw-accidental gc note)
           (draw-dots gc note)
           (transform-for-note gc note options)
-          (try (.render (.getDiagram svg-universe (.toURI (resource (str "score/" img ".svg")))) gc)
-            (catch Exception e
-              ;(println "failed" img)
-              )))))))
+          (hollow-non-exact-notes gc note)
+          (draw-svg gc (str "score/" img ".svg")))))))
 
 (defn draw-notes [g notes {:keys [scale-x] :or {scale-x 1} :as options}]
   (let [gc (.create g)]
@@ -221,8 +231,8 @@
     c
     ))
 
-(defn score-component [notes & {:keys [default-distance] :or {default-distance 20} :as opts}] 
-  (let [options-atom (atom (merge {:scale 1 :scale-x 1 :default-distance 20
+(defn score-component [notes & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
+  (let [options-atom (atom (merge {:scale 1 :scale-x 1 :default-distance 1/8
                                    :notes (get-notes-distance notes default-distance)} opts))
         get-notes #(:notes @options-atom)
         get-heights (fn [] (remove nil? (map #(if (:pitch %)

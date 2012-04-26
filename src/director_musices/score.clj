@@ -1,6 +1,6 @@
 (ns director-musices.score
-  (:use (director-musices [glue :only [load-active-score-from-file get-active-score]]
-                          [interpreter :only [eval-abcl]]
+  (:use (director-musices [glue :only [load-active-score-from-file load-active-score-from-midi-file get-active-score]]
+                          [interpreter :only [eval-abcl abcl-f]]
                           [draw-score :only [score-component score-graph-component get-note-for-x]]
                           [utils :only [new-file-dialog]]
                           [player :only [update-player]])
@@ -47,7 +47,7 @@
     (.replaceAll raw "," "")))
 
 (defn get-track [track-index]
-  (let [raw (eval-abcl (str "(map 'list #'var-list (segment-list (nth " track-index " (track-list *active-score*))))"))]
+  (let [raw (eval-abcl (str "(get-filtered-track " track-index ")"))]
     (->> raw
          .copyToArray
          (map segment->map))))
@@ -99,7 +99,8 @@
     (assoc
       (if n
         (assoc note :pitch (first n)
-          :length (* 4 (second n)))
+          :length dr
+          :nlength (second n)) ; (* 4 (second n)))
         note)
       :dr/ndr (- (/ dr ndr) 1))))
 
@@ -184,16 +185,17 @@
 (defn reload-score-panel [] 
   (swap! score-panel-reloader not))
 
+(defn load-new-score-with [f]
+  (.removeAll score-panel)
+  (f)
+  (update-score-panel)
+  (update-player))
+
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
-                  (.removeAll score-panel)
                   (let [path (.getCanonicalPath f)]
-                    (load-active-score-from-file path)
-                    ;(set-score (load-mus-from-path path))
-                    (update-score-panel)
-                    (update-player)
-                    ))))
+                    (load-new-score-with (fn [] (load-active-score-from-file path)))))))
 
 (defn choose-and-save-performance [& _]
   (if-let [f (new-file-dialog)]
@@ -201,4 +203,12 @@
 
 (defn choose-and-save-score [& _]
   (choose-and-save-performance))
+
+(defn choose-and-open-midi [& _]
+  (ssw-chooser/choose-file
+    :success-fn (fn [_ f]
+                  (let [path (.getCanonicalPath f)]
+                    (load-new-score-with (fn [] (load-active-score-from-midi-file path)))))))
+                  
+
 
