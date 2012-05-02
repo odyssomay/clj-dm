@@ -1,10 +1,12 @@
 (ns director-musices.interpreter
   (:use (director-musices [utils :only [log]])
-        [clojure.java.io :only [copy file resource]]))
+        [clojure.java.io :only [copy file delete-file resource]]))
 
 (def *interpreter*
   (future 
-    (do (org.armedbear.lisp.Interpreter/createInstance)
+    (do (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
+          (.dispose i))
+        (org.armedbear.lisp.Interpreter/createInstance)
         (org.armedbear.lisp.Interpreter/getInstance))))
 
 (defn eval-abcl [s]
@@ -21,21 +23,23 @@
 ;      (println "abcl form eval failed:" s "\n" e)
 ;      (.printStackTrace e))))
 
-(defn load-abcl [f]
+(defn eval-abcl-dm [s]
+  (eval-abcl (str "(in-package :dm) " s)))
+
+(def buffer-id (atom 0))
+
+(defn load-abcl [path]
   (try 
-    (println f)
-;    (-> (with-open [s1 (.openStream (resource (.replaceAll f ":" "/")))
-;                    s2 (java.io.StringWriter.)]
-;          (copy s1 s2)
-;          (.toString s2))
-;        eval-abcl)
-    (eval-abcl (str "(load \"" 
-                    (.getCanonicalPath (apply file (.split f ":")))
-                    ;(.getCanonicalPath (resource (.replaceAll f ":" "/")))
-                    "\")"))
-    (log :trace (str "loaded " f))
+    (println path)
+    (let [f (file (str "abcl-buffer" @buffer-id))]
+      (spit f (slurp (resource (.replaceAll path ":" "/"))))
+      (eval-abcl (str "(load \"" (.getCanonicalPath f) "\")"))
+      (swap! buffer-id inc)
+      (delete-file f)
+      )
+    (log :trace (str "loaded " path))
     (catch Exception e
-      (log :error e (str "failed loading " f)))))
+      (log :error e (str "failed loading " path)))))
 
 (defn import-abcl [package]
   (eval-abcl (str "(import " package ")")))
