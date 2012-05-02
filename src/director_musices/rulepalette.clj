@@ -10,6 +10,25 @@
              [chooser :as ssw-chooser]
              [mig :as ssw-mig]]))
 
+;; Default
+
+(def default-rulepalette
+"(in-package \"DM\")
+(set-dm-var 'all-rules '(
+(HIGH-LOUD 1.0)
+(MELODIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBAMP 1)
+(HARMONIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBFREQ 1)
+(DURATION-CONTRAST 1.0 :AMP 1 :DUR 1)
+(DOUBLE-DURATION 1.0)
+(PUNCTUATION 1.1 :DUR 1 :DUROFF 1 :MARKPHLEVEL7 NIL)
+(PHRASE-ARCH 1.5 :PHLEVEL 5 :TURN 0.3 :NEXT 1.3 :AMP 2)
+(PHRASE-ARCH 1.5 :PHLEVEL 6 :TURN 2 :AMP 2 :LAST 0.2)
+(NORMALIZE-SL T)
+(NORMALIZE-DR T)
+(FINAL-RITARD 1.0)
+))
+(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")
+
 ;; loading
 
 (defn string->rulepalette [string]
@@ -200,4 +219,7 @@
       (add-rulepalette 
         (assoc (rulepalette-view (path->rulepalette (.getCanonicalPath f)))
                :title (.getName f))))))
+
+(defn open-default-rulepalette [& _]
+  (add-rulepalette (assoc (rulepalette-view (string->rulepalette default-rulepalette)) :title "Default")))
 

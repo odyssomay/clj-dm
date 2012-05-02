@@ -1,5 +1,5 @@
 (ns director-musices.score
-  (:use (director-musices [glue :only [load-active-score-from-file load-active-score-from-midi-file get-active-score]]
+  (:use (director-musices [glue :only [load-active-score-from-file load-active-score-from-midi-file get-active-score str->abcl]]
                           [interpreter :only [eval-abcl abcl-f]]
                           [draw-score :only [score-component score-graph-component get-note-for-x]]
                           [utils :only [new-file-dialog]]
@@ -202,7 +202,9 @@
     (spit f (get-active-score))))
 
 (defn choose-and-save-score [& _]
-  (choose-and-save-performance))
+  (if-let [f (new-file-dialog)]
+    (let [path (.getCanonicalPath f)]
+      (.execute (abcl-f "DM" "save-score-fpath") (str->abcl path)))))
 
 (defn choose-and-open-midi [& _]
   (ssw-chooser/choose-file
@@ -210,5 +212,5 @@
                   (let [path (.getCanonicalPath f)]
                     (load-new-score-with (fn [] (load-active-score-from-midi-file path)))))))
                   
-
-
+(defn choose-and-save-midi [& _]
+  )

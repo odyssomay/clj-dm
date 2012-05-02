@@ -2,7 +2,6 @@
   director-musices "1"
   :description "FIXME: write description"
   :disable-deps-clean true
-  :resources-path "resources"
   :main director-musices.main
   :manifest ["SplashScreen-Image" "splash.gif"]
   :dependencies [[org.clojure/clojure "1.3.0"]
