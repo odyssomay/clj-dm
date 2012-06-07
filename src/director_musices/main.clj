@@ -4,4 +4,4 @@
 (javax.swing.UIManager/put "FileChooser.readOnly" true)
 
 (defn -main [& args]
-  (eval '(do (use 'director-musices.core) (director-musices))))
+  (eval (list 'do '(use 'director-musices.core) (apply list 'director-musices args))))
