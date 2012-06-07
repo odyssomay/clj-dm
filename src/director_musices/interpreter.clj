@@ -9,6 +9,8 @@
         (org.armedbear.lisp.Interpreter/createInstance)
         (org.armedbear.lisp.Interpreter/getInstance))))
 
+(defn repl [] (.start (Thread. (fn [] (.run @*interpreter*)))))
+
 (defn eval-abcl [s]
   (.eval @*interpreter* 
     (str "(let ((forms '(" s ")))

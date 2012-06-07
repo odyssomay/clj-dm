@@ -107,6 +107,7 @@
              :size [800 :by 600]
              :on-close :exit
              )]
+    (when (some #(= % "-cl-repl") args) (inr/repl)) 
     (ssw/show! fr)
     nil))
 
