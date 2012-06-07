@@ -137,12 +137,13 @@
         ]
     (ssw/listen sc 
                 :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
-                                               ta (ssw/text :text (clojure.string/replace (str (get-segment id note-id))
-                                                                                          "," "\n")
+                                               ta (ssw/text :text (-> (clojure.string/replace (str (get-segment id note-id))
+                                                                                              ", " "\n")
+                                                                    (clojure.string/replace #"\{|\}" ""))
                                                             :multi-line? true)]
                                            (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (.getText ta)))))))))
-    (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id))) 
+                                                                  :success-fn (fn [& _] (set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
+    (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id)))
     (ssw/listen graph-label :mouse-clicked
                 (fn [_]
                   (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
