@@ -12,8 +12,8 @@
 (defn load-core []
   (load-multiple-abcl
     "dm:lib-core:"
-    ["scoreobjects.lsp" "basicmacros.lsp"  "infixmath.lsp"    "musicio.lsp"     "rulemacros.lsp" "parallelrulemacros.lsp" 
-     "dm-objects.lsp"   "initconvert.lsp"  "rule-groups.lsp"  "syntobjects.lsp" "shapeobjects.lsp"
+    ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" "rulemacros.lsp" "parallelrulemacros.lsp" 
+     "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
      "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"])
   (load-abcl "dm:init.lsp"))
 
@@ -63,12 +63,16 @@
 (defn get-active-score []
   (.execute (abcl-f "DM" "get-active-score")))
 
-(defn apply-rules [rulelist-string sync-rule]
+(defn apply-rules [rulelist-string sync-rule & [rule-interaction-c]]
   (init-dm)
-  (eval-abcl (str "(in-package :dm)
-                  (reset-music)
-                  (rule-apply-list-sync '(" 
-                  rulelist-string ") '" sync-rule ")")) )
+  (if rule-interaction-c
+    (eval-abcl (str "(in-package :dm)
+                    (reset-music)
+                    (rule-interaction-apply-rules-sync '(" rulelist-string ") '" rule-interaction-c ")"))
+    (eval-abcl (str "(in-package :dm)
+                    (reset-music)
+                    (rule-apply-list-sync '(" 
+                    rulelist-string ") '" sync-rule ")"))))
 
 (defn save-midi-to-path [path]
   (init-dm)
