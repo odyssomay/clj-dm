@@ -354,3 +354,11 @@
 (defconstant *12tones* '("C" "C#" "D" "Eb" "E" "F" "F#"
                 "G" "Ab" "A" "Bb" "B"))
 (defconstant *modus* '("maj" "min"))
+
+
+
+
+
+
+
+

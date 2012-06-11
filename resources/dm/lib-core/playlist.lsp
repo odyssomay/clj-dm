@@ -193,7 +193,15 @@
                              ".mid")))))
     (save-performance-midifile1-fpath file)
     ;(excl:run-shell-command (concatenate 'string "mplayer2 " file) :wait nil)
-    (excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    ;(excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    ;; funkar med lite tricks på win 7
+    ;(print (concatenate 'string "java -jar C:\\af\\simip-2-standalone.jar " file))
+    ;(excl:run-shell-command (concatenate 'string "java -jar C:\\af\\simip-2-standalone.jar " file))
+    (excl:run-shell-command 
+     ;(concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\af\\simip-4-standalone.jar 2 " file)
+     ;;second argument gives midi device number (from zero)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     :wait nil)
     ))
 
 #+(and :mswindows :allegro)
@@ -208,24 +216,13 @@
                              ".mid"))))) 
     (save-performance-midifile1-fpath file)
     ;(excl:run-shell-command (concatenate 'string "mplayer2 " file) :wait nil)
-    (excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    ;(excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    (excl:run-shell-command 
+     ;;second argument gives midi device number (from zero)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     :wait nil)
     ))
 
-#+(and :mswindows :allegro)
-(defun playlist-mplayer ()
-  (with-waiting-cursor
-  (let ((file 
-         (namestring 
-          (merge-pathnames (system:temporary-directory)
-                           (concatenate 'string  
-                             (pathname-name (score-filename *active-score*))
-                             "-Play-"
-                             (GET-DATE-TIME-STRING)
-                             ".mid"))))) 
-    (save-performance-midifile1-fpath file)
-    ;(excl:run-shell-command (concatenate 'string "mplayer2 " file) :wait nil)
-    (excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
-    )))
 
 #+(and :mswindows :allegro)
 (defun playlist-mplayer ()
@@ -239,7 +236,11 @@
                              (GET-DATE-TIME-STRING)
                              ".mid"))))) 
     (save-performance-midifile1-fpath file)
-    (excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    ;(excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
+    (excl:run-shell-command 
+     ;;second argument gives midi device number (from zero)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     :wait nil)
     )))
 
 

@@ -29,38 +29,34 @@
 
 (defun score-legato-art1 (quant)
   (each-note-if
-     (or (and (not (this 'rest)) (this 'legato-start)) (and (not (this 'rest)) (= *legato* 1)))
+   (or (and (not (this 'rest)) (this 'legato-start)) (and (not (this 'rest)) (= *legato* 1)))
    (then
     (setf *legato* 1)
     (if (next 'legato-end) ;; the last note in a series of legato marked notes is NOT played legato
-            (setf *legato* 0))
+        (setf *legato* 0))
     (cond ((and
             (> quant 1)
             (<= quant 5) )
            (then 
             (set-this 'scorelegatoddr
-;; Original equation:   (dr * (0.00005 * quant - 0.011)+ 1.105*quant+16.063) * dr / 100
-          (/ (* (+ (+ (* (- (* 0.00005 quant) 0.011) (this 'dr)) (* 1.105 quant)) 16.063) (this 'dr)) 100))) )
-          
+                      ;; Original equation:   (dr * (0.00005 * quant - 0.011)+ 1.105*quant+16.063) * dr / 100
+                      (/ (* (+ (+ (* (- (* 0.00005 quant) 0.011) (this 'dr)) (* 1.105 quant)) 16.063) (this 'dr)) 100))) )
           
           ((and
             (> quant 0)
             (<= quant 1) )
            (then 
             (set-this 'scorelegatoddr                    
-;; Original equation:   (dr * (- 0.0043*quant - 0.0066)+ (5.8533* quant + 11.315))* dr / 100
-          (/ (* (+ (+ (* ( - (* -0.0043 quant) 0.0066 ) (this 'dr)) (*  5.8533 quant)) 11.315) (this 'dr)) 100))) )
-                      
+                      ;; Original equation:   (dr * (- 0.0043*quant - 0.0066)+ (5.8533* quant + 11.315))* dr / 100
+                      (/ (* (+ (+ (* ( - (* -0.0043 quant) 0.0066 ) (this 'dr)) (*  5.8533 quant)) 11.315) (this 'dr)) 100))) )
           )
-
+    
     (if (and (not (next 'rest)) (not (zerop (abs (- (next-f0) (this-f0))))))
-    (if (this 'dro)
-       (add-this 'dro (* (this 'scorelegatoddr) -1))
-     (set-this 'dro (*(this 'scorelegatoddr) -1))
-     ))
-         ) ))
-;;   ))
-
+        (if (this 'dro)
+            (add-this 'dro (* (this 'scorelegatoddr) -1))
+          (set-this 'dro (*(this 'scorelegatoddr) -1))
+          ))
+    ) ))
 
 (defun check-for-legato-marks ()
  (let ((found nil))

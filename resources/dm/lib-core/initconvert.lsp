@@ -7,6 +7,7 @@
 ;;2004-04-26/af fixed a bug in the application of set-dynamics
 ;;2004-09-21/af added  nsl support in reset-music function - other functions should be fixed as well
 ;;2006-02-15/af added  voice track init
+;;120607/af new notation version with dots and tuples allowed in fraction notation
 
 
 
@@ -326,7 +327,75 @@
                           (setq notevalue (/ (* notevalue (car tuple)) (cdr tuple)))
                           (error 'get-note-value-fraction "this tuplet not implemented: " tuple) ))
                     )))
-            notevalue )))
+        notevalue )))
+
+;120607/af new notation version with dots and tuples allowed in fraction notation
+(defun get-note-value-fraction (i)
+  (let ((notevalue nil))
+    
+    (if (listp (cdr (iget i 'n)))
+        (setq notevalue (apply #'+ (cdr (iget i 'n))))  ;from fraction list notation
+      (setq notevalue (/ 1 (cdr (iget i 'n)))) ) ;from old notation
+    
+    (if (iget i 'dot)
+        (case (iget i 'dot)
+          (1 (setq notevalue (* notevalue 3/2)))
+          (2 (setq notevalue (* notevalue 7/4)))
+          (t (error 'get-note-value-fraction "wrong dot value on note" *i*)) ))
+    (if (iget i 't)
+        (let ((tuple (iget i 't)))
+          (case tuple
+            (3 (setq notevalue (* notevalue 2/3)))
+            (5 (setq notevalue (* notevalue 4/5)))
+            (t (if (listp tuple)
+                   (setq notevalue (/ (* notevalue (car tuple)) (cdr tuple)))
+                 (error 'get-note-value-fraction "this tuplet not implemented: " tuple) ))
+            )))
+    (if (iget i 'tuple)
+        (let ((tuple (iget i 'tuple)))
+          (case tuple
+            (3 (setq notevalue (* notevalue 2/3)))
+            (5 (setq notevalue (* notevalue 4/5)))
+            (t (if (listp tuple)
+                   (setq notevalue (/ (* notevalue (car tuple)) (cdr tuple)))
+                 (error 'get-note-value-fraction "this tuplet not implemented: " tuple) ))
+            )))
+    notevalue ))
+
+#| not used finally since we instead change format
+;the same conversion using segment object as input
+;used by clj-dm, see scoreobjects
+;120416/af
+(defun get-note-value-fraction-from-segment (seg)
+   (if (listp (cdr (get-var seg 'n)))
+      (apply #'+ (cdr (get-var seg 'n)))
+      (let ((notevalue (/ 1 (cdr (get-var seg 'n))))) ;fraction list notation
+            (if (get-var seg 'dot)
+               (case (get-var seg 'dot)
+                 (1 (setq notevalue (* notevalue 3/2)))
+                 (2 (setq notevalue (* notevalue 7/4)))
+                 (t (error 'get-note-value-fraction "wrong dot value on note" *i*)) ))
+            (if (get-var seg 't)
+               (let ((tuple (get-var seg 't)))
+                  (case tuple
+                    (3 (setq notevalue (* notevalue 2/3)))
+                    (5 (setq notevalue (* notevalue 4/5)))
+                    (t (if (listp tuple)
+                          (setq notevalue (/ (* notevalue (car tuple)) (cdr tuple)))
+                          (error 'get-note-value-fraction "this tuplet not implemented: " tuple) ))
+                    )))
+            (if (get-var seg 'tuple)
+               (let ((tuple (get-var seg 'tuple)))
+                  (case tuple
+                    (3 (setq notevalue (* notevalue 2/3)))
+                    (5 (setq notevalue (* notevalue 4/5)))
+                    (t (if (listp tuple)
+                          (setq notevalue (/ (* notevalue (car tuple)) (cdr tuple)))
+                          (error 'get-note-value-fraction "this tuplet not implemented: " tuple) ))
+                    )))
+        notevalue )))
+|#
+
 ;;
 ;; ----------
 ;;   NOM-DR

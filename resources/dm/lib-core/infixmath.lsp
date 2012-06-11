@@ -8,24 +8,20 @@
 ;; /Anders Friberg  October 1987. 
 ;; ****************************************
 
-
-
-(defpackage :infix
-   #+mcl (:use :common-lisp :ccl)
-   #+(and :mswindows :allegro) (:use :cg :cl :excl)
-   #+:lispworks (:add-use-defaults t) 
-   )
-
-;(in-package :infix)
 (in-package :dm)
+
+;(defpackage :infix
+;   #+mcl (:use :common-lisp :ccl)
+;   #+(and :mswindows :allegro) (:use :cg :cl :excl)
+;   #+:lispworks (:add-use-defaults t) 
+;   )
+;(in-package :infix)
 
 ;; -------------
 ;;   DM::INFIX
 ;; -------------
 ;;
-
-;(defmacro dm::infix (list)
-(defmacro infix (list)
+(defmacro dm::infix (list)
   `(,@(inf-to-pre list)) )
 
 ;(defun foo ()(let ((dr 2)(i 3)) (infix (-19 / (sqrt dr) - 0.5))))

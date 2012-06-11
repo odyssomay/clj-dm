@@ -1,3 +1,4 @@
+ ;;;-*-Mode: LISP; Package: DM -*-
 ;;
 ;; *************************************************
 ;;   Loading/saving scores and printing properties
@@ -603,3 +604,4 @@
                         (setq l (append1 l (iget *i* prop))) )))
               *print-prop-list* )
         (print (round-list l)) )))))
+

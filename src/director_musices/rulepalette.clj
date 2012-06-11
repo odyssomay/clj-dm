@@ -165,7 +165,12 @@
         rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
         editable? (ssw/checkbox :text "editable?")
         syncrule-select (ssw/combobox :model ["melodic-sync" "no-sync" "bar-sync"])
+        rule-interaction? (ssw/checkbox :text "rule interaction")
+        rule-interaction-c (ssw/text :text 2 :columns 5)
+        rule-interaction (ssw/horizontal-panel :items [rule-interaction? rule-interaction-c])
         rp-obj {:syncrule (atom "melodic-sync")
+                :rule-interaction? (atom false)
+                :rule-interaction-c (atom 2)
                 :rules rules
                 :rule-panel rule-panel
                 :content (ssw/scrollable rule-panel)
@@ -177,11 +182,14 @@
                                     (add-rule-at rp-obj 0 (rule-display rp-obj [nm (if np? 'T 0.0)]))
                                     (set-editable rule-panel (.isSelected editable?)))))]
     (add-watch rules "panel updater" (fn [_ _ old-items items]
-      (ssw/config! rule-panel :items (concat items [[(ssw/horizontal-panel :items [add-new-rule editable? syncrule-select]) "span"]]))))
+      (ssw/config! rule-panel :items (concat items [[add-new-rule "span"] [editable? "span"] [syncrule-select "span"] [rule-interaction "span"]]))))
+;                                             [(ssw/horizontal-panel :items [add-new-rule editable? syncrule-select rule-interaction]) "span"]]))))
     (reset! rules (apply concat (map (partial rule-display rp-obj) (:all-rules rulepalette))))
     (ssw/listen editable? :selection (fn [& _] (set-editable rule-panel (.isSelected editable?))))
-    (ssw/listen syncrule-select :selection (fn [& _] (let [selection "melodic-sync"]
+    (ssw/listen syncrule-select :selection (fn [& _] (let [selection (.getSelectedItem syncrule-select)]
                                                        (reset! (:syncrule rp-obj) selection))))
+    (ssw/listen rule-interaction? :selection (fn [& _] (reset! (:rule-interaction? rp-obj) (.isSelected rule-interaction?))))
+    (ssw/listen rule-interaction-c :selection (fn [& _] (reset! (:rule-interaction-c rp-obj) (read-string (.getText rule-interaction-c)))))
     (set-editable rule-panel false)
     rp-obj))
 
@@ -198,9 +206,9 @@
                (panel->rules rule-panel)
                "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))"))))
 
-(defn apply-rp-obj [{:keys [syncrule rule-panel]}]
+(defn apply-rp-obj [{:keys [rule-interaction? rule-interaction-c syncrule rule-panel]}]
   (with-indeterminate-progress "applying rules"
-    (apply-rules (panel->rules rule-panel) @syncrule)
+    (apply-rules (panel->rules rule-panel) @syncrule (if @rule-interaction? @rule-interaction-c))
     (reload-score-panel)))
 
 (defn apply-current-rulepalette [& _]

@@ -506,9 +506,16 @@
 
 (defmethod print-object ((self segment) stream)
   (format stream "<SEGMENT object, ndr: ~D, n or ph: ~S>" 
-             (round (get-var self 'ndr))(or (get-var self 'n) (get-var self 'ph))) )
+    (round (get-var self 'ndr))(or (get-var self 'n) (get-var self 'ph))) )
 
+;---- get a modified var-list for clj-dm ------
+;a new prop :note-value-fraction is added for the note value converted to a fraction
+;works for both old and new notation including dot, tuple etc,
+;120416/af
 
+(defmethod var-list-clj-dm ((self segment))
+  (acons :note-value-fraction (get-note-value-fraction-from-segment self)
+         (var-list self) ))
 
 ;------segment var-list accessors ---------
 

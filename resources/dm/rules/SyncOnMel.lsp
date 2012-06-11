@@ -16,6 +16,7 @@
 ;; 960205/af Sync the last note offset
 ;; 000914/af new function: simple-sync
 ;; 101213/af adding accent-dr marks for Erica and Richard
+;; 111116/af adding accent-h,m,c marks for Erica and Richard
 
 
 (in-package :dm)
@@ -78,6 +79,7 @@
 ;;
 
 ;;101213/af adding accent-dr marks for Erica and Richard
+;;111116/af adding accent-h,m,c marks for Erica and Richard
 (defun sync-make-mel ()
    (sync-mark-oondr)
    (sync-mark-mc)
@@ -137,6 +139,12 @@
                           (set-var ton 'phrase-end (cdar (p-this 'phrase-end))))
                      (if (p-this 'accent-dr)
                          (set-var ton 'accent-dr (cdar (p-this 'accent-dr))))
+                     (if (p-this 'accent-h)
+                         (set-var ton 'accent-h (cdar (p-this 'accent-h))))
+                     (if (p-this 'accent-m)
+                         (set-var ton 'accent-m (cdar (p-this 'accent-m))))
+                     (if (p-this 'accent-c)
+                         (set-var ton 'accent-c (cdar (p-this 'accent-c))))
 
                       (add-one-segment *sync-track* ton) ))) ;cond
            ))
@@ -213,33 +221,40 @@
      ))
 
 ;;101213/af adding accent-dr marks for Erica and Richard
+;;111116/af adding accent-h,m,c marks for Erica and Richard
 (defun simple-sync-make-mel ()
-   (let ((ton)
-         (last-from-voice)
-         (*sync-track* (make-instance 'mono-track :trackname "sync-track")) )
-      (p-each-note
-       (let ((minl (p-min-all (p-this 'ndr)))
-             (l))
-                  
-         ;a new master note from top f0
-         (let* ((from-voice (or (car (p-max (p-this-f0)))
-                                (caar *cur-notes*) ))) ;if all rests?
-           (setq ton (make-instance 'segment))
-           (if (not from-voice) (print-ll "*ndr-to-next* " *ndr-to-next* " *all-notes* " *all-notes* " *cur-notes* " *cur-notes*))
-           (simple-sync-copy-prop ton from-voice) )
-         
-         ;copy phrasing from any of the current notes
-         (if (p-this 'phrase-start)
-             (set-var ton 'phrase-start (cdar (p-this 'phrase-start))))
-         (if (p-this 'phrase-end)
-             (set-var ton 'phrase-end (cdar (p-this 'phrase-end))))
-         (if (p-this 'accent-dr)
-             (set-var ton 'accent-dr (cdar (p-this 'accent-dr))))
-         
-         (add-one-segment *sync-track* ton) ))
-     (set-var (car (segment-list *sync-track*)) :mr t)
-      *sync-track*
-     ))
+  (let ((ton)
+        (last-from-voice)
+        (*sync-track* (make-instance 'mono-track :trackname "sync-track")) )
+    (p-each-note
+     (let ((minl (p-min-all (p-this 'ndr)))
+           (l))
+       
+       ;a new master note from top f0
+       (let* ((from-voice (or (car (p-max (p-this-f0)))
+                              (caar *cur-notes*) ))) ;if all rests?
+         (setq ton (make-instance 'segment))
+         (if (not from-voice) (print-ll "*ndr-to-next* " *ndr-to-next* " *all-notes* " *all-notes* " *cur-notes* " *cur-notes*))
+         (simple-sync-copy-prop ton from-voice) )
+       
+       ;copy phrasing from any of the current notes
+       (if (p-this 'phrase-start)
+           (set-var ton 'phrase-start (cdar (p-this 'phrase-start))))
+       (if (p-this 'phrase-end)
+           (set-var ton 'phrase-end (cdar (p-this 'phrase-end))))
+       (if (p-this 'accent-dr)
+           (set-var ton 'accent-dr (cdar (p-this 'accent-dr))))
+       (if (p-this 'accent-h)
+           (set-var ton 'accent-h (cdar (p-this 'accent-h))))
+       (if (p-this 'accent-m)
+           (set-var ton 'accent-m (cdar (p-this 'accent-m))))
+       (if (p-this 'accent-c)
+           (set-var ton 'accent-c (cdar (p-this 'accent-c))))
+       
+       (add-one-segment *sync-track* ton) ))
+    (set-var (car (segment-list *sync-track*)) :mr t)
+    *sync-track*
+    ))
 
 ;------------------radio baton sync track ---------------------------------
 

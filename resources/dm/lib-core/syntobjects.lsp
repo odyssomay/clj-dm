@@ -1,3 +1,4 @@
+;;;-*-Mode: LISP; Package: DM -*-
 ;;
 ;; ***********************************************************
 ;;  Definition of synt objects used by the playing functions
@@ -35,6 +36,7 @@
         ("Kontakt2-wind" . synt-Kontakt2-wind)
         ("Technics-SX-P30" . synt-Technics-SX-P30)
         ("Yamaha-Clavinova-CLP370" . synt-Yamaha-Clavinova-CLP370)
+        ("Yamaha-Disklavier-2" . synt-Yamaha-Disklavier-2)
         ("Proteus" . synt-Proteus)
         ("SampleCell" . synt-SampleCell)
         ("S3000" . synt-S3000)
@@ -59,6 +61,7 @@
         "Kontakt2-wind"
         "Technics-SX-P30"
         "Yamaha-Clavinova-CLP370"
+        "Yamaha-Disklavier-2"
         "Proteus"
         "SampleCell"
         "S3000"
@@ -515,7 +518,7 @@
 ;sends volume, -63.5 <= vol <= 0  [dB]
 ;-63.5 or less give zero amplitude
 ;approximation accurate down to -40 dB
-;error approx ± 0.5 dB
+;error approx \B1 0.5 dB
 (defmethod set-vol ((synt synt-proteus) vol time)
    (midi-write-list 
      (list (logior #xB0 (1- (channel synt)))
@@ -1172,7 +1175,7 @@
                          126.16)))
 |#
 
-;send attack time as control 73 - according to midi spec **** just nu ctrl 0 så att bt patch funkar ****
+;send attack time as control 73 - according to midi spec **** just nu ctrl 0 s\E5 att bt patch funkar ****
 ;transformation according to pDM braintuning exp4 patch 2008
 (defmethod set-at ((synt synt-kontakt2-wind) at time)
   (setq at (round (if (>= at 94)
@@ -1308,6 +1311,34 @@
 (defun foo (vol) (round  (+  (* 0.0797 (expt vol 2)) 
                          (* 5.9317 vol) 
                          127.0)))
+ |#
+
+;----------- Yamaha Disklavier II (Bresin, Goebl) -----------------------------------------------------
+;; Measured from Disklavier II in Uppsalla
+;; Goebl, W., & Bresin, R. (2003). Measurement and reproduction accuracy of computer-controlled grand pianos.
+;; Journal of the Acoustical Society of America, 114(4), 2273-2283.
+
+(defclass synt-yamaha-disklavier-2 (synt) ())
+
+(defun synt-yamaha-disklavier-2 () 
+   (make-instance 'synt-yamaha-disklavier-2 :program-list *program-list-general-midi*))
+
+(defmethod print-object ((self synt-yamaha-disklavier-2) stream)
+  (format stream "(synt-yamaha-disklavier-2)") )
+
+;;y=0.0423x2 + 2.7998x + 63.836s
+(defmethod sl-to-vel ((synt synt-yamaha-disklavier-2) sl)
+  (round (+ (* 0.0423 (expt sl 2)) 
+            (* 2.7998 sl) 
+            63.836) ))
+
+;; volume not implemented/measured
+
+#| for testing
+(defun foo (sl)
+  (round (+ (* 0.0423 (expt sl 2)) 
+            (* 2.7998 sl) 
+            63.836) ) )
  |#
 
 ;----------- Generator software synthesizer -----------------------------------------------------
@@ -1475,7 +1506,7 @@
 ;range: -45 <= vol <= 0  [dB]
 ;-45 or less give zero amplitude
 ;approximation accurate down to -43 dB
-;error approx ± 0.1 dB
+;error approx \B1 0.1 dB
 (defmethod set-vol ((synt synt-S3000) vol time)
    (midi-write-list 
      (list (logior #xB0 (1- (channel synt)))
@@ -1723,7 +1754,7 @@
 ;;which are not possible to isolate
 ;;op1adr = #x28; op2adr = #x20; op3adr = #x18; op4adr = #x10; 
 
-#|  **** funkar ej med CL varfr mapc ?
+#|  **** funkar ej med CL varf\9Ar mapc ?
 (defmethod set-env ((synt synt-fb01) riset platt dsustl sustt relr time)
    (let 
         ((arval (round (- 25.8079 (* 2.9367 (log riset)))))
