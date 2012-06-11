@@ -33,13 +33,17 @@
 (defn load-abcl [path]
   (try 
     (println path)
-    (let [f (file (str "abcl-buffer" @buffer-id))]
-      (spit f (slurp (resource (.replaceAll path ":" "/"))))
-      (eval-abcl (str "(load \"" (.getCanonicalPath f) "\")"))
-      (swap! buffer-id inc)
-      (delete-file f)
-      )
-    (log :trace (str "loaded " path))
+    (let [f (file (last (.split path ":")))
+          r (resource (.replaceAll path ":" "/"))]
+      (if r
+        (do 
+          (spit f (slurp (resource (.replaceAll path ":" "/"))))
+          (eval-abcl (str "(load \"" (.getCanonicalPath f) "\")"))
+          (swap! buffer-id inc)
+          (delete-file f)
+          (log :trace (str "loaded " path))
+          )
+        (println "... does not exist!")))
     (catch Exception e
       (log :error e (str "failed loading " path)))))
 
