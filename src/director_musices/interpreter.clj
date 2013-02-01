@@ -30,6 +30,7 @@
 
 (def buffer-id (atom 0))
 
+(declare abcl-path str->abcl)
 (defn load-abcl [path]
   (try 
     (println path)
@@ -38,7 +39,7 @@
       (if r
         (do 
           (spit f (slurp (resource (.replaceAll path ":" "/"))))
-          (eval-abcl (str "(load \"" (.getName f) "\")"))
+          (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath f)) "\")"))
           (swap! buffer-id inc)
           (delete-file f)
           (log :trace (str "loaded " path))
@@ -75,3 +76,9 @@
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
     (load-abcl (str prefix f))))
+
+
+(defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
+
+(defn abcl-path [path] (.replace path "\\" "/"))
+(defn abcl-path-str [path] (str->abcl (abcl-path path)))

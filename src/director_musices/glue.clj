@@ -1,6 +1,7 @@
 (ns director-musices.glue
   (:use clojure.java.io
-        (director-musices interpreter
+        (director-musices 
+          interpreter
           [utils :only [with-indeterminate-progress]]))
   (:require [seesaw.core :as ssw]))
 
@@ -32,9 +33,6 @@
       (load-rules)
       (swap! dm-init? (constantly true)))))
 
-(defn str->abcl [s]
-  (eval-abcl (str "\"" s "\"")))
-
 ;(use 'clojure.pprint)
 
 (defn load-active-score [string]
@@ -51,13 +49,13 @@
 (defn load-active-score-from-file [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "read-active-score-from-file") (str->abcl path))
+  (.execute (abcl-f "DM" "read-active-score-from-file") (abcl-path-str path))
   (eval-abcl "(init-music-score)"))
 
 (defn load-active-score-from-midi-file [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "load-midifile-fpath") (str->abcl path))
+  (.execute (abcl-f "DM" "load-midifile-fpath") (abcl-path-str path))
   (eval-abcl "(init-music-score)"))
 
 (defn get-active-score []
@@ -77,4 +75,4 @@
 (defn save-midi-to-path [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "save-performance-midifile1-fpath") (str->abcl path)))
+  (.execute (abcl-f "DM" "save-performance-midifile1-fpath") (abcl-path-str path)))
