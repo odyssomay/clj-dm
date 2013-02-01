@@ -38,7 +38,7 @@
       (if r
         (do 
           (spit f (slurp (resource (.replaceAll path ":" "/"))))
-          (eval-abcl (str "(load \"" (.getCanonicalPath f) "\")"))
+          (eval-abcl (str "(load \"" (.getName f) "\")"))
           (swap! buffer-id inc)
           (delete-file f)
           (log :trace (str "loaded " path))
