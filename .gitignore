@@ -5,6 +5,9 @@ lein.bat
 # ignore build files
 *.jar
 
+# ignore run files
+*.log
+
 # ignore lein stuff
 target
 .lein*
