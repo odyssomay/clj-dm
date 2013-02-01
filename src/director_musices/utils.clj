@@ -52,3 +52,6 @@
      (ssw/show! d#)
      ~@body
      (ssw/dispose! d#)))
+
+(defn centered-component [c]
+  (ssw/horizontal-panel :items [:fill-h c :fill-h]))
