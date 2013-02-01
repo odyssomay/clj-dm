@@ -5,7 +5,9 @@
                           [utils :only [new-file-dialog]]
                           [player :only [update-player]])
         [clojure.java.io :only [resource]])
-  (:require [seesaw 
+  (:require (director-musices
+              [utils :as util])
+            [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]
              [mig :as ssw-mig]]))
@@ -92,7 +94,13 @@
 ;; score gui
 
 ;(def score-panel (ssw-mig/mig-panel))
-(def score-panel (ssw/horizontal-panel))
+
+(declare choose-and-open-score)
+(let [l (ssw/label "No score loaded yet, click here to load one!")
+      p (util/centered-component l)]
+  (ssw/listen p :mouse-clicked (fn [e] (choose-and-open-score)))
+  
+  (def score-panel (ssw/horizontal-panel :items [p])))
 
 (defn convert-track [track]
   (for [{:keys [dr ndr n] :as note} track]
