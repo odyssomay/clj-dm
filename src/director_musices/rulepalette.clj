@@ -5,7 +5,9 @@
          [utils :only [find-i new-file-dialog with-indeterminate-progress]]
          [player :only [update-player]]]
         [clojure.java.io :only [resource]])
-  (:require [seesaw
+  (:require (director-musices
+              [utils :as util])
+            [seesaw
              [core :as ssw]
              [chooser :as ssw-chooser]
              [mig :as ssw-mig]]))
@@ -47,7 +49,21 @@
 (def rulepalettes (atom []))
 (def rulepalette-container (ssw/tabbed-panel))
 
+(declare choose-and-open-rulepalette)
+(let [l (ssw/label "No rulepalette loaded yet, click here to load one!")
+      p (util/centered-component l)
+      r-cont-loaded? (atom false)]
+  (ssw/listen p :mouse-clicked (fn [e] (choose-and-open-rulepalette)))
+  
+  (def rulepalette-panel (ssw/horizontal-panel :items [p]))
+  
+  (defn load-rulepalette-container []
+    (when (not @r-cont-loaded?)
+      (ssw/config! rulepalette-panel :items [rulepalette-container])
+      (swap! r-cont-loaded? not))))
+
 (defn add-rulepalette [c]
+  (load-rulepalette-container)
   (swap! rulepalettes conj c)
   (ssw/config! rulepalette-container :tabs @rulepalettes))
 
