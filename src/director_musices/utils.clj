@@ -54,4 +54,4 @@
      (ssw/dispose! d#)))
 
 (defn centered-component [c]
-  (ssw/horizontal-panel :items [:fill-h c :fill-h]))
+  (ssw/border-panel :center (ssw/horizontal-panel :items [:fill-h c :fill-h])))
