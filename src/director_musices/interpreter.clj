@@ -80,5 +80,10 @@
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 
-(defn abcl-path [path] (.replace path "\\" "/"))
+(let [windows? (.startsWith (System/getProperty "os.name") "Windows")]
+  (defn abcl-path [path] 
+    (if windows?
+      (.replace path "\\" "/")
+      path)))
+
 (defn abcl-path-str [path] (str->abcl (abcl-path path)))
