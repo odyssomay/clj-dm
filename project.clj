@@ -8,7 +8,7 @@
                  [org.clojure/tools.logging "0.1.2"]
                  [seesaw "1.4.2"]
                  [com.miglayout/miglayout "3.7.4"]
-                 [org.armedbear.lisp/abcl "0.25.0"]
+                 [abcl "1.1.0"]
                  [log4j "1.2.15" :exclusions [javax.mail/mail
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools

@@ -27,7 +27,7 @@
     v))
 
 (defn segment->map [segment]
-  (let [raw (.writeToString segment)]
+  (let [raw (.printObject segment)]
     (->> (.replaceAll raw " \\. " " ")
          read-string
          (map (fn [[k & vs]]
