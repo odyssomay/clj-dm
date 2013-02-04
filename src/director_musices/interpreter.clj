@@ -2,35 +2,28 @@
   (:use (director-musices [utils :only [log]])
         [clojure.java.io :only [copy file delete-file resource]]))
 
-(def *interpreter*
+(def interpreter
   (future 
     (do (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
           (.dispose i))
         (org.armedbear.lisp.Interpreter/createInstance)
         (org.armedbear.lisp.Interpreter/getInstance))))
 
-(defn repl [] (.start (Thread. (fn [] (.run @*interpreter*)))))
+(defn repl [] (.start (Thread. (fn [] (.run @interpreter)))))
 
-(defn eval-abcl [s]
-  (.eval @*interpreter* 
-    (str "(let ((forms '(" s ")))
-            (loop for form in (butlast forms)
-                  do (eval form))
-            (eval (first (last forms))))")))
+(let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)]
+  (defn eval-abcl [s]
+    (.invokeAll thread-pool
+                [(fn [] 
+                   (.eval @interpreter (str "(progn " s ")"))
+                   )])
+    ))
 
-;(defn eval-abcl [s]
-;  (try 
-;    (.eval *interpreter* s)
-;    (catch Exception e
-;      (println "abcl form eval failed:" s "\n" e)
-;      (.printStackTrace e))))
-
-(defn eval-abcl-dm [s]
-  (eval-abcl (str "(in-package :dm) " s)))
+(defn eval-abcl-dm [s] (eval-abcl (str "(in-package :dm) " s)))
 
 (def buffer-id (atom 0))
 
-(declare abcl-path str->abcl)
+(declare abcl-path)
 (defn load-abcl [path]
   (try 
     (println path)
@@ -50,11 +43,6 @@
 
 (defn import-abcl [package]
   (eval-abcl (str "(import " package ")")))
-
-(defn abcl-f [package function]
-  (let [p (org.armedbear.lisp.Packages/findPackage (.toUpperCase package))
-        f (.getSymbolFunction (.findAccessibleSymbol p (.toUpperCase function)))]
-    f))
 
 ;; UTIL
 
@@ -76,7 +64,6 @@
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
     (load-abcl (str prefix f))))
-
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 

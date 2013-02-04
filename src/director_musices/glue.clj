@@ -33,33 +33,32 @@
       (load-rules)
       (swap! dm-init? (constantly true)))))
 
-;(use 'clojure.pprint)
-
 (defn load-active-score [string]
+  (.start (Thread. (fn []
   (init-dm)
   (eval-abcl 
     (str "(in-package :dm)
           (read-active-score-from-string \"" string 
          "\")
           (init-music-score)")))
-;  (eval-abcl "(in-package :dm)")
-;  (.execute (abcl-f "DM" "read-score-from-string") (str->abcl string))
-;  (eval-abcl "(init-music-score)"))
+                   )))
 
 (defn load-active-score-from-file [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "read-active-score-from-file") (abcl-path-str path))
+  (eval-abcl (str "(read-active-score-from-file \"" (abcl-path path) "\")"))
   (eval-abcl "(init-music-score)"))
 
 (defn load-active-score-from-midi-file [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "load-midifile-fpath") (abcl-path-str path))
+  (eval-abcl (str "(load-midifile-fpath \"" (abcl-path path) "\")"))
   (eval-abcl "(init-music-score)"))
 
 (defn get-active-score []
-  (.execute (abcl-f "DM" "get-active-score")))
+  (init-dm)
+  (eval-abcl "(in-package :dm)")
+  (eval-abcl "(get-active-score)"))
 
 (defn apply-rules [rulelist-string sync-rule & [rule-interaction-c]]
   (init-dm)
@@ -75,4 +74,4 @@
 (defn save-midi-to-path [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
-  (.execute (abcl-f "DM" "save-performance-midifile1-fpath") (abcl-path-str path)))
+  (eval-abcl (str "(save-performance-midifile1-fpath \"" (abcl-path path) "\")")))

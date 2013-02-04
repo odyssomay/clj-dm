@@ -1,6 +1,6 @@
 (ns director-musices.score
   (:use (director-musices [glue :only [load-active-score-from-file load-active-score-from-midi-file get-active-score]]
-                          [interpreter :only [eval-abcl abcl-f]]
+                          [interpreter :only [eval-abcl]]
                           [draw-score :only [score-component score-graph-component get-note-for-x]]
                           [utils :only [new-file-dialog]]
                           [player :only [update-player]])
