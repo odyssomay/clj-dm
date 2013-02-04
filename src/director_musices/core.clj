@@ -88,7 +88,7 @@
 (def help-menu
   (ssw/menu
     :text "Help"
-    :items 
+    :items
     [(ssw/action :name "About")]))
 
 (defn init-menu-bar []
@@ -99,16 +99,17 @@
                        ]))
 
 (defn director-musices [& args]
-  (let [fr (ssw/frame 
+  (let [arg? (fn [arg] (some #(= % arg) args))
+        fr (ssw/frame
              :title "Director Musices"
              :content (ssw/border-panel :north player-panel :center (ssw/top-bottom-split score-panel
                                                                                           rulepalette-panel
                                                                                           :divider-location 0.5))
              :menubar (init-menu-bar)
              :size [800 :by 600]
-             :on-close :exit
+             :on-close (if (arg? "-no-exit") :hide :exit)
              )]
-    (when (some #(= % "-cl-repl") args) (inr/repl)) 
+    (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
     nil))
 
