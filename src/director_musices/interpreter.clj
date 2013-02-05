@@ -44,9 +44,6 @@
     (catch Exception e
       (log :error e (str "failed loading " path)))))
 
-(defn import-abcl [package]
-  (eval-abcl (str "(import " package ")")))
-
 ;; UTIL
 
 (defn load-dir-abcl [excluding & dirs]
@@ -67,6 +64,29 @@
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
     (load-abcl (str prefix f))))
+
+(defn load-multiple-abcl-with-progress [& defs-in]
+  (let [defs (partition 2 defs-in)
+        total (reduce + (map #(count (second %)) defs))
+        number-done (atom 0)
+        percent-done (atom 0)
+        ]
+    (println total defs)
+    (add-watch number-done ::update-percent 
+               (fn [_ _ _ new-number-done] 
+                 (reset! percent-done (/ new-number-done total))))
+    (.start (Thread. 
+              (fn []
+                (doseq [[prefix files] defs]
+                  (doseq [f files]
+                    (load-abcl (str prefix f))
+                    (swap! number-done inc)))
+                )))
+    {:total total
+     :number-done number-done
+     :percent-done percent-done}
+    ))
+    
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 
