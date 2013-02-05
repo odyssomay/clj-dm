@@ -9,7 +9,7 @@
 (let [dm-init? (atom nil)]
   (defn init-dm []
     (when-not @dm-init?
-      (global/update-progress-bar :large-text "Loading lisp env"
+      (global/update-progress-bar :large-text "Loading files"
                                   :indeterminate? false
                                   :percent-done 0)
       (global/show-progress-bar)
