@@ -9,6 +9,8 @@
              [chooser :as ssw-chooser]])
   (:import javax.sound.midi.MidiSystem))
 
+(ssw/native!)
+
 (def sequencer (atom nil))
 (def transmitter (atom nil))
 (def output-device (atom nil))
