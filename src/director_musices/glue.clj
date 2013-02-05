@@ -34,14 +34,12 @@
       (swap! dm-init? (constantly true)))))
 
 (defn load-active-score [string]
-  (.start (Thread. (fn []
   (init-dm)
   (eval-abcl 
     (str "(in-package :dm)
           (read-active-score-from-string \"" string 
          "\")
           (init-music-score)")))
-                   )))
 
 (defn load-active-score-from-file [path]
   (init-dm)
