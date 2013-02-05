@@ -11,12 +11,15 @@
 
 (defn repl [] (.start (Thread. (fn [] (.run @interpreter)))))
 
-(let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)]
+(let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)
+      res (atom nil)]
   (defn eval-abcl [s]
+    (reset! res nil)
     (.invokeAll thread-pool
                 [(fn [] 
-                   (.eval @interpreter (str "(progn " s ")"))
+                   (reset! res (.eval @interpreter (str "(progn " s ")")))
                    )])
+    @res
     ))
 
 (defn eval-abcl-dm [s] (eval-abcl (str "(in-package :dm) " s)))
