@@ -6,7 +6,8 @@
             (director-musices [global :as global]
                               [glue :as glue]
                               [interpreter :as inr]
-                              [score :as score])))
+                              [score :as score]
+                              [utils :as util])))
 
 (def file-menu
   (ssw/menu
@@ -115,4 +116,5 @@
                            :divider-location 0.5))
     (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
+    (util/thread (glue/init-dm))
     nil))
