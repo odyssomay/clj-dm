@@ -48,16 +48,16 @@
 
 (defn load-dir-abcl [excluding & dirs]
   (let [fl (apply file dirs)]
-    (dorun 
+    (dorun
       (map #(apply load-abcl (concat dirs [%]))
            (remove #(some (partial = %)
                           excluding)
                    (.list fl))))))
 
-(defn load-dir-in-abcl 
+(defn load-dir-in-abcl
   [including & dirs]
   (let [fl (apply file dirs)]
-    (dorun 
+    (dorun
       (map #(apply load-abcl (concat dirs [%]))
            including))))
 
@@ -80,7 +80,7 @@
                    (reset! done true)
                    ))
         ]
-    (add-watch number-done ::update-percent 
+    (add-watch number-done ::update-percent
                (fn [_ _ _ new-number-done] 
                  (reset! percent-done (/ new-number-done total))))
     (.start thread)
@@ -95,7 +95,7 @@
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 
 (let [windows? (.startsWith (System/getProperty "os.name") "Windows")]
-  (defn abcl-path [path] 
+  (defn abcl-path [path]
     (if windows?
       (.replace path "\\" "/")
       path)))
