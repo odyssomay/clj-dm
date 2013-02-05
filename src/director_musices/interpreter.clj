@@ -90,7 +90,6 @@
      :done done
      :thread thread}
     ))
-    
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 
