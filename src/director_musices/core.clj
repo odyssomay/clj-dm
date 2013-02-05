@@ -3,7 +3,8 @@
 ;        (director-musices.gui score)
         )
   (:require [seesaw.core :as ssw]
-            (director-musices [glue :as glue]
+            (director-musices [global :as global]
+                              [glue :as glue]
                               [interpreter :as inr]
                               [score :as score])))
 
@@ -99,15 +100,18 @@
 
 (defn director-musices [& args]
   (let [arg? (fn [arg] (some #(= % arg) args))
-        fr (ssw/frame
-             :title "Director Musices"
-             :content (ssw/border-panel :north player-panel :center (ssw/top-bottom-split score-panel
-                                                                                          rulepalette-panel
-                                                                                          :divider-location 0.5))
-             :menubar (init-menu-bar)
-             :size [800 :by 600]
-             :on-close (if (arg? "-no-exit") :hide :exit)
-             )]
+        fr (global/get-frame)]
+    (ssw/config! fr
+                 :title "Director Musices"
+                 :content (ssw/border-panel :north player-panel 
+                                            :center (ssw/top-bottom-split 
+                                                      score-panel
+                                                      rulepalette-panel
+                                                      :divider-location 0.5))
+                 :menubar (init-menu-bar)
+                 :size [800 :by 600]
+                 :on-close (if (arg? "-no-exit") :hide :exit)
+                 )
     (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
     nil))
