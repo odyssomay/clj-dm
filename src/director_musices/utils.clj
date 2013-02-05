@@ -55,3 +55,8 @@
 
 (defn centered-component [c]
   (ssw/border-panel :center (ssw/horizontal-panel :items [:fill-h c :fill-h])))
+
+(defmacro thread [& body]
+  `(let [t# (Thread. (fn [] ~@body))]
+     (.start t#)
+     t#))
