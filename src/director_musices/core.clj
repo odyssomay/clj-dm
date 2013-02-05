@@ -103,16 +103,16 @@
         fr (global/get-frame)]
     (ssw/config! fr
                  :title "Director Musices"
-                 :content (ssw/border-panel :north player-panel 
-                                            :center (ssw/top-bottom-split 
-                                                      score-panel
-                                                      rulepalette-panel
-                                                      :divider-location 0.5))
                  :menubar (init-menu-bar)
                  :size [800 :by 600]
                  :on-close (if (arg? "-no-exit") :hide :exit)
                  )
+    (ssw/config! (global/get-main-panel)
+                 :north player-panel 
+                 :center (ssw/top-bottom-split 
+                           score-panel
+                           rulepalette-panel
+                           :divider-location 0.5))
     (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
     nil))
-
