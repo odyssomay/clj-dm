@@ -3,35 +3,40 @@
         (director-musices 
           interpreter
           [utils :only [with-indeterminate-progress]]))
-  (:require [seesaw.core :as ssw]))
+  (:require (director-musices [global :as global])
+            [seesaw.core :as ssw]))
 
-(def dm-init? (atom nil))
-
-(defn load-package-dm []
-  (load-abcl "dm:package-dm.lsp"))
-
-(defn load-core []
-  (load-multiple-abcl
-    "dm:lib-core:"
-    ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" "rulemacros.lsp" "parallelrulemacros.lsp" 
-     "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
-     "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"])
-  (load-abcl "dm:init.lsp"))
-
-(defn load-rules []
-  (load-multiple-abcl
-    "dm:rules:"
-    ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
-     "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
-     "phrasearch.lsp" "SyncOnMel.lsp"]))
-
-(defn init-dm []
-  (when-not @dm-init?
-    (with-indeterminate-progress "Loading lisp environment"
-      (load-package-dm)
-      (load-core)
-      (load-rules)
-      (swap! dm-init? (constantly true)))))
+(let [dm-init? (atom nil)]
+  (defn init-dm []
+    (when-not @dm-init?
+      (global/update-progress-bar :large-text "Loading lisp env"
+                                  :indeterminate? false
+                                  :percent-done 0)
+      (global/show-progress-bar)
+      (let [{:keys [done percent-done thread]}
+            (load-multiple-abcl-with-progress
+              "dm:"
+              ["package-dm.lsp"]
+              "dm:lib-core:"
+              ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" 
+               "rulemacros.lsp" "parallelrulemacros.lsp" 
+               "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" 
+               "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
+               "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"]
+              "dm:"
+              ["init.lsp"]
+              "dm:rules:"
+              ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
+               "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
+               "phrasearch.lsp" "SyncOnMel.lsp"])]
+        (add-watch percent-done ::progress-bar
+                   (fn [_ _ _ current-percent-done]
+                     (global/update-progress-bar :percent-done current-percent-done)))
+        (.join thread)
+        (global/hide-progress-bar)
+        (reset! dm-init? true)
+        ))))
+      
 
 (defn load-active-score [string]
   (init-dm)
