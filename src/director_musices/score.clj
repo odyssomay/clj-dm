@@ -168,7 +168,10 @@
     (ssw/config! view :items [[(ssw/vertical-panel :items [options-label graph-label])]
                               [sc "span"]])
     (add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (get-track id)))))
-    {:score-component sc :view view}))
+    {:score-component sc 
+     :view sc
+     ;:view view
+     }))
 
 (defn update-score-panel []
   (let [mouse-position-x-start (atom 0)
@@ -186,8 +189,15 @@
                                     :mouse-dragged (fn [e] 
                                                      (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
                         (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX sc scale-x)))
-                        [[(:view sv) "span"]]))]
-    (ssw/config! p :items (reduce concat score-views))
+                        [(:view sv) "span"]
+                        ;(:view sv)
+                        ))]
+    (ssw/config! p 
+                 :items
+                 (interleave score-views
+                             (take (count score-views)
+                                   (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
+                 )
     (ssw/config! score-panel :items [(ssw/scrollable p)])
     p))
 
