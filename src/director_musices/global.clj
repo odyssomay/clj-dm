@@ -1,5 +1,6 @@
 (ns director-musices.global
-  (:require [seesaw.core :as ssw]))
+  (:require [seesaw.core :as ssw]
+            seesaw.mig))
 
 (ssw/native!)
 
@@ -21,8 +22,20 @@
         large-label (ssw/label :text "Large")
         small-label (ssw/label :text "Small")]
     (ssw/config! progress-bar-panel
-                 :center (ssw/vertical-panel 
-                           :items [large-label small-label pb]))
+                 :center (seesaw.mig/mig-panel
+                           :constraints ["" "[grow][][grow]" 
+                                         "[grow][][][][grow]"]
+                           :items [[:fill-v "span"]
+                                   [:fill-h] [large-label] [:fill-h "wrap"]
+                                   [:fill-h] [small-label] [:fill-h "wrap"]
+                                   [:fill-h] [pb "gaptop 10, width 300!"] [:fill-h "wrap"]
+                                   [:fill-v "gaptop 100, span"]]
+                           ;:maximum-size [400 :by 300]
+                           ;:align :center
+                           :size [400 :by 300]
+                           ))
+    
+    (.setFont large-label (.deriveFont (.getFont large-label) (float 16)))
     
     (defn update-progress-bar [& {:keys [indeterminate? percent-done
                                          large-text small-text]
