@@ -13,29 +13,26 @@
                                   :indeterminate? false
                                   :percent-done 0)
       (global/show-progress-bar)
-      (let [{:keys [done percent-done thread]}
-            (load-multiple-abcl-with-progress
-              "dm:"
-              ["package-dm.lsp"]
-              "dm:lib-core:"
-              ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" 
-               "rulemacros.lsp" "parallelrulemacros.lsp" 
-               "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" 
-               "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
-               "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"]
-              "dm:"
-              ["init.lsp"]
-              "dm:rules:"
-              ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
-               "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
-               "phrasearch.lsp" "SyncOnMel.lsp"])]
-        (add-watch percent-done ::progress-bar
-                   (fn [_ _ _ current-percent-done]
-                     (global/update-progress-bar :percent-done current-percent-done)))
-        (.join thread)
+      (load-multiple-abcl-with-progress
+        {:percent-done #(global/update-progress-bar :percent-done %)
+         :current-file #(global/update-progress-bar :small-text %)}
+        "dm:"
+        ["package-dm.lsp"]
+        "dm:lib-core:"
+        ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" 
+         "rulemacros.lsp" "parallelrulemacros.lsp" 
+         "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" 
+         "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
+         "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"]
+        "dm:"
+        ["init.lsp"]
+        "dm:rules:"
+        ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
+         "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
+         "phrasearch.lsp" "SyncOnMel.lsp"])
         (global/hide-progress-bar)
         (reset! dm-init? true)
-        ))))
+        )))
       
 
 (defn load-active-score [string]

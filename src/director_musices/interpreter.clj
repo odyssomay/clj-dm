@@ -65,30 +65,24 @@
   (doseq [f fs]
     (load-abcl (str prefix f))))
 
-(defn load-multiple-abcl-with-progress [& defs-in]
-  (let [defs (partition 2 defs-in)
+(defn load-multiple-abcl-with-progress [progress-fns & defs-in]
+  (let [{:keys [percent-done current-file]}
+        (merge {:percent-done #() :current-file #()}
+               progress-fns)
+        defs (partition 2 defs-in)
         total (reduce + (map #(count (second %)) defs))
-        number-done (atom 0)
-        percent-done (atom 0)
-        done (atom false)
-        thread (Thread.
-                 (fn []
-                   (doseq [[prefix files] defs]
-                     (doseq [f files]
-                       (load-abcl (str prefix f))
-                       (swap! number-done inc)))
-                   (reset! done true)
-                   ))
+        number-done-a (atom 0)
         ]
-    (add-watch number-done ::update-percent
-               (fn [_ _ _ new-number-done] 
-                 (reset! percent-done (/ new-number-done total))))
-    (.start thread)
-    {:total total
-     :number-done number-done
-     :percent-done percent-done
-     :done done
-     :thread thread}
+    (add-watch number-done-a nil
+               (fn [_ _ _ v]
+                 (percent-done (/ v total))))
+    (doseq [[prefix files] defs]
+      (doseq [f files]
+        (let [path (str prefix f)]
+          (current-file path)
+          (load-abcl path))
+        (swap! number-done-a inc)
+        ))
     ))
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
