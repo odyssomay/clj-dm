@@ -4,7 +4,7 @@
   :disable-deps-clean true
   :main director-musices.main
   :manifest ["SplashScreen-Image" "splash.gif"]
-  :dependencies [[org.clojure/clojure "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.1.2"]
                  [seesaw "1.4.2"]
                  [com.miglayout/miglayout "3.7.4"]
