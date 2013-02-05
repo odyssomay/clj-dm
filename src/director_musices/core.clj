@@ -1,5 +1,4 @@
 (ns director-musices.core
-  (:gen-class)
   (:use (director-musices rulepalette player score)
 ;        (director-musices.gui score)
         )
