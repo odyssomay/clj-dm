@@ -70,21 +70,25 @@
         total (reduce + (map #(count (second %)) defs))
         number-done (atom 0)
         percent-done (atom 0)
+        done (atom false)
+        thread (Thread.
+                 (fn []
+                   (doseq [[prefix files] defs]
+                     (doseq [f files]
+                       (load-abcl (str prefix f))
+                       (swap! number-done inc)))
+                   (reset! done true)
+                   ))
         ]
-    (println total defs)
     (add-watch number-done ::update-percent 
                (fn [_ _ _ new-number-done] 
                  (reset! percent-done (/ new-number-done total))))
-    (.start (Thread. 
-              (fn []
-                (doseq [[prefix files] defs]
-                  (doseq [f files]
-                    (load-abcl (str prefix f))
-                    (swap! number-done inc)))
-                )))
+    (.start thread)
     {:total total
      :number-done number-done
-     :percent-done percent-done}
+     :percent-done percent-done
+     :done done
+     :thread thread}
     ))
     
 
