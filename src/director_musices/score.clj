@@ -202,9 +202,11 @@
 
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
-    :success-fn (fn [_ f]
-                  (let [path (.getCanonicalPath f)]
-                    (load-new-score-with (fn [] (load-active-score-from-file path)))))))
+    :success-fn 
+    (fn [_ f]
+      (let [path (.getCanonicalPath f)]
+        (load-new-score-with 
+          (fn [] (load-active-score-from-file path)))))))
 
 (defn choose-and-save-performance [& _]
   (if-let [f (new-file-dialog)]
