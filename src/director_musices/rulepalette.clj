@@ -72,14 +72,14 @@
 
 (defn panel->rules [panel]
   (apply str
-    (map (fn [[_ _ ch l _ k args _]]
-           (if (.isSelected ch)
-             (str \( (.getText l) " " 
-                     (condp = (class k)
-                       javax.swing.JSlider (double (/ (.getValue k) slider-precision))
-                       nil) " " 
-                     (.getText args) ")\n")))
-      (partition components-per-line (.getComponents panel)))))
+         (map (fn [[_ _ ch l _ k args _ :as in-vec]]
+                (if (.isSelected ch)
+                  (str "(" (.getText l) " " 
+                       (if (instance? javax.swing.JSlider k)
+                         (double (/ (.getValue k) slider-precision)))
+                       " " 
+                       (.getText args) ")\n")))
+              (partition components-per-line (.getComponents panel)))))
 
 (defn get-line-index-starting-with [{:keys [rule-panel]} up]
   (/ 
