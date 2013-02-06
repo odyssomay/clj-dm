@@ -3,7 +3,7 @@
   (:require (director-musices
               [player :as player]
               [utils :as util])
-            [director-musices.draw-score :as draw-score]
+            [director-musices.score.draw-score :as draw-score]
             (director-musices.common-lisp
               [glue :as glue]
               [interpreter :as interpreter])

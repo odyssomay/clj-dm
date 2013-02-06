@@ -218,7 +218,7 @@
                                    :notes (get-notes-distance notes default-distance)} opts))
         note-components (map #(note-component % options-atom) (:notes @options-atom))
         ;c (ssw/horizontal-panel :items note-components)
-        c (proxy [javax.swing.JPanel director_musices.draw_score.scoreProperties] []
+        c (proxy [javax.swing.JPanel director_musices.score.draw_score.scoreProperties] []
             (setScale [scale] (swap! options-atom assoc :scale scale))
             (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x))
             (setNotes [notes] (println "setNotes(notes) not implemented :("))
@@ -241,7 +241,7 @@
         get-highest (fn [] (+ (apply max (cons (* 5 line-separation) (get-heights))) 10))
         get-height (fn [] (- (get-highest) (get-lowest)))
         c (proxy [javax.swing.JComponent javax.swing.Scrollable 
-                  director_musices.draw_score.scoreProperties] []
+                  director_musices.score.draw_score.scoreProperties] []
             (paintComponent [g]
               (let [gc (.create g)
                     options @options-atom

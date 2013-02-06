@@ -2,7 +2,7 @@
 ; https://github.com/odyssomay/simip
 
 (ns director-musices.player
-  (:use [director-musices.glue :only [save-midi-to-path]]
+  (:use [director-musices.common-lisp.glue :only [save-midi-to-path]]
         [clojure.java.io :only [resource file]])
   (:require [seesaw 
              [core :as ssw]
