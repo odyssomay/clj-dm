@@ -45,7 +45,7 @@
           (init-music-score)")))
 
 (defn load-active-score-from-file [path]
-  ;(init-dm)
+  (init-dm)
   (eval-abcl "(in-package :dm)")
   (eval-abcl (str "(read-active-score-from-file \"" (abcl-path path) "\")"))
   (eval-abcl "(init-music-score)"))
