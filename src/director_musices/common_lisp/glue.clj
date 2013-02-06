@@ -1,7 +1,7 @@
-(ns director-musices.glue
+(ns director-musices.common-lisp.glue
   (:use clojure.java.io
+        director-musices.common-lisp.interpreter
         (director-musices 
-          interpreter
           [utils :only [with-indeterminate-progress]]))
   (:require (director-musices [global :as global])
             [seesaw.core :as ssw]))
@@ -9,6 +9,7 @@
 (let [dm-init? (atom nil)]
   (defn init-dm []
     (when-not @dm-init?
+      (println "initing dm")
       (global/update-progress-bar :large-text "Loading files"
                                   :indeterminate? false
                                   :percent-done 0)
@@ -44,7 +45,7 @@
           (init-music-score)")))
 
 (defn load-active-score-from-file [path]
-  (init-dm)
+  ;(init-dm)
   (eval-abcl "(in-package :dm)")
   (eval-abcl (str "(read-active-score-from-file \"" (abcl-path path) "\")"))
   (eval-abcl "(init-music-score)"))

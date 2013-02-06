@@ -1,4 +1,4 @@
-(ns director-musices.draw-score
+(ns director-musices.score.draw-score
   (:use
     (director-musices [utils :only [log]])
     [clojure.java.io :only [resource]])

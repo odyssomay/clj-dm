@@ -1,7 +1,7 @@
-(ns director-musices.rulepalette
-  (:use [director-musices
-         [glue :only [apply-rules]]
-         [score :only [reload-score-panel]]
+(ns director-musices.rulepalette.rulepalette
+  (:use [director-musices.common-lisp.glue :only [apply-rules]]
+        [director-musices.score.score :only [reload-score-panel]]
+        [director-musices
          [utils :only [find-i new-file-dialog with-indeterminate-progress]]
          [player :only [update-player]]]
         [clojure.java.io :only [resource]])
@@ -179,6 +179,8 @@
 (defn rulepalette-view [rulepalette]
   (let [rules (atom [])
         rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
+        option-panel (ssw/vertical-panel :items [(ssw/action :name "apply") (ssw/action :name "apply & play")])
+        outer-panel (ssw/border-panel :center rule-panel :west option-panel)
         editable? (ssw/checkbox :text "editable?")
         syncrule-select (ssw/combobox :model ["melodic-sync" "no-sync" "bar-sync"])
         rule-interaction? (ssw/checkbox :text "rule interaction")
@@ -189,7 +191,8 @@
                 :rule-interaction-c (atom 2)
                 :rules rules
                 :rule-panel rule-panel
-                :content (ssw/scrollable rule-panel)
+                ;:content (ssw/scrollable rule-panel)
+                :content (ssw/scrollable outer-panel)
                 }
         add-new-rule (ssw/action 
                        :icon (resource "icons/add.png")
@@ -246,4 +249,3 @@
 
 (defn open-default-rulepalette [& _]
   (add-rulepalette (assoc (rulepalette-view (string->rulepalette default-rulepalette)) :title "Default")))
-

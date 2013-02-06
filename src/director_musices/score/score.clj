@@ -1,16 +1,18 @@
-(ns director-musices.score
-  (:use (director-musices [glue :only [load-active-score-from-file load-active-score-from-midi-file get-active-score]]
-                          [interpreter :only [eval-abcl]]
-                          [draw-score :only [score-component score-graph-component get-note-for-x]]
-                          [utils :only [new-file-dialog]]
-                          [player :only [update-player]])
-        [clojure.java.io :only [resource]])
+(ns director-musices.score.score
+  (:use [clojure.java.io :only [resource]])
   (:require (director-musices
+              [player :as player]
               [utils :as util])
+            [director-musices.draw-score :as draw-score]
+            (director-musices.common-lisp
+              [glue :as glue]
+              [interpreter :as interpreter])
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]
              [mig :as ssw-mig]]))
+
+(def eval-abcl interpreter/eval-abcl)
 
 ;; score object
 
@@ -138,13 +140,13 @@
 
 (defn score-view [id]
   (let [view (ssw-mig/mig-panel)
-        sc (score-component 
+        sc (draw-score/score-component 
              (convert-track (get-track id)) :clef \G )
         options-label (ssw/label :icon (resource "icons/gear_small.png"))
         graph-label   (ssw/label :icon (resource "icons/stats_small.png"))
         ]
     (ssw/listen sc 
-                :mouse-clicked (fn [evt] (let [note-id (get-note-for-x (.getX evt) sc)
+                :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
                                                ta (ssw/text :text (-> (clojure.string/replace (str (get-segment id note-id))
                                                                                               ", " "\n")
                                                                     (clojure.string/replace #"\{|\}" ""))
@@ -155,7 +157,7 @@
     (ssw/listen graph-label :mouse-clicked
                 (fn [_]
                   (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
-                    (let [c (score-graph-component choice sc :height 150)
+                    (let [c (draw-score/score-graph-component choice sc :height 150)
                           remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
                       (ssw/listen remove-label :mouse-clicked
                                   (fn [_] 
@@ -208,7 +210,7 @@
   (.removeAll score-panel)
   (f)
   (update-score-panel)
-  (update-player))
+  (player/update-player))
 
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
@@ -216,14 +218,14 @@
     (fn [_ f]
       (let [path (.getCanonicalPath f)]
         (load-new-score-with 
-          (fn [] (load-active-score-from-file path)))))))
+          (fn [] (glue/load-active-score-from-file path)))))))
 
 (defn choose-and-save-performance [& _]
-  (if-let [f (new-file-dialog)]
-    (spit f (get-active-score))))
+  (if-let [f (util/new-file-dialog)]
+    (spit f (glue/get-active-score))))
 
 (defn choose-and-save-score [& _]
-  (if-let [f (new-file-dialog)]
+  (if-let [f (util/new-file-dialog)]
     (let [path (.getCanonicalPath f)]
       ;(.execute (abcl-f "DM" "save-score-fpath") (str->abcl path))
       )))
@@ -232,7 +234,7 @@
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
                   (let [path (.getCanonicalPath f)]
-                    (load-new-score-with (fn [] (load-active-score-from-midi-file path)))))))
+                    (load-new-score-with (fn [] (glue/load-active-score-from-midi-file path)))))))
                   
 (defn choose-and-save-midi [& _]
   )
