@@ -1,12 +1,13 @@
 (ns director-musices.rulepalette.rulepalette
-  (:use [director-musices.common-lisp.glue :only [apply-rules]]
-        [director-musices.score.score :only [reload-score-panel]]
-        [director-musices
+  (:use [director-musices
          [utils :only [find-i new-file-dialog with-indeterminate-progress]]
          [player :only [update-player]]]
         [clojure.java.io :only [resource]])
   (:require (director-musices
+              [player :as player]
               [utils :as util])
+            [director-musices.common-lisp.glue :as glue]
+            [director-musices.score.score :as score]
             [seesaw
              [core :as ssw]
              [chooser :as ssw-chooser]
@@ -212,33 +213,31 @@
     (set-editable rule-panel false)
     rp-obj))
 
-;; actions
-
 (def reset-on-apply (atom false))
 (defn set-reset-on-apply [new-value]
   (swap! reset-on-apply (constantly new-value)))
 
 (defn save-rp-obj [{:keys [rule-panel]}]
-  (if-let [f (new-file-dialog rule-panel)]
+  (if-let [f (util/new-file-dialog rule-panel)]
     (spit f
           (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
                (panel->rules rule-panel)
                "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))"))))
 
 (defn apply-rp-obj [{:keys [rule-interaction? rule-interaction-c syncrule rule-panel]}]
-  (with-indeterminate-progress "applying rules"
-    (apply-rules (panel->rules rule-panel) @syncrule (if @rule-interaction? @rule-interaction-c))
-    (reload-score-panel)))
+  (util/with-indeterminate-progress "applying rules"
+    (glue/apply-rules (panel->rules rule-panel) @syncrule (if @rule-interaction? @rule-interaction-c))
+    (score/reload-score-panel)))
 
 (defn apply-current-rulepalette [& _]
   (let [rp-obj (nth @rulepalettes (.getSelectedIndex rulepalette-container) {})]
     (apply-rp-obj rp-obj))
-  (update-player))
+  (player/update-player))
 
 (defn apply-all-rulepalettes [& _]
   (doseq [rp-obj @rulepalettes]
     (apply-rp-obj rp-obj))
-  (update-player))
+  (player/update-player))
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
