@@ -24,8 +24,6 @@
 
 (defn eval-abcl-dm [s] (eval-abcl (str "(in-package :dm) " s)))
 
-(def buffer-id (atom 0))
-
 (declare abcl-path)
 (defn load-abcl [path]
   (try 
@@ -36,7 +34,6 @@
         (do 
           (spit f (slurp (resource (.replaceAll path ":" "/"))))
           (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath f)) "\")"))
-          (swap! buffer-id inc)
           (delete-file f)
           (log :trace (str "loaded " path))
           )
