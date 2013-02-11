@@ -165,3 +165,5 @@
     (ssw/listen rule-interaction-c :selection (fn [& _] (reset! (:rule-interaction-c rp-obj) (read-string (.getText rule-interaction-c)))))
     (set-editable rule-panel false)
     rp-obj))
+
+(defn reload-ui [])

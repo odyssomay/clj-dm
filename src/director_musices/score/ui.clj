@@ -107,3 +107,6 @@
                  )
     (ssw/config! score-panel :items [(ssw/scrollable p)])
     p))
+
+(defn reload-ui [] ;(update-score-panel)
+  )

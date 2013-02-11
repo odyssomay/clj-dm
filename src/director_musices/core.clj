@@ -8,8 +8,12 @@
               [glue :as glue]
               [interpreter :as inr]
               )
-            [director-musices.score.global :as score-global]
-            [director-musices.rulepalette.global :as rule-global]
+            (director-musices.score
+             [global :as score-global]
+             [ui :as score-ui])
+            (director-musices.rulepalette
+              [global :as rule-global]
+              [ui :as rule-ui])
             ))
 
 (defn director-musices [& args]
@@ -29,7 +33,12 @@
                            :divider-location 0.5))
     (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
-    (util/thread (glue/init-dm))
-    nil))
+    (if (arg? "-return-thread")
+      (util/thread (glue/init-dm))
+      nil)))
 
-(defn reload-fn [] (director-musices "-no-exit"))
+(defn reload-ui []
+  (.join (director-musices "-no-exit" "-return-thread"))
+  (score-ui/reload-ui)
+  (rule-ui/reload-ui)
+  )
