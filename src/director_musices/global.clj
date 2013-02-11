@@ -15,8 +15,6 @@
   
   (defn get-frame [] f)
   
-  ;(defn get-center-panel [] cp)
-  
   (defn get-main-panel [] main-panel)
   (let [max-value 100
         pb (ssw/progress-bar)
@@ -35,7 +33,6 @@
                            ;:align :center
                            :size [400 :by 300]
                            ))
-    
     (.setFont large-label (.deriveFont (.getFont large-label) (float 16)))
     
     (defn update-progress-bar [& {:keys [indeterminate? percent-done
