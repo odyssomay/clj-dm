@@ -13,6 +13,7 @@
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]
-                 [kitfox/svgsalamander "1.0"]]
+                 [kitfox/svgsalamander "1.0"]
+                 [org.clojure/tools.namespace "0.2.2"]]
 ;  :dev-dependencies [[com.stuartsierra/lazytest "1.1.2"]]
   )
