@@ -4,7 +4,8 @@
 (ns director-musices.player
   (:use [director-musices.common-lisp.glue :only [save-midi-to-path]]
         [clojure.java.io :only [resource file]])
-  (:require [seesaw 
+  (:require [director-musices.util :as util]
+            [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
   (:import javax.sound.midi.MidiSystem))
@@ -248,7 +249,7 @@
     ))
 
 (defn update-player []
-  (save-midi-to-path "buffer.midi")
-  (open-midi-file (file "buffer.midi"))
-  )
+  (let [f (java.io.File. (util/tmp-folder) "buffer.midi")]
+    (save-midi-to-path (.getCanonicalPath f))
+    (open-midi-file f)))
 
