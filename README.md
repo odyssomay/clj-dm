@@ -10,7 +10,7 @@ Licensed under the [zlib](http://en.wikipedia.org/wiki/Zlib_license) license:
 
 ---
 
-Copyright (c) 2012 Jonathan Fischer Friberg
+Copyright (c) 2012-2013 Jonathan Fischer Friberg
 
 This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
 
