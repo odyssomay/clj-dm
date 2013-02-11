@@ -20,9 +20,9 @@
 
 (defn director-musices [& args]
   (let [help? (some #{"--help" "-help" "-h"} args)
-        [arg-map invalid help-str] 
+        [arg-map invalid help-str]
         (global/set-arg-map
-          (clojure.tools.cli/cli 
+          (clojure.tools.cli/cli
             (if help? [] args)
             ["--dev" "Starts a developer version." :default false :flag true]
             ["--exit" "Exit after window has closed." :default true :flag true]
@@ -59,5 +59,4 @@
 (defn reload-ui []
   (.join (director-musices "--no-exit" "--return-thread"))
   (score-ui/reload-ui)
-  (rule-ui/reload-ui)
-  )
+  (rule-ui/reload-ui))
