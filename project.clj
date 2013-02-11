@@ -11,7 +11,9 @@
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]
-                 [kitfox/svgsalamander "1.0"]]
+                 [kitfox/svgsalamander "1.0"]
+                 [org.clojure/tools.cli "0.2.2"]
+                 [com.taoensso/timbre "1.5.2"]]
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.2"]]}
              :jar {:main director-musices.main}
              }
