@@ -24,6 +24,7 @@
         (clojure.tools.cli/cli
           (if help? [] args)
           ["--dev" "Starts a developer version." :default false :flag true]
+          ["--dm-path" "Define a path to director-musices source files." :default nil]
           ["--exit" "Exit after window has closed." :default true :flag true]
           ["--return-thread" "Returns a startup thread." :default false :flag true]
           ["--cl-repl" "Starts a common-lisp repl. Note that the repl will be started on the command line." :default false :flag true]
