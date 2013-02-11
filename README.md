@@ -2,7 +2,7 @@ This is a ui for [director-musices](https://github.com/docfry/Director-Musices).
 
 ## Documentation
 
-Can be found [on the wiki](wiki).
+Can be found [on the wiki](../../wiki).
 
 ## License
 
