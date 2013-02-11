@@ -1,8 +1,6 @@
 (defproject 
   director-musices "1"
   :description "FIXME: write description"
-  :disable-deps-clean true
-  :main director-musices.main
   :manifest ["SplashScreen-Image" "splash.gif"]
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.1.2"]
@@ -13,7 +11,8 @@
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
                                               com.sun.jmx/jmxri]]
-                 [kitfox/svgsalamander "1.0"]
-                 [org.clojure/tools.namespace "0.2.2"]]
-;  :dev-dependencies [[com.stuartsierra/lazytest "1.1.2"]]
+                 [kitfox/svgsalamander "1.0"]]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.2"]]}
+             :jar {:main director-musices.main}
+             }
   )
