@@ -60,3 +60,8 @@
   `(let [t# (Thread. (fn [] ~@body))]
      (.start t#)
      t#))
+
+(defn tmp-folder []
+  (if-let [path (System/getProperty "java.io.tmpdir")]
+    (java.io.File. path)
+    (java.io.File. ".")))
