@@ -1,5 +1,5 @@
 (ns director-musices.common-lisp.interpreter
-  (:use (director-musices [utils :only [log]])
+  (:use (director-musices [util :only [log]])
         [clojure.java.io :only [copy file delete-file resource]]))
 
 (def interpreter

@@ -1,6 +1,6 @@
 (ns director-musices.score.draw-score
   (:use
-    (director-musices [utils :only [log]])
+    (director-musices [util :only [log]])
     [clojure.java.io :only [resource]])
   (:require [seesaw [core :as ssw]
                     [graphics :as ssw-graphics]])
