@@ -1,4 +1,4 @@
-(ns director-musices.utils
+(ns director-musices.util
   (:use [clojure.java.io :only [file]])
   (:require [clojure.tools.logging :as logger]
             [seesaw 
