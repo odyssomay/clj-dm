@@ -1,9 +1,10 @@
 (ns director-musices.common-lisp.glue
-  (:use clojure.java.io
+  (:use [clojure.java.io :only [resource]]
         director-musices.common-lisp.interpreter
         (director-musices 
           [util :only [with-indeterminate-progress]]))
   (:require (director-musices [global :as global])
+            clojure.string
             [seesaw.core :as ssw]))
 
 (let [dm-init? (atom nil)]
@@ -17,24 +18,35 @@
       (load-multiple-abcl-with-progress
         {:percent-done #(global/update-progress-bar :percent-done %)
          :current-file #(global/update-progress-bar :small-text %)}
-        "dm:"
-        ["package-dm.lsp"]
-        "dm:lib-core:"
-        ["scoreobjects.lsp" "basicmacros.lsp" "infixmath.lsp" "musicio.lsp" 
-         "rulemacros.lsp" "parallelrulemacros.lsp" 
-         "dm-objects.lsp" "initconvert.lsp" "save-pdm-score.lsp" 
-         "rule-groups.lsp" "syntobjects.lsp" "shapeobjects.lsp"
-         "midifileoutput.lsp" "midifileinput.lsp" "playlist.lsp" "midibasic-lw.lsp"]
-        "dm:"
-        ["init.lsp"]
-        "dm:rules:"
-        ["frules1.lsp" "frules2.lsp" "Intonation.lsp"
-         "FinalRitard.lsp" "utilityrules.lsp" "Punctuation.lsp"
-         "phrasearch.lsp" "SyncOnMel.lsp"])
+        "dm"
+        ["package-dm"]
+        "dm:lib-core"
+        ["scoreobjects" "basicmacros" "infixmath" "musicio" 
+         "rulemacros" "parallelrulemacros" 
+         "dm-objects" "initconvert" "save-pdm-score" 
+         "rule-groups" "syntobjects" "shapeobjects"
+         "midifileoutput" "midifileinput" "playlist" "midibasic-lw"]
+        "dm"
+        ["init"]
+        "dm:rules"
+        ["frules1" "frules2" "Intonation"
+         "FinalRitard" "utilityrules" "Punctuation"
+         "phrasearch" "SyncOnMel"])
         (global/hide-progress-bar)
         (reset! dm-init? true)
         )))
 
+; (defn read-dm-paths-file [path]
+;   (let [lines (clojure.string/split-lines (slurp path))]
+;     (map #(vec [(ffirst %) (second %)])
+;          (partition 2 (partition-by #(.startsWith % " ")
+;                                ;#(re-matches #"\s+.+" %) 
+;                                lines)))
+;     ;lines
+;     ))
+
+; (prn (read-dm-paths-file (resource "dm/paths")))
+    
 (defn eval-dm [s]
   (init-dm)
   (eval-abcl "(in-package :dm)")
