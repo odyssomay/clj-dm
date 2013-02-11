@@ -60,7 +60,7 @@
 
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
-    (load-abcl (str prefix f))))
+    (load-abcl (str prefix ":" f ".lsp"))))
 
 (defn load-multiple-abcl-with-progress [progress-fns & defs-in]
   (let [{:keys [percent-done current-file]}
@@ -75,7 +75,7 @@
                  (percent-done (/ v total))))
     (doseq [[prefix files] defs]
       (doseq [f files]
-        (let [path (str prefix f)]
+        (let [path (str prefix ":" f ".lsp")]
           (current-file path)
           (load-abcl path))
         (swap! number-done-a inc)
