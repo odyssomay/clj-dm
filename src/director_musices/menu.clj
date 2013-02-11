@@ -5,8 +5,8 @@
               )
             [director-musices.rulepalette.menu :as rulepalette-menu]
             (director-musices.score
-              [score :as score]
-              [menu :as score-menu])
+              [menu :as score-menu]
+              [ui :as score-ui])
             [seesaw.core :as ssw]
             ))
 
@@ -44,9 +44,9 @@
                                       (let [p (read-string raw)]
                                         (inr/eval-abcl-dm (str "(rem-all '" p ")"))))))
      (ssw/action :name "Reset Soundlevel"
-                 :handler (fn [& _] (inr/eval-abcl-dm "(reset-sound-level)") (score/reload-score-panel)))
+                 :handler (fn [& _] (inr/eval-abcl-dm "(reset-sound-level)") (score-menu/reload-score-panel)))
      (ssw/action :name "Rebar"
-                 :handler (fn [& _] (inr/eval-abcl-dm "(rebar)") (score/reload-score-panel)))
+                 :handler (fn [& _] (inr/eval-abcl-dm "(rebar)") (score-menu/reload-score-panel)))
      ]))
 
 (def help-menu

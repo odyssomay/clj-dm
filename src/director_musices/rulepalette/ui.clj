@@ -1,66 +1,19 @@
-(ns director-musices.rulepalette.rulepalette
-  (:use [director-musices
-         [utils :only [find-i new-file-dialog with-indeterminate-progress]]
-         [player :only [update-player]]]
+(ns director-musices.rulepalette.ui
+  (:use [director-musices.rulepalette.global 
+         :only [rulepalettes rulepalette-container]
+         :as global]
         [clojure.java.io :only [resource]])
-  (:require (director-musices
-              [player :as player]
-              [utils :as util])
-            [director-musices.common-lisp.glue :as glue]
-            [director-musices.score.score :as score]
-            [seesaw
-             [core :as ssw]
-             [chooser :as ssw-chooser]
-             [mig :as ssw-mig]]))
+  (:require (director-musices.rulepalette
+              [global :as global])
+            [director-musices.util :as util]
+            [seesaw.core :as ssw]
+            [seesaw.mig :as ssw-mig])
+  )
 
-;; Default
-
-(def default-rulepalette
-"(in-package \"DM\")
-(set-dm-var 'all-rules '(
-(HIGH-LOUD 1.0)
-(MELODIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBAMP 1)
-(HARMONIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBFREQ 1)
-(DURATION-CONTRAST 1.0 :AMP 1 :DUR 1)
-(DOUBLE-DURATION 1.0)
-(PUNCTUATION 1.1 :DUR 1 :DUROFF 1 :MARKPHLEVEL7 NIL)
-(PHRASE-ARCH 1.5 :PHLEVEL 5 :TURN 0.3 :NEXT 1.3 :AMP 2)
-(PHRASE-ARCH 1.5 :PHLEVEL 6 :TURN 2 :AMP 2 :LAST 0.2)
-(NORMALIZE-SL T)
-(NORMALIZE-DR T)
-(FINAL-RITARD 1.0)
-))
-(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")
-
-;; loading
-
-(defn string->rulepalette [string]
-  (->> (load-string (str "(let [set-dm-var (fn [s content]
-                         [(keyword s) content])
-                         in-package (fn [_] )]
-                         [" string "])"))
-    (remove nil?)
-    (into {})))
-
-(defn path->rulepalette [path]
-  (string->rulepalette (slurp path)))
-
-;; Display
-
-(def rulepalettes (atom []))
-(def rulepalette-container (ssw/tabbed-panel))
-
-(declare choose-and-open-rulepalette)
-(let [l (ssw/label "No rulepalette loaded yet, click here to load one!")
-      p (util/centered-component l)
-      r-cont-loaded? (atom false)]
-  (ssw/listen p :mouse-clicked (fn [e] (choose-and-open-rulepalette)))
-  
-  (def rulepalette-panel (ssw/horizontal-panel :items [p]))
-  
+(let [r-cont-loaded? (atom nil)]
   (defn load-rulepalette-container []
     (when (not @r-cont-loaded?)
-      (ssw/config! rulepalette-panel :items [rulepalette-container])
+      (ssw/config! global/rulepalette-panel :items [rulepalette-container])
       (swap! r-cont-loaded? not))))
 
 (defn add-rulepalette [c]
@@ -84,7 +37,7 @@
 
 (defn get-line-index-starting-with [{:keys [rule-panel]} up]
   (/ 
-    (find-i up (.getComponents rule-panel))
+    (util/find-i up (.getComponents rule-panel))
     components-per-line))
 
 (defn get-rule-at [{:keys [rules]} line]
@@ -212,39 +165,3 @@
     (ssw/listen rule-interaction-c :selection (fn [& _] (reset! (:rule-interaction-c rp-obj) (read-string (.getText rule-interaction-c)))))
     (set-editable rule-panel false)
     rp-obj))
-
-(def reset-on-apply (atom false))
-(defn set-reset-on-apply [new-value]
-  (swap! reset-on-apply (constantly new-value)))
-
-(defn save-rp-obj [{:keys [rule-panel]}]
-  (if-let [f (util/new-file-dialog rule-panel)]
-    (spit f
-          (str "(in-package \"DM\")\n(set-dm-var 'all-rules '(\n"
-               (panel->rules rule-panel)
-               "))\n(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))"))))
-
-(defn apply-rp-obj [{:keys [rule-interaction? rule-interaction-c syncrule rule-panel]}]
-  (util/with-indeterminate-progress "applying rules"
-    (glue/apply-rules (panel->rules rule-panel) @syncrule (if @rule-interaction? @rule-interaction-c))
-    (score/reload-score-panel)))
-
-(defn apply-current-rulepalette [& _]
-  (let [rp-obj (nth @rulepalettes (.getSelectedIndex rulepalette-container) {})]
-    (apply-rp-obj rp-obj))
-  (player/update-player))
-
-(defn apply-all-rulepalettes [& _]
-  (doseq [rp-obj @rulepalettes]
-    (apply-rp-obj rp-obj))
-  (player/update-player))
-
-(defn choose-and-open-rulepalette [& _]
-  (ssw-chooser/choose-file :success-fn 
-    (fn [_ f] 
-      (add-rulepalette 
-        (assoc (rulepalette-view (path->rulepalette (.getCanonicalPath f)))
-               :title (.getName f))))))
-
-(defn open-default-rulepalette [& _]
-  (add-rulepalette (assoc (rulepalette-view (string->rulepalette default-rulepalette)) :title "Default")))

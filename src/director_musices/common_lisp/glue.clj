@@ -2,7 +2,7 @@
   (:use clojure.java.io
         director-musices.common-lisp.interpreter
         (director-musices 
-          [utils :only [with-indeterminate-progress]]))
+          [util :only [with-indeterminate-progress]]))
   (:require (director-musices [global :as global])
             [seesaw.core :as ssw]))
 
@@ -34,45 +34,13 @@
         (global/hide-progress-bar)
         (reset! dm-init? true)
         )))
-      
-
-(defn load-active-score [string]
-  (init-dm)
-  (eval-abcl 
-    (str "(in-package :dm)
-          (read-active-score-from-string \"" string 
-         "\")
-          (init-music-score)")))
-
-(defn load-active-score-from-file [path]
-  (init-dm)
-  (eval-abcl "(in-package :dm)")
-  (eval-abcl (str "(read-active-score-from-file \"" (abcl-path path) "\")"))
-  (eval-abcl "(init-music-score)"))
-
-(defn load-active-score-from-midi-file [path]
-  (init-dm)
-  (eval-abcl "(in-package :dm)")
-  (eval-abcl (str "(load-midifile-fpath \"" (abcl-path path) "\")"))
-  (eval-abcl "(init-music-score)"))
-
-(defn get-active-score []
-  (init-dm)
-  (eval-abcl "(in-package :dm)")
-  (eval-abcl "(get-active-score)"))
-
-(defn apply-rules [rulelist-string sync-rule & [rule-interaction-c]]
-  (init-dm)
-  (if rule-interaction-c
-    (eval-abcl (str "(in-package :dm)
-                    (reset-music)
-                    (rule-interaction-apply-rules-sync '(" rulelist-string ") '" rule-interaction-c ")"))
-    (eval-abcl (str "(in-package :dm)
-                    (reset-music)
-                    (rule-apply-list-sync '(" 
-                    rulelist-string ") '" sync-rule ")"))))
 
 (defn save-midi-to-path [path]
   (init-dm)
   (eval-abcl "(in-package :dm)")
   (eval-abcl (str "(save-performance-midifile1-fpath \"" (abcl-path path) "\")")))
+
+(defn eval-dm [s]
+  (init-dm)
+  (eval-abcl "(in-package :dm)")
+  (eval-abcl s))

@@ -1,6 +1,50 @@
 (ns director-musices.score.menu
-  (:use director-musices.score.score)
-  (:require [seesaw.core :as ssw]))
+  (:require (director-musices
+              [player :as player]
+              [util :as util])
+            (director-musices.score
+              [global :as global]
+              [glue :as glue]
+              [ui :as ui])
+            (seesaw
+              [chooser :as ssw-chooser]
+              [core :as ssw])))
+
+(defn reload-score-panel [] 
+  (swap! ui/score-panel-reloader not))
+
+(defn load-new-score-with [f]
+  (.removeAll global/score-panel)
+  (f)
+  (ui/update-score-panel)
+  (player/update-player))
+
+(defn choose-and-open-score [& _]
+  (ssw-chooser/choose-file
+    :success-fn 
+    (fn [_ f]
+      (let [path (.getCanonicalPath f)]
+        (load-new-score-with 
+          (fn [] (glue/load-active-score-from-file path)))))))
+
+(defn choose-and-save-performance [& _]
+  (if-let [f (util/new-file-dialog)]
+    (spit f (glue/get-active-score))))
+
+(defn choose-and-save-score [& _]
+  (if-let [f (util/new-file-dialog)]
+    (let [path (.getCanonicalPath f)]
+      ;(.execute (abcl-f "DM" "save-score-fpath") (str->abcl path))
+      )))
+
+(defn choose-and-open-midi [& _]
+  (ssw-chooser/choose-file
+    :success-fn (fn [_ f]
+                  (let [path (.getCanonicalPath f)]
+                    (load-new-score-with (fn [] (glue/load-active-score-from-midi-file path)))))))
+                  
+(defn choose-and-save-midi [& _]
+  )
 
 (def file-menu
   (ssw/menu
