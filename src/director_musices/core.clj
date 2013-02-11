@@ -21,14 +21,14 @@
 (defn director-musices [& args]
   (let [help? (some #{"--help" "-help" "-h"} args)
         [arg-map invalid help-str]
-        (global/set-arg-map
-          (clojure.tools.cli/cli
-            (if help? [] args)
-            ["--dev" "Starts a developer version." :default false :flag true]
-            ["--exit" "Exit after window has closed." :default true :flag true]
-            ["--return-thread" "Returns a startup thread." :default false :flag true]
-            ["--cl-repl" "Starts a common-lisp repl. Note that the repl will be started on the command line." :default false :flag true]
-            ))]
+        (clojure.tools.cli/cli
+          (if help? [] args)
+          ["--dev" "Starts a developer version." :default false :flag true]
+          ["--exit" "Exit after window has closed." :default true :flag true]
+          ["--return-thread" "Returns a startup thread." :default false :flag true]
+          ["--cl-repl" "Starts a common-lisp repl. Note that the repl will be started on the command line." :default false :flag true]
+          )]
+    (global/set-arg-map arg-map)
     (when help?
       (println help-str)
       (System/exit 0))
