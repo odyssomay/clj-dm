@@ -35,12 +35,10 @@
         (reset! dm-init? true)
         )))
 
-(defn save-midi-to-path [path]
-  (init-dm)
-  (eval-abcl "(in-package :dm)")
-  (eval-abcl (str "(save-performance-midifile1-fpath \"" (abcl-path path) "\")")))
-
 (defn eval-dm [s]
   (init-dm)
   (eval-abcl "(in-package :dm)")
   (eval-abcl s))
+
+(defn save-midi-to-path [path]
+  (eval-dm (str "(save-performance-midifile1-fpath \"" (abcl-path path) "\")")))
