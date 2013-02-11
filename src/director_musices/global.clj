@@ -1,5 +1,6 @@
 (ns director-musices.global
-  (:require [seesaw.core :as ssw]
+  (:require [taoensso.timbre :as log]
+            [seesaw.core :as ssw]
             seesaw.mig))
 
 (ssw/native!)
@@ -49,3 +50,11 @@
     (defn show-progress-bar [] (ssw/show-card! cp :progress-bar))
     (defn hide-progress-bar [] (ssw/show-card! cp :main)))
   )
+
+(let [arg-map (atom nil)]
+  (defn set-arg-map [as] (reset! arg-map as))
+  
+  (defn get-arg [a]
+    (if (not (contains? @arg-map a))
+      (log/warn "tried to access arg:" a "but it is not defined!"))
+    (get @arg-map a nil)))
