@@ -33,9 +33,10 @@
                            :divider-location 0.5))
     (when (some #(= % "-cl-repl") args) (inr/repl))
     (ssw/show! fr)
-    (if (arg? "-return-thread")
-      (util/thread (glue/init-dm))
-      nil)))
+    (let [t (util/thread (glue/init-dm))]
+      (if (arg? "-return-thread")
+        t
+        nil))))
 
 (defn reload-ui []
   (.join (director-musices "-no-exit" "-return-thread"))
