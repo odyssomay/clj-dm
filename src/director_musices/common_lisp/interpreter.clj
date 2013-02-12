@@ -1,6 +1,7 @@
 (ns director-musices.common-lisp.interpreter
   (:use [clojure.java.io :only [copy file delete-file resource]])
   (:require [director-musices.util :as util]
+            [clojure.string :as clj-str]
             [taoensso.timbre :as log]))
 
 (def interpreter
@@ -23,12 +24,12 @@
     @res
     ))
 
-(defn eval-abcl-dm [s] (eval-abcl (str "(in-package :dm) " s)))
-
 (declare abcl-path)
-(defn load-abcl [path]
+(defn load-abcl [path & [{:keys [base-dir]}]]
   (try
-    (let [in (resource (.replaceAll path ":" "/"))
+    (let [in (if base-dir
+               (apply file base-dir (drop 1 (clj-str/split path ":")))
+               (resource (.replaceAll path ":" "/")))
           out-name (last (.split path ":"))
           out (file (util/tmp-dir) out-name)]
       (if in
@@ -42,30 +43,15 @@
     (catch Exception e
       (log/error "failed loading" path ", error:" e))))
 
-;; UTIL
-
-(defn load-dir-abcl [excluding & dirs]
-  (let [fl (apply file dirs)]
-    (dorun
-      (map #(apply load-abcl (concat dirs [%]))
-           (remove #(some (partial = %)
-                          excluding)
-                   (.list fl))))))
-
-(defn load-dir-in-abcl [including & dirs]
-  (let [fl (apply file dirs)]
-    (dorun
-      (map #(apply load-abcl (concat dirs [%]))
-           including))))
-
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
     (load-abcl (str prefix ":" f ".lsp"))))
 
-(defn load-multiple-abcl-with-progress [progress-fns & defs-in]
+(defn load-multiple-abcl-with-progress [opts & defs-in]
   (let [{:keys [percent-done current-file]}
         (merge {:percent-done #() :current-file #()}
-               progress-fns)
+               opts)
+        load-opts (dissoc opts :percent-done :current-file)
         defs (partition 2 defs-in)
         total (reduce + (map #(count (second %)) defs))
         number-done-a (atom 0)
@@ -77,7 +63,7 @@
       (doseq [f files]
         (let [path (str prefix ":" f ".lsp")]
           (current-file path)
-          (load-abcl path))
+          (load-abcl path opts))
         (swap! number-done-a inc)
         ))
     ))
