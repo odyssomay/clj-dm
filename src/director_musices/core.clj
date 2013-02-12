@@ -1,5 +1,6 @@
 (ns director-musices.core
-  (:require (director-musices [global :as global]
+  (:require (director-musices [cli :as cli]
+                              [global :as global]
                               [menu :as menu]
                               [player :as player]
                               [util :as util])
@@ -15,27 +16,10 @@
               [ui :as rule-ui])
             [seesaw.core :as ssw]
             [taoensso.timbre :as log]
-            clojure.tools.cli
             ))
 
 (defn director-musices [& args]
-  (let [help? (some #{"--help" "-help" "-h"} args)
-        [arg-map invalid help-str]
-        (clojure.tools.cli/cli
-          (if help? [] args)
-          ["--dev" "Starts a developer version." :default false :flag true]
-          ["--dm-path" "Define a path to director-musices source files." :default nil]
-          ["--exit" "Exit after window has closed." :default true :flag true]
-          ["--return-thread" "Returns a startup thread." :default false :flag true]
-          ["--cl-repl" "Starts a common-lisp repl. Note that the repl will be started on the command line." :default false :flag true]
-          )]
-    (global/set-arg-map arg-map)
-    (when help?
-      (println help-str)
-      (System/exit 0))
-    (when (> (count invalid) 0)
-      (log/warn "these arguments are invalid:" invalid))
-    )
+  (cli/parse-args args)
   (let [arg? (fn [arg] (some #(= % arg) args))
         fr (global/get-frame)]
     (ssw/config! fr
