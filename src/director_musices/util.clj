@@ -61,7 +61,7 @@
      (.start t#)
      t#))
 
-(defn tmp-folder []
+(defn tmp-dir []
   (if-let [path (System/getProperty "java.io.tmpdir")]
     (java.io.File. path)
     (java.io.File. ".")))
