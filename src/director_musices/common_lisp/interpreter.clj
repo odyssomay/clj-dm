@@ -1,6 +1,8 @@
 (ns director-musices.common-lisp.interpreter
   (:use [clojure.java.io :only [copy file delete-file resource]])
-  (:require [director-musices.util :as util]
+  (:require (director-musices
+              [global :as global]
+              [util :as util])
             [clojure.string :as clj-str]
             [taoensso.timbre :as log]))
 
@@ -21,11 +23,10 @@
                 [(fn [] 
                    (reset! res (.eval @interpreter (str "(progn " s ")")))
                    )])
-    @res
-    ))
+    @res))
 
 (declare abcl-path)
-(defn load-abcl [path & [{:keys [base-dir]}]]
+(defn load-abcl [path & [{:keys [base-dir] :as opts}]]
   (try
     (let [in (if base-dir
                (apply file base-dir (drop 1 (clj-str/split path #":")))
@@ -38,6 +39,11 @@
           (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath out)) "\")"))
           (delete-file out)
           (log/info "loaded" path)
+          (if (and base-dir (global/get-arg :watch))
+            (util/watch-file 
+              in (fn [] 
+                   (log/info "reloading" (.getName in))
+                   (load-abcl path opts))))
           )
         (log/error path "does not exist!")))
     (catch Exception e
@@ -63,7 +69,7 @@
       (doseq [f files]
         (let [path (str prefix ":" f ".lsp")]
           (current-file path)
-          (load-abcl path opts))
+          (load-abcl path load-opts))
         (swap! number-done-a inc)
         ))
     ))
