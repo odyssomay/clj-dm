@@ -249,7 +249,7 @@
     ))
 
 (defn update-player []
-  (let [f (java.io.File. (util/tmp-folder) "buffer.midi")]
+  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
     (save-midi-to-path (.getCanonicalPath f))
     (open-midi-file f)))
 
