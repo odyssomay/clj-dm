@@ -26,7 +26,7 @@
     @res))
 
 (declare abcl-path)
-(defn load-abcl [path & [{:keys [base-dir] :as opts}]]
+(defn load-abcl [path & [{:keys [base-dir no-reload] :as opts}]]
   (try
     (let [in (if base-dir
                (apply file base-dir (drop 1 (clj-str/split path #":")))
@@ -39,11 +39,12 @@
           (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath out)) "\")"))
           (delete-file out)
           (log/info "loaded" path)
-          (if (and base-dir (global/get-arg :watch))
-            (util/watch-file 
+          (if (and base-dir (global/get-arg :watch)
+                   (not no-reload))
+            (util/watch-file
               in (fn [] 
                    (log/info "reloading" (.getName in))
-                   (load-abcl path opts))))
+                   (load-abcl path (assoc opts :no-reload true)))))
           )
         (log/error path "does not exist!")))
     (catch Exception e
