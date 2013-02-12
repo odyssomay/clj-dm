@@ -1,7 +1,6 @@
 (ns director-musices.util
   (:use [clojure.java.io :only [file]])
-  (:require [clojure.tools.logging :as logger]
-            [seesaw 
+  (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]]))
 
@@ -16,16 +15,6 @@
         (if (= (first c) value)
           i
           (recur (inc i) (rest c)))))))
-
-(defmacro log
-  ([level msg]
-   `(logger/log ~level ~msg))
-  ([level e msg]
-   `(logger/log ~level (str ~msg "\n    "
-                            ~e   "\n        "
-                            (apply str (interpose "\n        "
-                                                  (take 7 (.getStackTrace ~e))))
-                            "\n"))))
 
 (defn new-file-dialog [& [parent]]
   (let [filename (ssw/text)

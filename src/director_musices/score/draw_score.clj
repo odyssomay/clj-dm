@@ -1,9 +1,8 @@
 (ns director-musices.score.draw-score
-  (:use
-    (director-musices [util :only [log]])
-    [clojure.java.io :only [resource]])
+  (:use [clojure.java.io :only [resource]])
   (:require [seesaw [core :as ssw]
-                    [graphics :as ssw-graphics]])
+                    [graphics :as ssw-graphics]]
+            [taoensso.timbre :as log])
   (:import (java.awt Font)))
 
 (def line-separation 7)
@@ -21,7 +20,7 @@
   (try
     (.render (get-diagram id) g)
     (catch Exception e
-      (log :error e (str "unable to render file svg: " id)))))
+      (log/error "unable to render file svg:" id ", error:" e))))
 
 (defn get-relative-x-offset [i notes]
   (:distance (nth notes (dec i) {:distance 0})))
