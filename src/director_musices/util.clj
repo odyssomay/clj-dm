@@ -2,7 +2,8 @@
   (:use [clojure.java.io :only [file]])
   (:require [seesaw 
              [core :as ssw]
-             [chooser :as ssw-chooser]]))
+             [chooser :as ssw-chooser]]
+            [taoensso.timbre :as log]))
 
 (defn find-i
   "Find the index of value in coll"
@@ -54,3 +55,19 @@
   (if-let [path (System/getProperty "java.io.tmpdir")]
     (java.io.File. path)
     (java.io.File. ".")))
+
+(defn watch-file [file on-change & [rate]]
+  (let [rate (if rate rate 500)
+        last-modified (atom (.lastModified file))
+        task (proxy [java.util.TimerTask] []
+               (run []
+                    (let [new-last-modified (.lastModified file)]
+                      (if (= 0 new-last-modified)
+                        (log/error "i/o error when retreiving last modification of file.")
+                        (when (> new-last-modified @last-modified)
+                          (on-change)
+                          (reset! last-modified new-last-modified))))))
+        ]
+    (.scheduleAtFixedRate 
+      (new java.util.Timer)
+      task 0 rate)))
