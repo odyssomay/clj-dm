@@ -1,9 +1,10 @@
 (ns director-musices.common-lisp.interpreter
-  (:use (director-musices [util :only [log]])
-        [clojure.java.io :only [copy file delete-file resource]]))
+  (:use [clojure.java.io :only [copy file delete-file resource]])
+  (:require [director-musices.util :as util]
+            [taoensso.timbre :as log]))
 
 (def interpreter
-  (future 
+  (future
     (do (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
           (.dispose i))
         (org.armedbear.lisp.Interpreter/createInstance)
@@ -26,20 +27,20 @@
 
 (declare abcl-path)
 (defn load-abcl [path]
-  (try 
-    (println path)
-    (let [f (file (last (.split path ":")))
-          r (resource (.replaceAll path ":" "/"))]
-      (if r
-        (do 
-          (spit f (slurp (resource (.replaceAll path ":" "/"))))
-          (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath f)) "\")"))
-          (delete-file f)
-          (log :trace (str "loaded " path))
+  (try
+    (let [in (resource (.replaceAll path ":" "/"))
+          out-name (last (.split path ":"))
+          out (file (util/tmp-dir) out-name)]
+      (if in
+        (do
+          (spit out (slurp in))
+          (eval-abcl (str "(load \"" (abcl-path (.getCanonicalPath out)) "\")"))
+          (delete-file out)
+          (log/info "loaded" path)
           )
-        (println "... does not exist!")))
+        (log/error path "does not exist!")))
     (catch Exception e
-      (log :error e (str "failed loading " path)))))
+      (log/error "failed loading" path ", error:" e))))
 
 ;; UTIL
 
@@ -51,8 +52,7 @@
                           excluding)
                    (.list fl))))))
 
-(defn load-dir-in-abcl
-  [including & dirs]
+(defn load-dir-in-abcl [including & dirs]
   (let [fl (apply file dirs)]
     (dorun
       (map #(apply load-abcl (concat dirs [%]))
