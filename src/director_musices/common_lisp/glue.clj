@@ -31,19 +31,20 @@
                                   :percent-done 0)
       (global/show-progress-bar)
       (let [d (resource "dm/paths")
-            dm-paths (read-dm-paths-file
-                       (if-let [p (global/get-arg :dm-path)]
+            paths-file (if-let [p (global/get-arg :dm-path)]
                          (let [f (java.io.File. p "paths")]
                            (if (.exists f)
                              f
                              (do (log/warn "'paths' file was not found in" p 
                                            ", using in-built.")
-                               d)))
-                         d))]
+                               nil))))
+            paths (read-dm-paths-file (if paths-file paths-file d))]
         (apply load-multiple-abcl-with-progress
                {:percent-done #(global/update-progress-bar :percent-done %)
-                :current-file #(global/update-progress-bar :small-text %)}
-               dm-paths)
+                :current-file #(global/update-progress-bar :small-text %)
+                :base-dir (if paths-file (java.io.File.
+                                           (global/get-arg :dm-path)))}
+               paths)
         (global/hide-progress-bar)
         (reset! dm-init? true)
         ))))
