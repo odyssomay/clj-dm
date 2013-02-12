@@ -1,6 +1,7 @@
 (ns director-musices.core
   (:require (director-musices [cli :as cli]
                               [global :as global]
+                              [logging :as logging]
                               [menu :as menu]
                               [player :as player]
                               [util :as util])
@@ -14,21 +15,12 @@
             (director-musices.rulepalette
               [global :as rule-global]
               [ui :as rule-ui])
-            [clojure.string :as clj-str]
             [seesaw.core :as ssw]
             [taoensso.timbre :as log]
             ))
 
 (defn director-musices [& args]
-  (log/set-config! 
-    [:prefix-fn] 
-    (fn [{:keys [level]}]
-      (let [t (int (/ (.getUptime (java.lang.management.ManagementFactory/getRuntimeMXBean))
-                      1000))
-            minutes (quot t 60)
-            seconds (rem t 60)]
-        (str (format "%02d:%02d" minutes seconds)
-             " " (-> level name clj-str/upper-case)))))
+  (logging/init)
   (cli/parse-args args)
   (let [arg? (fn [arg] (some #(= % arg) args))
         fr (global/get-frame)]
