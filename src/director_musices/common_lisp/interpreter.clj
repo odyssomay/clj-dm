@@ -28,7 +28,7 @@
 (defn load-abcl [path & [{:keys [base-dir]}]]
   (try
     (let [in (if base-dir
-               (apply file base-dir (drop 1 (clj-str/split path ":")))
+               (apply file base-dir (drop 1 (clj-str/split path #":")))
                (resource (.replaceAll path ":" "/")))
           out-name (last (.split path ":"))
           out (file (util/tmp-dir) out-name)]
