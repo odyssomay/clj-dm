@@ -43,7 +43,7 @@
                               "; font-weight:" 
                               (if bold? "bold" "normal")
                               "'>"
-                              prefix " - " message " " more
+                              prefix " - " message " " more ; <- note: (str) is applied to 'more'
                               ))))})))
 
 (defn init []
