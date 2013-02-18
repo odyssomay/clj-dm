@@ -6,7 +6,7 @@
               [global :as global]
               [glue :as glue]
               [ui :as ui])
-            [director-musices.score.menu :as score-menu]
+            [director-musices.score.ui :as score-ui]
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw])))
@@ -60,17 +60,17 @@
 (defn apply-rp-obj [{:keys [rule-interaction? rule-interaction-c syncrule rule-panel]}]
   (util/with-indeterminate-progress "applying rules"
     (glue/apply-rules (ui/panel->rules rule-panel) @syncrule (if @rule-interaction? @rule-interaction-c))
-    (score-menu/reload-score-panel)))
+    (score-ui/reload-score-panel)))
 
-(defn apply-current-rulepalette [& _]
-  (let [rp-obj (nth @global/rulepalettes (.getSelectedIndex global/rulepalette-container) {})]
-    (apply-rp-obj rp-obj))
-  (player/update-player))
+; (defn apply-current-rulepalette [& _]
+;   (let [rp-obj (nth @global/rulepalettes (.getSelectedIndex global/rulepalette-container) {})]
+;     (apply-rp-obj rp-obj))
+;   (player/update-player))
 
-(defn apply-all-rulepalettes [& _]
-  (doseq [rp-obj @global/rulepalettes]
-    (apply-rp-obj rp-obj))
-  (player/update-player))
+; (defn apply-all-rulepalettes [& _]
+;   (doseq [rp-obj @global/rulepalettes]
+;     (apply-rp-obj rp-obj))
+;   (player/update-player))
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
@@ -88,13 +88,13 @@
             [(ssw/action :name "Open Rulepalette"
                          :handler choose-and-open-rulepalette)
              (ssw/action :name "Open Default Rulepalette" :handler open-default-rulepalette)
-             (ssw/action :name "Save Rulepalette")
-             (ssw/separator)
-             (ssw/action :name "Apply current Rulepalette"
-                         :handler apply-current-rulepalette)
-             (ssw/action :name "Apply all rulepalettes"
-                         :handler apply-all-rulepalettes)
-             (let [cb (ssw/checkbox :text "Reset on Apply")]
-               (ssw/listen cb :selection (fn [& _] (set-reset-on-apply (.isSelected cb))))
-               cb)
+             ;(ssw/action :name "Save Rulepalette")
+             ;(ssw/separator)
+             ;(ssw/action :name "Apply current Rulepalette"
+             ;            :handler apply-current-rulepalette)
+             ;(ssw/action :name "Apply all rulepalettes"
+             ;            :handler apply-all-rulepalettes)
+             ;(let [cb (ssw/checkbox :text "Reset on Apply")]
+             ;  (ssw/listen cb :selection (fn [& _] (set-reset-on-apply (.isSelected cb))))
+             ;  cb)
              ]))

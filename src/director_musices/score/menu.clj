@@ -10,22 +10,13 @@
               [chooser :as ssw-chooser]
               [core :as ssw])))
 
-(defn reload-score-panel [] 
-  (swap! ui/score-panel-reloader not))
-
-(defn load-new-score-with [f]
-  (.removeAll global/score-panel)
-  (f)
-  (ui/update-score-panel)
-  (player/update-player))
-
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn 
     (fn [_ f]
       (let [path (.getCanonicalPath f)]
-        (load-new-score-with 
-          (fn [] (glue/load-active-score-from-file path)))))))
+        (ui/load-score-from-path path)
+        ))))
 
 (defn choose-and-save-performance [& _]
   (if-let [f (util/new-file-dialog)]
@@ -41,7 +32,7 @@
   (ssw-chooser/choose-file
     :success-fn (fn [_ f]
                   (let [path (.getCanonicalPath f)]
-                    (load-new-score-with (fn [] (glue/load-active-score-from-midi-file path)))))))
+                    (ui/load-score-from-midi path)))))
                   
 (defn choose-and-save-midi [& _]
   )
