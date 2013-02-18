@@ -1,8 +1,5 @@
 (ns director-musices.rulepalette.ui
-  (:use [director-musices.rulepalette.global 
-         :only [rulepalettes rulepalette-container]
-         :as global]
-        [clojure.java.io :only [resource]])
+  (:use [clojure.java.io :only [resource]])
   (:require (director-musices.rulepalette
               [global :as global]
               [glue :as glue])
@@ -17,13 +14,13 @@
 (let [r-cont-loaded? (atom nil)]
   (defn load-rulepalette-container []
     (when (not @r-cont-loaded?)
-      (ssw/config! global/rulepalette-panel :items [rulepalette-container])
+      (ssw/config! global/rulepalette-panel :items [global/rulepalette-container])
       (swap! r-cont-loaded? not))))
 
 (defn add-rulepalette [c]
   (load-rulepalette-container)
-  (swap! rulepalettes conj c)
-  (ssw/config! rulepalette-container :tabs @rulepalettes))
+  (swap! global/rulepalettes conj c)
+  (ssw/config! global/rulepalette-container :tabs @global/rulepalettes))
 
 (def components-per-line 8)
 (def slider-precision 1000)
@@ -222,5 +219,5 @@
   (add-rulepalette (assoc (rulepalette-view (string->rulepalette default-rulepalette)) :title "Default")))
 
 (defn reload-ui []
-  (reset! rulepalettes [])
+  (reset! global/rulepalettes [])
   (open-default-rulepalette))
