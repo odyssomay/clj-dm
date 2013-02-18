@@ -1,9 +1,19 @@
 (ns director-musices.global
   (:require [taoensso.timbre :as log]
             [seesaw.core :as ssw]
-            seesaw.mig))
+            seesaw.mig)
+  (:import javax.swing.UIManager))
 
-(ssw/native!)
+(let [linux? (.startsWith (System/getProperty "os.name") "Linux")]
+  (defn native! []
+    (if linux?
+      nil
+      ;(doseq [info (UIManager/getInstalledLookAndFeels)]
+      ;  (if (= "Nimbus" (.getName info))
+      ;    (UIManager/setLookAndFeel (.getClassName info))))
+      (ssw/native!))))
+
+(native!)
 
 (let [main-panel (ssw/border-panel)
       progress-bar-panel (ssw/border-panel)

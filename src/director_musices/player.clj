@@ -3,14 +3,16 @@
 
 (ns director-musices.player
   (:use [clojure.java.io :only [resource file]])
-  (:require [director-musices.util :as util]
+  (:require (director-musices
+              [global :as global]
+              [util :as util])
             [director-musices.score.glue :as score-glue]
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
   (:import javax.sound.midi.MidiSystem))
 
-(ssw/native!)
+(global/native!)
 
 (def sequencer (atom nil))
 (def transmitter (atom nil))

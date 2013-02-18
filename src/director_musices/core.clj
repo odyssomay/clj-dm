@@ -20,6 +20,7 @@
             ))
 
 (defn director-musices [& args]
+  (global/native!)
   (logging/init)
   (cli/parse-args args)
   (let [arg? (fn [arg] (some #(= % arg) args))
