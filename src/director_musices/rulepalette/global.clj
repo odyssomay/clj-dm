@@ -7,4 +7,4 @@
 (def rulepalettes (atom []))
 (def rulepalette-container (ssw/tabbed-panel))
 
-(def rulepalette-panel (ssw/horizontal-panel :items [p]))
+(def rulepalette-panel (ssw/horizontal-panel))

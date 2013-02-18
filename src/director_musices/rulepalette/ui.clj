@@ -22,14 +22,15 @@
 (def slider-precision 1000)
 
 (defn rules->string [rules]
-  (for [{:keys [name parameterless? enabled? v options]} rules]
-    (str "(" name " "
-         (if parameterless?
-           (if enabled? "T" "F")
-           (str v " " options)
-           )
-         ") \n")
-    ))
+  (apply str
+         (for [{:keys [name parameterless? enabled? v options]} rules]
+           (if enabled?
+             (str "(" name " "
+                  (if (not parameterless?)
+                    (str v " " options)
+                    )
+                  ") ")
+             ))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction]
   (glue/apply-rules (rules->string (map deref (:rules rulepalette)))

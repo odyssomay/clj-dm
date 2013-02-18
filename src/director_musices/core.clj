@@ -38,6 +38,7 @@
                            :divider-location 0.5))
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
+    (rule-ui/init)
     (ssw/show! fr)
     (let [t (util/thread (glue/init-dm))]
       (if (global/get-arg :return-thread)

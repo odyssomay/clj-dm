@@ -2,7 +2,6 @@
   (:require [director-musices.logging :as logging]
             (director-musices.common-lisp
               [glue :as glue])
-            [director-musices.rulepalette.menu :as rulepalette-menu]
             (director-musices.score
               [menu :as score-menu]
               [ui :as score-ui])
@@ -60,6 +59,5 @@
   (ssw/menubar :items 
                [score-menu/file-menu
                 edit-menu
-                rulepalette-menu/rules-menu
                 help-menu
                 ]))
