@@ -57,9 +57,9 @@
      (a-if-score :name "Save Performance As..."
                  :handler choose-and-save-performance)
      (ssw/separator)
-     (ssw/action :name "Import Score From Midifile..."
+     (ssw/action :name "Import Score from Midifile..."
                  :handler choose-and-open-midi)
-     (a-if-score :name "Save Midifile As..."
+     (a-if-score :name "Export Performance to Midifile..."
                  :handler choose-and-save-midi)
      (ssw/separator)
      (ssw/action :name "Quit"
