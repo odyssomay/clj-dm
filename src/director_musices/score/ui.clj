@@ -108,7 +108,7 @@
                              (take (count score-views)
                                    (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
                  )
-    (ssw/config! score-panel :items [(ssw/scrollable p)])
+    (ssw/config! score-panel :items [(ssw/scrollable p :border nil)])
     p))
 
 (defn reload-score-panel [] 
