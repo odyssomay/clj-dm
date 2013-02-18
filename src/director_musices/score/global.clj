@@ -3,7 +3,10 @@
             [seesaw.core :as ssw]))
 
 (def score-loaded? (atom false))
-(def score-filename (atom "C:\\Users\\jff\\Documents\\Mozart-Amaj-newformat.mus"))
+(def score-path (atom ""))
+
+;; This is the only place where score-loaded? is modified!
+(add-watch score-path nil (fn [& _] (reset! score-loaded? true)))
 
 (let [l (ssw/label "No score loaded yet, click here to load one!")
       p (util/centered-component l)]

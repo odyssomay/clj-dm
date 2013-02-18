@@ -102,7 +102,7 @@
                         [(:view sv) "span"]
                         ;(:view sv)
                         ))]
-    (ssw/config! p 
+    (ssw/config! p
                  :items
                  (interleave score-views
                              (take (count score-views)
@@ -122,11 +122,13 @@
 
 (defn load-score-from-path [path]
   (load-new-score-with
-    #(glue/load-active-score-from-file path)))
+    #(glue/load-active-score-from-file path))
+  (reset! global/score-path path))
 
 (defn load-score-from-midi [path]
   (load-new-score-with
-    #(glue/load-active-score-from-midi-file path)))
+    #(glue/load-active-score-from-midi-file path))
+  (reset! global/score-path path))
 
 (defn reload-ui []
-  (load-score-from-path @global/score-filename))
+  (load-score-from-path @global/score-path))
