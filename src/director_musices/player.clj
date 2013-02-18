@@ -2,9 +2,9 @@
 ; https://github.com/odyssomay/simip
 
 (ns director-musices.player
-  (:use [director-musices.common-lisp.glue :only [save-midi-to-path]]
-        [clojure.java.io :only [resource file]])
+  (:use [clojure.java.io :only [resource file]])
   (:require [director-musices.util :as util]
+            [director-musices.score.glue :as score-glue]
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
@@ -250,6 +250,6 @@
 
 (defn update-player []
   (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
-    (save-midi-to-path (.getCanonicalPath f))
+    (score-glue/save-midi-to-path (.getCanonicalPath f))
     (open-midi-file f)))
 
