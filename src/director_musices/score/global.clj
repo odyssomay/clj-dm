@@ -2,6 +2,7 @@
   (:require [director-musices.util :as util]
             [seesaw.core :as ssw]))
 
+(def score-loaded? (atom false))
 (def score-filename (atom "C:\\Users\\jff\\Documents\\Mozart-Amaj-newformat.mus"))
 
 (let [l (ssw/label "No score loaded yet, click here to load one!")
