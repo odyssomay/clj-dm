@@ -173,8 +173,10 @@
                                     (add-rule-at rp-obj 0 (rule-display rp-obj [nm (if np? 'T 0.0)])))))
         ]
     (add-watch rules "panel updater" (fn [_ _ old-items items]
-      (ssw/config! rule-panel :items (concat items [[add-new-rule "span"] [editable? "span"] [syncrule-select "span"] [rule-interaction "span"]]))))
-;                                             [(ssw/horizontal-panel :items [add-new-rule editable? syncrule-select rule-interaction]) "span"]]))))
+      (ssw/config! rule-panel :items (concat items [[add-new-rule "span"]
+                                                    [editable? "span"]
+                                                    [syncrule-select "span"]
+                                                    [rule-interaction "span"]]))))
     (reset! rules (apply concat (map (partial rule-display rp-obj) (:all-rules rulepalette))))
     (ssw/listen editable? :selection (fn [& _] (set-editable rule-panel (.isSelected editable?))))
     (ssw/listen syncrule-select :selection (fn [& _] (let [selection (.getSelectedItem syncrule-select)]
@@ -184,4 +186,41 @@
     (set-editable rule-panel false)
     rp-obj))
 
-(defn reload-ui [])
+;; =====
+;; Loading
+;; =====
+
+(def default-rulepalette
+"(in-package \"DM\")
+(set-dm-var 'all-rules '(
+(HIGH-LOUD 1.0)
+(MELODIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBAMP 1)
+(HARMONIC-CHARGE 1.0 :AMP 1 :DUR 1 :VIBFREQ 1)
+(DURATION-CONTRAST 1.0 :AMP 1 :DUR 1)
+(DOUBLE-DURATION 1.0)
+(PUNCTUATION 1.1 :DUR 1 :DUROFF 1 :MARKPHLEVEL7 NIL)
+(PHRASE-ARCH 1.5 :PHLEVEL 5 :TURN 0.3 :NEXT 1.3 :AMP 2)
+(PHRASE-ARCH 1.5 :PHLEVEL 6 :TURN 2 :AMP 2 :LAST 0.2)
+(NORMALIZE-SL T)
+(NORMALIZE-DR T)
+(FINAL-RITARD 1.0)
+))
+(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")
+
+(defn string->rulepalette [string]
+  (->> (load-string (str "(let [set-dm-var (fn [s content]
+                         [(keyword s) content])
+                         in-package (fn [_] )]
+                         [" string "])"))
+    (remove nil?)
+    (into {})))
+
+(defn path->rulepalette [path]
+  (string->rulepalette (slurp path)))
+
+(defn open-default-rulepalette [& _]
+  (add-rulepalette (assoc (rulepalette-view (string->rulepalette default-rulepalette)) :title "Default")))
+
+(defn reload-ui []
+  (reset! rulepalettes [])
+  (open-default-rulepalette))
