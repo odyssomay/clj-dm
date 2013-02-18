@@ -4,8 +4,12 @@
          :as global]
         [clojure.java.io :only [resource]])
   (:require (director-musices.rulepalette
-              [global :as global])
-            [director-musices.util :as util]
+              [global :as global]
+              [glue :as glue])
+            (director-musices
+              [player :as player]
+              [util :as util])
+            [director-musices.score.ui :as score-ui]
             [seesaw.core :as ssw]
             [seesaw.mig :as ssw-mig])
   )
@@ -133,27 +137,41 @@
 (defn rulepalette-view [rulepalette]
   (let [rules (atom [])
         rule-panel (ssw-mig/mig-panel :constraints ["gap 1 1, novisualpadding" "" ""])
-        option-panel (ssw/vertical-panel :items [(ssw/action :name "apply") (ssw/action :name "apply & play")])
-        outer-panel (ssw/border-panel :center rule-panel :west option-panel)
         editable? (ssw/checkbox :text "editable?")
         syncrule-select (ssw/combobox :model ["melodic-sync" "no-sync" "bar-sync"])
         rule-interaction? (ssw/checkbox :text "rule interaction")
         rule-interaction-c (ssw/text :text 2 :columns 5)
         rule-interaction (ssw/horizontal-panel :items [rule-interaction? rule-interaction-c])
+        apply (fn [& _]
+                (glue/apply-rules
+                  (panel->rules rule-panel)
+                  (.getSelectedItem syncrule-select)
+                  (if (.isSelected rule-interaction?)
+                    (.getText rule-interaction-c)))
+                (score-ui/reload-score-panel)
+                (player/update-player))
+        
+        option-panel (ssw/vertical-panel :items [(ssw/action :name "apply"
+                                                             :handler apply)
+                                                 (ssw/action :name "apply & play"
+                                                             :handler (fn [& _] (apply) (player/start!)))
+                                                 editable?])
+        outer-panel (ssw/border-panel :center rule-panel :west option-panel)
+        
         rp-obj {:syncrule (atom "melodic-sync")
                 :rule-interaction? (atom false)
                 :rule-interaction-c (atom 2)
                 :rules rules
                 :rule-panel rule-panel
-                ;:content (ssw/scrollable rule-panel)
+                ; :content (ssw/scrollable rule-panel)
                 :content (ssw/scrollable outer-panel)
                 }
         add-new-rule (ssw/action 
                        :icon (resource "icons/add.png")
                        :handler (fn [_] 
                                   (when-let [{nm :name np? :no-parameters?} (rule-name-dialog "" false)]
-                                    (add-rule-at rp-obj 0 (rule-display rp-obj [nm (if np? 'T 0.0)]))
-                                    (set-editable rule-panel (.isSelected editable?)))))]
+                                    (add-rule-at rp-obj 0 (rule-display rp-obj [nm (if np? 'T 0.0)])))))
+        ]
     (add-watch rules "panel updater" (fn [_ _ old-items items]
       (ssw/config! rule-panel :items (concat items [[add-new-rule "span"] [editable? "span"] [syncrule-select "span"] [rule-interaction "span"]]))))
 ;                                             [(ssw/horizontal-panel :items [add-new-rule editable? syncrule-select rule-interaction]) "span"]]))))
