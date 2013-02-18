@@ -25,7 +25,7 @@
 (defn choose-and-save-score [& _]
   (if-let [f (util/new-file-dialog)]
     (let [path (.getCanonicalPath f)]
-      ;(.execute (abcl-f "DM" "save-score-fpath") (str->abcl path))
+      (glue/save-score-to-path path)
       )))
 
 (defn choose-and-open-midi [& _]
@@ -35,22 +35,31 @@
                     (ui/load-score-from-midi path)))))
                   
 (defn choose-and-save-midi [& _]
-  )
+  (if-let [f (util/new-file-dialog)]
+    (glue/save-midi-to-path (.getCanonicalPath f))))
+
+(defn a-if-score [& opts]
+  (let [a (apply ssw/action opts)
+        update #(ssw/config! a :enabled? %)]
+    (add-watch global/score-loaded? (gensym)
+               (fn [_ _ _ loaded?] (update loaded?)))
+    (update @global/score-loaded?)
+    a))
 
 (def file-menu
   (ssw/menu
     :text "File"
     :items 
-    [(ssw/action :name "Open Score"
+    [(ssw/action :name "Open Score..."
                  :handler choose-and-open-score)
-     (ssw/action :name "Save Score"
+     (a-if-score :name "Save Score As..."
                  :handler choose-and-save-score)
-     (ssw/action :name "Save Performance"
+     (a-if-score :name "Save Performance As..."
                  :handler choose-and-save-performance)
      (ssw/separator)
-     (ssw/action :name "Import Midifile"
+     (ssw/action :name "Import Score From Midifile..."
                  :handler choose-and-open-midi)
-     (ssw/action :name "Save Midifile"
+     (a-if-score :name "Save Midifile As..."
                  :handler choose-and-save-midi)
      (ssw/separator)
      (ssw/action :name "Quit"
