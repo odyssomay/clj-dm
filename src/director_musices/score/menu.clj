@@ -6,6 +6,8 @@
               [global :as global]
               [glue :as glue]
               [ui :as ui])
+            (director-musices.rulepalette
+              [ui :as rule-ui])
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw])))
@@ -62,6 +64,10 @@
      (a-if-score :name "Export Performance to Midifile..."
                  :handler choose-and-save-midi)
      (ssw/separator)
+     (ssw/action :name "Open Rulepalette..."
+                 :handler rule-ui/choose-and-open-rulepalette)
+     (ssw/action :name "Open Default Rulepalette"
+                 :handler rule-ui/open-default-rulepalette)
      (ssw/action :name "Quit"
                  :handler (fn [&_ ] (System/exit 0)))
      ]))
