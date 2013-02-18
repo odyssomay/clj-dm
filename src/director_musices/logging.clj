@@ -30,7 +30,6 @@
       [:appenders :log-window]
       {:min-level nil :enabled? true :async? false
        :fn (fn [{:keys [level prefix message more]}]
-             (println "appending")
              (let [color (case level
                            :warn "red"
                            :fatal "red"
