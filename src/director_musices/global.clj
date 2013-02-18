@@ -14,8 +14,8 @@
   (ssw/show-card! cp :main)
   
   (defn get-frame [] f)
-  
   (defn get-main-panel [] main-panel)
+  
   (let [max-value 100
         pb (ssw/progress-bar)
         large-label (ssw/label :text "Large")
