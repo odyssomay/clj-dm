@@ -43,9 +43,9 @@
                                       (let [p (read-string raw)]
                                         (glue/eval-dm (str "(rem-all '" p ")"))))))
      (ssw/action :name "Reset Soundlevel"
-                 :handler (fn [& _] (glue/eval-dm "(reset-sound-level)") (score-menu/reload-score-panel)))
+                 :handler (fn [& _] (glue/eval-dm "(reset-sound-level)") (score-ui/reload-score-panel)))
      (ssw/action :name "Rebar"
-                 :handler (fn [& _] (glue/eval-dm "(rebar)") (score-menu/reload-score-panel)))
+                 :handler (fn [& _] (glue/eval-dm "(rebar)") (score-ui/reload-score-panel)))
      ]))
 
 (def help-menu

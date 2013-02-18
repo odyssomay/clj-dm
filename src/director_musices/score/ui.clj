@@ -4,7 +4,10 @@
         [clojure.java.io :only [resource]])
   (:require (director-musices.score
               [draw-score :as draw-score]
+              [global :as global]
               [glue :as glue])
+            (director-musices
+              [player :as player])
             [seesaw.core :as ssw]
             [seesaw.mig :as ssw-mig])
   )
@@ -108,5 +111,22 @@
     (ssw/config! score-panel :items [(ssw/scrollable p)])
     p))
 
-(defn reload-ui [] ;(update-score-panel)
-  )
+(defn reload-score-panel [] 
+  (swap! score-panel-reloader not))
+
+(defn- load-new-score-with [f]
+  (.removeAll global/score-panel)
+  (f)
+  (update-score-panel)
+  (player/update-player))
+
+(defn load-score-from-path [path]
+  (load-new-score-with
+    #(glue/load-active-score-from-file path)))
+
+(defn load-score-from-midi [path]
+  (load-new-score-with
+    #(glue/load-active-score-from-midi-file path)))
+
+(defn reload-ui []
+  (load-score-from-path @global/score-filename))
