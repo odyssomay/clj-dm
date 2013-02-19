@@ -16,7 +16,7 @@
 (let [r-cont-loaded? (atom nil)]
   (defn load-rulepalette-container []
     (when (not @r-cont-loaded?)
-      (ssw/config! global/rulepalette-panel :items [global/rulepalette-container])
+      (ssw/config! (global/get-rulepalette-panel) :items [(global/get-rulepalette-container)])
       (swap! r-cont-loaded? not))))
 
 (def slider-precision 1000)
@@ -126,7 +126,7 @@
       (assoc :path path :name (.getName (file path)))))
 
 (defn add-rulepalette [rulepalette]
-  (.add global/rulepalette-container
+  (.add (global/get-rulepalette-container)
         (:name rulepalette)
         (rulepalette-view rulepalette))
   (load-rulepalette-container))
@@ -167,12 +167,12 @@
         (path->rulepalette (.getCanonicalPath f))))))
 
 ;; =====
-;; Initing
+;; Init
 ;; =====
-
 (defn init []
-  (.removeAll global/rulepalette-container)
-  (ssw/config! global/rulepalette-panel
+  (global/init)
+  (.removeAll (global/get-rulepalette-container))
+  (ssw/config! (global/get-rulepalette-panel)
                :items [(util/start-panel
                          "No rulepalette loaded"
                          [(ssw/action :name "Open default rulepalette"
@@ -180,14 +180,9 @@
                           (ssw/action :name "Open from disk..."
                                       :handler choose-and-open-rulepalette)])]))
 
-(defn reload-ui []
-  (reset! global/rulepalettes [])
-  (open-default-rulepalette))
-
 ;; =====
 ;; Testing
 ;; =====
-
 (def rulepalette-test
   {:path nil
    :name "Default"
@@ -210,7 +205,7 @@
   (let [f (ssw/frame :title "rulepalette test"
                      :content ;(rulepalette-view rulepalette-test)
                      ;(rulepalette-view default-rulepalette)
-                     global/rulepalette-panel
+                     (global/get-rulepalette-panel)
                      :size [700 :by 400])]
     (ssw/show! f)
     ))

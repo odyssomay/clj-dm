@@ -10,9 +10,9 @@
 (defn a-if-score [& opts]
   (let [a (apply ssw/action opts)
         update #(ssw/config! a :enabled? %)]
-    (add-watch global/score-loaded? (gensym)
-               (fn [_ _ _ loaded?] (update loaded?)))
-    (update @global/score-loaded?)
+    (global/on-score-loaded
+      (fn [loaded?] (update loaded?)))
+    (update (global/get-score-loaded?))
     a))
 
 (def file-menu

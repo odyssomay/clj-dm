@@ -2,9 +2,14 @@
   (:require [director-musices.util :as util]
             [seesaw.core :as ssw]))
 
-(def rulepalette-filenames (atom ["Default"]))
+(def ^{:private true} env (atom {}))
 
-(def rulepalettes (atom []))
-(def rulepalette-container (ssw/tabbed-panel))
+(defn get-rulepalettes          [] (:rulepalettes @env))
+(defn get-rulepalette-container [] (:rulepalette-container @env))
+(defn get-rulepalette-panel     [] (:rulepalette-panel @env))
 
-(def rulepalette-panel (ssw/horizontal-panel))
+(defn init []
+  (reset! env
+          {:rulepalettes []
+           :rulepalette-container (ssw/tabbed-panel)
+           :rulepalette-panel (ssw/horizontal-panel)}))

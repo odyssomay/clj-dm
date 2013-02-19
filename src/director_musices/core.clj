@@ -21,9 +21,11 @@
 
 (defn director-musices [& args]
   (global/native!)
-  (global/init)
   (logging/init)
   (cli/parse-args args)
+  (global/init)
+  (rule-ui/init)
+  (score-ui/init)
   (let [arg? (fn [arg] (some #(= % arg) args))
         fr (global/get-frame)]
     (ssw/config! fr
@@ -34,13 +36,11 @@
                  )
     (ssw/config! (global/get-main-panel)
                  :center (ssw/top-bottom-split
-                           score-global/score-panel
-                           rule-global/rulepalette-panel
+                           (score-global/get-score-panel)
+                           (rule-global/get-rulepalette-panel)
                            :divider-location 0.5))
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
-    (rule-ui/init)
-    (score-ui/init)
     (ssw/show! fr)
     (let [t (util/thread (glue/init-dm))]
       (if (global/get-arg :return-thread)

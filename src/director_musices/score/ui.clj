@@ -1,7 +1,5 @@
 (ns director-musices.score.ui
-  (:use (director-musices.score
-          [global :only [score-panel]])
-        [clojure.java.io :only [file resource]])
+  (:use [clojure.java.io :only [file resource]])
   (:require (director-musices.score
               [draw-score :as draw-score]
               [global :as global]
@@ -111,7 +109,7 @@
                              (take (count score-views)
                                    (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
                  )
-    (ssw/config! score-panel :items [(ssw/scrollable p :border nil)])
+    (ssw/config! (global/get-score-panel) :items [(ssw/scrollable p :border nil)])
     p))
 
 (defn reload-score-panel [] 
@@ -122,7 +120,7 @@
 ;; =====
 
 (defn- load-new-score-with [f & [info-text]]
-  (.removeAll global/score-panel)
+  (.removeAll (global/get-score-panel))
   (dm-global/update-progress-bar
     :indeterminate? true
     :large-text "Loading score"
@@ -139,13 +137,13 @@
   (load-new-score-with
     #(glue/load-active-score-from-file path)
     path)
-  (reset! global/score-path path))
+  (global/set-score-path path))
 
 (defn load-score-from-midi [path]
   (load-new-score-with
     #(glue/load-active-score-from-midi-file path)
     path)
-  (reset! global/score-path path))
+  (global/set-score-path path))
 
 ;; =====
 ;; Menu functions
@@ -184,7 +182,8 @@
 ;; =====
 
 (defn init []
-  (ssw/config! global/score-panel :items 
+  (global/init)
+  (ssw/config! (global/get-score-panel) :items 
                [(util/start-panel
                   "No score loaded"
                   [(ssw/action :name "Open test score"
@@ -197,5 +196,5 @@
                    (ssw/action :name "Open from disk..."
                                :handler choose-and-open-score)])]))
 
-(defn reload-ui []
-  (load-score-from-path @global/score-path))
+; (defn reload-ui []
+;   (load-score-from-path @global/score-path))
