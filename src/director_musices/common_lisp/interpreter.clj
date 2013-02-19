@@ -20,7 +20,7 @@
   (defn eval-abcl [s]
     (reset! res nil)
     (.invokeAll thread-pool
-                [(fn [] 
+                [(fn []
                    (reset! res (.eval @interpreter (str "(progn " s ")")))
                    )])
     @res))
