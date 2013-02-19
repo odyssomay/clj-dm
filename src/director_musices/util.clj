@@ -71,3 +71,13 @@
     (.scheduleAtFixedRate 
       (new java.util.Timer)
       task 0 rate)))
+
+(defn start-panel [label-text & items]
+  (let [l (ssw/label :text label-text :h-text-position :left)]
+    (.setAlignmentX l java.awt.Component/CENTER_ALIGNMENT)
+    (.setFont l (.deriveFont (.getFont l) (float 15.0)))
+    (centered-component
+      (ssw/vertical-panel 
+        :items [l [:fill-v 20]
+                (ssw/horizontal-panel
+                  :items items)]))))

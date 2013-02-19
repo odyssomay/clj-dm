@@ -130,5 +130,12 @@
     #(glue/load-active-score-from-midi-file path))
   (reset! global/score-path path))
 
+(defn init []
+  (ssw/config! global/score-panel :items 
+               [(util/start-panel
+                  "No score loaded"
+                  (ssw/action :name "Open test Score")
+                  (ssw/action :name "Open from disk..."))]))
+
 (defn reload-ui []
   (load-score-from-path @global/score-path))

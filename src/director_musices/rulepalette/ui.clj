@@ -170,23 +170,15 @@
 ;; Initing
 ;; =====
 
-(defn start-panel []
-  (let [l (ssw/label :text "No rulepalette loaded" :h-text-position :left)]
-    (.setAlignmentX l java.awt.Component/CENTER_ALIGNMENT)
-    (.setFont l (.deriveFont (.getFont l) (float 15.0)))
-    (util/centered-component
-      (ssw/vertical-panel :items [l
-                                  [:fill-v 20]
-                                  (ssw/horizontal-panel :items [(ssw/action :name "Open Default rulepalette"
-                                                                            :handler open-default-rulepalette) 
-                                                                (ssw/action :name "Open from disk..."
-                                                                            :handler choose-and-open-rulepalette)])])
-      )))
-
 (defn init []
   (.removeAll global/rulepalette-container)
   (ssw/config! global/rulepalette-panel
-               :items [(start-panel)]))
+               :items [(util/start-panel
+                         "No rulepalette loaded"
+                         :items [(ssw/action :name "Open Default rulepalette"
+                                             :handler open-default-rulepalette) 
+                                 (ssw/action :name "Open from disk..."
+                                             :handler choose-and-open-rulepalette)])]))
 
 (defn reload-ui []
   (reset! global/rulepalettes [])
