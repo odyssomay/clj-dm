@@ -2,11 +2,11 @@
   (:require [director-musices.common-lisp.interpreter :as inr]
             [director-musices.common-lisp.glue :as glue]))
 
-(defn load-active-score [string]
-  (glue/eval-dm
-    (str "(in-package :dm)
-          (read-active-score-from-string \"" string "\")
-          (init-music-score)")))
+; The CL function doesn't work
+; (defn load-active-score-from-string [string]
+;   (glue/eval-dm
+;     (str "(read-active-score-from-string \"" string "\")
+;           (init-music-score)")))
 
 (defn load-active-score-from-file [path]
   (glue/eval-dm
