@@ -21,6 +21,7 @@
 
 (defn director-musices [& args]
   (global/native!)
+  (global/init)
   (logging/init)
   (cli/parse-args args)
   (let [arg? (fn [arg] (some #(= % arg) args))
@@ -48,5 +49,6 @@
 
 (defn reload-ui []
   (.join (director-musices "--no-exit" "--return-thread"))
-  (score-ui/reload-ui)
-  (rule-ui/reload-ui))
+  ;(score-ui/reload-ui)
+  ;(rule-ui/reload-ui)
+  )
