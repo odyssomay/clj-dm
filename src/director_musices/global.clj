@@ -8,9 +8,6 @@
   (defn native! []
     (if linux?
       nil
-      ;(doseq [info (UIManager/getInstalledLookAndFeels)]
-      ;  (if (= "Nimbus" (.getName info))
-      ;    (UIManager/setLookAndFeel (.getClassName info))))
       (ssw/native!))))
 
 (native!)
