@@ -1,7 +1,7 @@
 (ns director-musices.score.ui
   (:use (director-musices.score
           [global :only [score-panel]])
-        [clojure.java.io :only [resource]])
+        [clojure.java.io :only [file resource]])
   (:require (director-musices.score
               [draw-score :as draw-score]
               [global :as global]
@@ -174,7 +174,7 @@
     :success-fn (fn [_ f]
                   (let [path (.getCanonicalPath f)]
                     (load-score-from-midi path)))))
-                  
+
 (defn choose-and-save-midi [& _]
   (if-let [f (util/new-file-dialog)]
     (glue/save-midi-to-path (.getCanonicalPath f))))
@@ -188,7 +188,12 @@
                [(util/start-panel
                   "No score loaded"
                   [(ssw/action :name "Open test score"
-                               :handler (fn [_]))
+                               :handler (fn [_]
+                                          (load-new-score-with
+                                            #(let [f (file (util/tmp-dir) "test-score.mus")]
+                                               (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
+                                               (glue/load-active-score-from-file (.getCanonicalPath f)))
+                                            "Mozart-Amaj-newformat.mus")))
                    (ssw/action :name "Open from disk..."
                                :handler choose-and-open-score)])]))
 
