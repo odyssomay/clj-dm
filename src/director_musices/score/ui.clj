@@ -7,6 +7,7 @@
               [global :as global]
               [glue :as glue])
             (director-musices
+              [global :as dm-global]
               [player :as player]
               [util :as util])
             (seesaw
@@ -120,20 +121,30 @@
 ;; Loading
 ;; =====
 
-(defn- load-new-score-with [f]
+(defn- load-new-score-with [f & [info-text]]
   (.removeAll global/score-panel)
-  (f)
-  (update-score-panel)
-  (player/update-player))
+  (dm-global/update-progress-bar
+    :indeterminate? true
+    :large-text "Loading score"
+    :small-text info-text)
+  (dm-global/show-progress-bar)
+  (util/thread
+    (f)
+    (ssw/invoke-now
+      (update-score-panel)
+      (player/update-player)
+      (dm-global/hide-progress-bar))))
 
 (defn load-score-from-path [path]
   (load-new-score-with
-    #(glue/load-active-score-from-file path))
+    #(glue/load-active-score-from-file path)
+    path)
   (reset! global/score-path path))
 
 (defn load-score-from-midi [path]
   (load-new-score-with
-    #(glue/load-active-score-from-midi-file path))
+    #(glue/load-active-score-from-midi-file path)
+    path)
   (reset! global/score-path path))
 
 ;; =====
