@@ -52,6 +52,16 @@
     ))
 
 ;; =====
+;; Error
+;; =====
+
+(let [error-env (atom {})]
+  (defn configure-error [& args])
+  
+  (defn init-error []
+    (reset! error-env {})))
+
+;; =====
 ;; Init
 ;; =====
 (defn init []
@@ -75,7 +85,8 @@
 
 (defn show-progress-bar [] (ssw/show-card! (:card-panel @env) :progress-bar))
 (defn hide-progress-bar [] (ssw/show-card! (:card-panel @env) :main))
-  
+
+(defn show-error [& opts] (ssw/show-card! (:card-panel @env) :error))
 
 (let [arg-map (atom nil)]
   (defn set-arg-map [as] (reset! arg-map as))
