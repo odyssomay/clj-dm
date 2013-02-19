@@ -175,10 +175,10 @@
   (ssw/config! global/rulepalette-panel
                :items [(util/start-panel
                          "No rulepalette loaded"
-                         :items [(ssw/action :name "Open Default rulepalette"
-                                             :handler open-default-rulepalette) 
-                                 (ssw/action :name "Open from disk..."
-                                             :handler choose-and-open-rulepalette)])]))
+                         [(ssw/action :name "Open default rulepalette"
+                                      :handler open-default-rulepalette) 
+                          (ssw/action :name "Open from disk..."
+                                      :handler choose-and-open-rulepalette)])]))
 
 (defn reload-ui []
   (reset! global/rulepalettes [])

@@ -32,7 +32,6 @@
                  :on-close (if (global/get-arg :exit) :exit :hide)
                  )
     (ssw/config! (global/get-main-panel)
-                 :north player/player-panel
                  :center (ssw/top-bottom-split
                            score-global/score-panel
                            rule-global/rulepalette-panel
@@ -40,6 +39,7 @@
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
     (rule-ui/init)
+    (score-ui/init)
     (ssw/show! fr)
     (let [t (util/thread (glue/init-dm))]
       (if (global/get-arg :return-thread)

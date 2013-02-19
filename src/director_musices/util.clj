@@ -72,7 +72,7 @@
       (new java.util.Timer)
       task 0 rate)))
 
-(defn start-panel [label-text & items]
+(defn start-panel [label-text items]
   (let [l (ssw/label :text label-text :h-text-position :left)]
     (.setAlignmentX l java.awt.Component/CENTER_ALIGNMENT)
     (.setFont l (.deriveFont (.getFont l) (float 15.0)))

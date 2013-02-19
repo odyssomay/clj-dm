@@ -7,10 +7,12 @@
               [global :as global]
               [glue :as glue])
             (director-musices
-              [player :as player])
-            [seesaw.core :as ssw]
-            [seesaw.mig :as ssw-mig])
-  )
+              [player :as player]
+              [util :as util])
+            (seesaw
+              [chooser :as ssw-chooser]
+              [core :as ssw]
+              [mig :as ssw-mig])))
 
 (defn convert-track [track]
   (for [{:keys [dr ndr n] :as note} track]
@@ -114,6 +116,10 @@
 (defn reload-score-panel [] 
   (swap! score-panel-reloader not))
 
+;; =====
+;; Loading
+;; =====
+
 (defn- load-new-score-with [f]
   (.removeAll global/score-panel)
   (f)
@@ -130,12 +136,50 @@
     #(glue/load-active-score-from-midi-file path))
   (reset! global/score-path path))
 
+;; =====
+;; Menu functions
+;; =====
+
+(defn choose-and-open-score [& _]
+  (ssw-chooser/choose-file
+    :success-fn 
+    (fn [_ f]
+      (let [path (.getCanonicalPath f)]
+        (load-score-from-path path)
+        ))))
+
+(defn choose-and-save-performance [& _]
+  (if-let [f (util/new-file-dialog)]
+    (spit f (glue/get-active-score))))
+
+(defn choose-and-save-score [& _]
+  (if-let [f (util/new-file-dialog)]
+    (let [path (.getCanonicalPath f)]
+      (glue/save-score-to-path path)
+      )))
+
+(defn choose-and-open-midi [& _]
+  (ssw-chooser/choose-file
+    :success-fn (fn [_ f]
+                  (let [path (.getCanonicalPath f)]
+                    (load-score-from-midi path)))))
+                  
+(defn choose-and-save-midi [& _]
+  (if-let [f (util/new-file-dialog)]
+    (glue/save-midi-to-path (.getCanonicalPath f))))
+
+;; =====
+;; Init
+;; =====
+
 (defn init []
   (ssw/config! global/score-panel :items 
                [(util/start-panel
                   "No score loaded"
-                  (ssw/action :name "Open test Score")
-                  (ssw/action :name "Open from disk..."))]))
+                  [(ssw/action :name "Open test score"
+                               :handler (fn [_]))
+                   (ssw/action :name "Open from disk..."
+                               :handler choose-and-open-score)])]))
 
 (defn reload-ui []
   (load-score-from-path @global/score-path))
