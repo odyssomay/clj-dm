@@ -66,13 +66,13 @@
                            (ssw/action :name "Restart")])))
   
   (defn init-error []
-    (let [error-title (ssw/label "An error occured :(")
+    (let [error-title (ssw/label ":(")
           error-text (ssw/label "An error occured.")
           button-panel (ssw/horizontal-panel)
           content (ssw-mig/mig-panel :items [[error-title "wrap, gaptop 50, gapbottom 5"]
                                              [error-text "wrap, gapbottom 20"]
                                              [button-panel "wrap"]])]
-      (.setFont error-title (.deriveFont (.getFont error-title) (float 15)))
+      (.setFont error-title (.deriveFont (.getFont error-title) (float 20)))
       (ssw/config! (:error-panel @env)
                    :center (ssw/horizontal-panel
                              :items [:fill-h content :fill-h]))
