@@ -6,6 +6,11 @@
             [clojure.string :as clj-str]
             [taoensso.timbre :as log]))
 
+(defn abcl-error [e]
+  (global/configure-error
+    :text "The backend crashed unexpectedly!")
+  (global/show-error))
+
 (def interpreter
   (future
     (do (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
@@ -16,14 +21,24 @@
 (defn repl [] (.start (Thread. (fn [] (.run @interpreter)))))
 
 (let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)
-      res (atom nil)]
+      res (atom nil)
+      error (atom false)]
   (defn eval-abcl [s]
     (reset! res nil)
-    (.invokeAll thread-pool
-                [(fn []
-                   (reset! res (.eval @interpreter (str "(progn " s ")")))
-                   )])
-    @res))
+    (reset! error nil)
+    (.invokeAll
+      thread-pool
+      [(fn []
+         (try
+           (reset! res (.eval @interpreter 
+                              (str "(let ((*debugger-hook*
+                                            #'sys::%debugger-hook-function)) (/ 1 0)"
+                                            s ")")))
+           (catch Throwable e
+             (reset! error e)
+             (abcl-error e)))
+         )])
+    (if @error (throw @error) @res)))
 
 (declare abcl-path)
 (defn load-abcl [path & [{:keys [base-dir no-reload] :as opts}]]
