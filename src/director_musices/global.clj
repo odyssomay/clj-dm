@@ -1,7 +1,8 @@
 (ns director-musices.global
   (:require [taoensso.timbre :as log]
-            [seesaw.core :as ssw]
-            seesaw.mig)
+            (seesaw
+              [core :as ssw]
+              [mig :as ssw-mig]))
   (:import javax.swing.UIManager))
 
 (let [linux? (.startsWith (System/getProperty "os.name") "Linux")]
@@ -56,10 +57,28 @@
 ;; =====
 
 (let [error-env (atom {})]
-  (defn configure-error [& args])
+  (defn configure-error [& args]
+    (let [{:keys [text]} args
+          {:keys [error-text button-panel]} @error-env]
+      (if text (ssw/config! error-text :text text))
+      (ssw/config! button-panel
+                   :items [(ssw/action :name "Ignore")
+                           (ssw/action :name "Restart")])))
   
   (defn init-error []
-    (reset! error-env {})))
+    (let [error-title (ssw/label "An error occured :(")
+          error-text (ssw/label "An error occured.")
+          button-panel (ssw/horizontal-panel)
+          content (ssw-mig/mig-panel :items [[error-title "wrap, gaptop 50, gapbottom 5"]
+                                             [error-text "wrap, gapbottom 20"]
+                                             [button-panel "wrap"]])]
+      (.setFont error-title (.deriveFont (.getFont error-title) (float 15)))
+      (ssw/config! (:error-panel @env)
+                   :center (ssw/horizontal-panel
+                             :items [:fill-h content :fill-h]))
+      (reset! error-env
+              {:error-text error-text
+               :button-panel button-panel}))))
 
 ;; =====
 ;; Init
@@ -67,17 +86,21 @@
 (defn init []
   (let [main-panel (ssw/border-panel)
         progress-bar-panel (ssw/border-panel)
+        error-panel (ssw/border-panel)
         cp (ssw/card-panel :items [[main-panel :main]
-                                   [progress-bar-panel :progress-bar]])
+                                   [progress-bar-panel :progress-bar]
+                                   [error-panel :error]])
         f (ssw/frame :content cp)]
     (ssw/show-card! cp :main)
     
     (reset! env
             {:main-panel main-panel
              :progress-bar-panel progress-bar-panel
+             :error-panel error-panel
              :card-panel cp
              :frame f})
     (init-progress-bar)
+    (init-error)
     ))
 
 (defn get-frame      [] (:frame @env))
@@ -86,7 +109,7 @@
 (defn show-progress-bar [] (ssw/show-card! (:card-panel @env) :progress-bar))
 (defn hide-progress-bar [] (ssw/show-card! (:card-panel @env) :main))
 
-(defn show-error [& opts] (ssw/show-card! (:card-panel @env) :error))
+(defn show-error [] (ssw/show-card! (:card-panel @env) :error))
 
 (let [arg-map (atom nil)]
   (defn set-arg-map [as] (reset! arg-map as))
