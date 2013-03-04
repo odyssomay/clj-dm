@@ -1,9 +1,10 @@
 (ns director-musices.score.ui
   (:use [clojure.java.io :only [file resource]])
   (:require (director-musices.score
-              [draw-score :as draw-score]
               [global :as global]
               [glue :as glue])
+            (director-musices.score.draw
+              [score :as draw-score])
             (director-musices
               [global :as dm-global]
               [player :as player]
@@ -63,19 +64,19 @@
                                            (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
                                                                   :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
     (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id)))
-    (ssw/listen graph-label :mouse-clicked
-                (fn [_]
-                  (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
-                    (let [c (draw-score/score-graph-component choice sc :height 150)
-                          remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
-                      (ssw/listen remove-label :mouse-clicked
-                                  (fn [_] 
-                                    (.remove view remove-label)
-                                    (.remove view c)
-                                    (.revalidate view)))
-                      (.add view remove-label)
-                      (.add view c "span")
-                      (.revalidate view)))))
+    ; (ssw/listen graph-label :mouse-clicked
+    ;             (fn [_]
+    ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
+    ;                 (let [c (draw-score/score-graph-component choice sc :height 150)
+    ;                       remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
+    ;                   (ssw/listen remove-label :mouse-clicked
+    ;                               (fn [_] 
+    ;                                 (.remove view remove-label)
+    ;                                 (.remove view c)
+    ;                                 (.revalidate view)))
+    ;                   (.add view remove-label)
+    ;                   (.add view c "span")
+    ;                   (.revalidate view)))))
     (ssw/config! view :items [[(ssw/vertical-panel :items [options-label graph-label])]
                               [sc "span"]])
     (add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
