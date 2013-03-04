@@ -95,7 +95,8 @@
 
 (defn set-hollow [g note]
   (when (:hollow? note)
-    (.setComposite g (java.awt.AlphaComposite/getInstance java.awt.AlphaComposite/SRC_OVER 0.5))))
+    (.setComposite g (java.awt.AlphaComposite/getInstance
+                       java.awt.AlphaComposite/SRC_OVER 0.5))))
 
 (defn draw-note [g note {:keys [scale] :as options}]
   (let [img
