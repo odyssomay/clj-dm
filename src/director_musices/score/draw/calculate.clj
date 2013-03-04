@@ -51,10 +51,15 @@
             ))
       add-absolute-lengths))
 
-(defn calculate-track [track]
-  
-  )
+(defn add-track-width [track]
+  (let [notes (:notes track)
+        ln (last notes)]
+    (assoc track :width (+ (:absolute-x-offset ln) (:length ln)))))
 
+(defn calculate-track [track]
+  (-> track
+      (update-in [:notes] calculate-notes)
+      add-track-width))
 
 ;; =====
 ;; Testing
@@ -98,6 +103,8 @@
 
 (use 'clojure.pprint)
 (defn test-run []
-  (let [notes (calculate-notes test-notes)]
-    (pprint notes)
+  (let [notes (calculate-notes test-notes)
+        track (calculate-track test-track)]
+    ;(pprint notes)
+    (pprint (update-in track [:notes] #(take 5 %)))
     ))
