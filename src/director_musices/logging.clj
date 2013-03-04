@@ -46,6 +46,17 @@
                               prefix " - " message " " more ; <- note: (str) is applied to 'more'
                               ))))})))
 
+(defn override-exception-handler [& [print-to-err?]]
+  (let [old-handler (Thread/getDefaultUncaughtExceptionHandler)
+        new-handler (reify Thread$UncaughtExceptionHandler
+                      (uncaughtException [this thread e]
+                                         ;(when print-to-err?
+                                         (.uncaughtException old-handler thread e);)
+                                         ;(global/configure-error :text (str "Error: " e))
+                                         (log/error "BLABLA")
+                                         ))]
+    (Thread/setDefaultUncaughtExceptionHandler new-handler)))
+
 (defn init []
   (init-cl-log-config)
   (init-log-frame))
