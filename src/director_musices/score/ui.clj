@@ -38,11 +38,14 @@
       ssw/show!)
     ))
 
+(defn track-options-view [id]
+  "hello"
+  )
+
 (defn score-view [id]
-  (let [view (ssw-mig/mig-panel)
+  (let [opts-view (track-options-view id)
         sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        options-label (ssw/label :icon (resource "icons/gear_small.png"))
-        graph-label   (ssw/label :icon (resource "icons/stats_small.png"))
+        view (ssw-mig/mig-panel :items [[opts-view] [sc]])
         ]
     ; (ssw/listen sc 
     ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
@@ -52,7 +55,6 @@
     ;                                                         :multi-line? true)]
     ;                                        (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
     ;                                                               :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
-    (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id)))
     ; (ssw/listen graph-label :mouse-clicked
     ;             (fn [_]
     ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
@@ -66,12 +68,10 @@
     ;                   (.add view remove-label)
     ;                   (.add view c "span")
     ;                   (.revalidate view)))))
-    (ssw/config! view :items [[(ssw/vertical-panel :items [options-label graph-label])]
-                              [sc "span"]])
     ;(add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
     {:score-component sc 
-     :view sc
-     ;:view view
+     ;:view sc
+     :view view
      }))
 
 (defn update-score-panel []
