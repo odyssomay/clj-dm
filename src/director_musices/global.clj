@@ -17,6 +17,8 @@
 (def pb-env (atom {}))
 (def max-value 100)
 
+(defn- show-card [card] (ssw/show-card! (:card-panel @env) card))
+
 ;; =====
 ;; Progress bar
 ;; =====
@@ -106,10 +108,10 @@
 (defn get-frame      [] (:frame @env))
 (defn get-main-panel [] (:main-panel @env))
 
-(defn show-progress-bar [] (ssw/show-card! (:card-panel @env) :progress-bar))
-(defn hide-progress-bar [] (ssw/show-card! (:card-panel @env) :main))
+(defn show-progress-bar [] (show-card :progress-bar))
+(defn hide-progress-bar [] (show-card :main))
 
-(defn show-error [] (ssw/show-card! (:card-panel @env) :error))
+(defn show-error [] (show-card :error))
 
 (let [arg-map (atom nil)]
   (defn set-arg-map [as] (reset! arg-map as))
