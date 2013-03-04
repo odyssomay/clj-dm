@@ -4,12 +4,13 @@
               [global :as global]
               [util :as util])
             [clojure.string :as clj-str]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [seesaw.core :as ssw]))
 
 (defn abcl-error [e]
-  (global/configure-error
-    :text "The back end crashed.")
-  (global/show-error))
+  (global/show-error
+    :text "The back end crashed."
+    :buttons [(ssw/action :name "Restart")]))
 
 (def interpreter
   (future
