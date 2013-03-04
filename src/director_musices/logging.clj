@@ -38,7 +38,7 @@
                            "purple")
                    bold? (#{:fatal :error} level)]
                (append (apply str
-                              "<span style='color:"
+                              "<pre style='font-family: monospace; color:"
                               color
                               "; font-weight:" 
                               (if bold? "bold" "normal")
