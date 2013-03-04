@@ -4,7 +4,7 @@
               [global :as global]
               [glue :as glue])
             (director-musices.score.draw
-              [score :as draw-score])
+              [track :as draw-score])
             (director-musices
               [global :as dm-global]
               [player :as player]
@@ -51,7 +51,7 @@
 (defn score-view [id]
   (let [view (ssw-mig/mig-panel)
         sc (draw-score/score-component 
-             (convert-track (glue/get-track id)) :clef \G )
+             (convert-track (glue/get-track id)) :clef \G :scale-x 0.2 )
         options-label (ssw/label :icon (resource "icons/gear_small.png"))
         graph-label   (ssw/label :icon (resource "icons/stats_small.png"))
         ]
