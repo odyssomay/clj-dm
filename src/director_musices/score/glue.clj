@@ -61,10 +61,11 @@
     (.replaceAll raw "," "")))
 
 (defn get-track [track-index]
-  (let [raw (glue/eval-dm (str "(get-filtered-track " track-index ")"))]
-    (->> raw
-         .copyToArray
-         (map segment->map))))
+  (let [raw (glue/eval-dm (str "(get-filtered-track " track-index ")"))
+        notes (->> raw
+                   .copyToArray
+                   (map segment->map))]
+    {:clef \G :notes notes}))
 
 (defn get-segment [track-index segment-index]
   (nth (get-track track-index) segment-index nil))

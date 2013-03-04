@@ -4,7 +4,7 @@
               [global :as global]
               [glue :as glue])
             (director-musices.score.draw
-              [track :as draw-score])
+              [track :as draw-track])
             (director-musices
               [global :as dm-global]
               [player :as player]
@@ -13,16 +13,6 @@
               [chooser :as ssw-chooser]
               [core :as ssw]
               [mig :as ssw-mig])))
-
-(defn convert-track [track]
-  (for [{:keys [dr ndr n] :as note} track]
-    (assoc
-      (if n
-        (assoc note :pitch (first n)
-          :length dr
-          :nlength (second n)) ; (* 4 (second n)))
-        note)
-      :dr/ndr (- (/ dr ndr) 1))))
 
 (def score-panel-reloader (atom nil))
 
@@ -50,19 +40,18 @@
 
 (defn score-view [id]
   (let [view (ssw-mig/mig-panel)
-        sc (draw-score/score-component 
-             (convert-track (glue/get-track id)) :clef \G :scale-x 0.2 )
+        sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         options-label (ssw/label :icon (resource "icons/gear_small.png"))
         graph-label   (ssw/label :icon (resource "icons/stats_small.png"))
         ]
-    (ssw/listen sc 
-                :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
-                                               ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
-                                                                                              ", " "\n")
-                                                                    (clojure.string/replace #"\{|\}" ""))
-                                                            :multi-line? true)]
-                                           (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                                                                  :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
+    ; (ssw/listen sc 
+    ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
+    ;                                            ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
+    ;                                                                                           ", " "\n")
+    ;                                                                 (clojure.string/replace #"\{|\}" ""))
+    ;                                                         :multi-line? true)]
+    ;                                        (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+    ;                                                               :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
     (ssw/listen options-label :mouse-clicked (fn [_] (track-options-dialog id)))
     ; (ssw/listen graph-label :mouse-clicked
     ;             (fn [_]
@@ -79,7 +68,7 @@
     ;                   (.revalidate view)))))
     (ssw/config! view :items [[(ssw/vertical-panel :items [options-label graph-label])]
                               [sc "span"]])
-    (add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
+    ;(add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
     {:score-component sc 
      :view sc
      ;:view view

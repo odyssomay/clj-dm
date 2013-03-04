@@ -151,9 +151,9 @@
              (+ (:absolute-x-offset ln)
                 (:length ln)))))))
 
-(defn score-component [notes & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
-  (let [options-atom (atom (merge {:scale 1 :scale-x 1 :default-distance 1/8
-                                   :notes (calc/calculate-notes notes)} opts))
+(defn track-component [track & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
+  (let [options-atom (atom (merge {:scale 1 :scale-x 1
+                                   :notes (calc/calculate-notes (:notes track))} opts))
         get-notes #(:notes @options-atom)
         get-heights (fn [] (remove nil? (map #(if (:pitch %)
                                                   (:y-offset %)) (get-notes))))
