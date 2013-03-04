@@ -39,13 +39,17 @@
     ))
 
 (defn track-options-view [id]
-  "hello"
+  (ssw-mig/mig-panel :items [[(str "Track " id)]]
+                     :background "green"
+                     :size [100 :by 150]
+                     :background "#DDD")
   )
 
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        view (ssw-mig/mig-panel :items [[opts-view] [sc]])
+        view (ssw-mig/mig-panel :items [[opts-view] ["hello"] [sc]]
+                                :constraints ["insets 0" "" ""])
         ]
     ; (ssw/listen sc 
     ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
@@ -78,7 +82,7 @@
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
-        p (ssw-mig/mig-panel)
+        p (ssw-mig/mig-panel :constraints ["insets 0"])
         score-views (for [i (range (glue/get-track-count))]
                       (let [sv (score-view i)
                             sc (:score-component sv)
