@@ -18,8 +18,6 @@
         (org.armedbear.lisp.Interpreter/createInstance)
         (org.armedbear.lisp.Interpreter/getInstance))))
 
-(defn repl [] (.start (Thread. (fn [] (.run @interpreter)))))
-
 (let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)
       res (atom nil)
       error (atom false)]
@@ -38,7 +36,11 @@
              (reset! error e)
              (abcl-error e)))
          )])
-    (if @error (throw @error) @res)))
+    (if @error (throw @error) @res))
+  
+  (defn repl []
+    (.start (Thread. (fn [] (.invokeAll thread-pool 
+                                        [#(.run @interpreter)]))))))
 
 (declare abcl-path)
 (defn load-abcl [path & [{:keys [base-dir no-reload] :as opts}]]
