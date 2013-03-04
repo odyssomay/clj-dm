@@ -8,7 +8,7 @@
 
 (defn abcl-error [e]
   (global/configure-error
-    :text "The back end crashed unexpectedly.")
+    :text "The back end crashed.")
   (global/show-error))
 
 (def interpreter
