@@ -6,7 +6,7 @@
 (def text-area (javax.swing.JTextPane.))
 (def log-frame (ssw/frame :title "Director-musices log"
                           :content (ssw/scrollable text-area)
-                          :size [500 :by 300]))
+                          :size [600 :by 400]))
 
 (defn init-cl-log-config []
   (log/set-config!
