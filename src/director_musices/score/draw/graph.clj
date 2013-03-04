@@ -1,6 +1,5 @@
 (ns director-musices.score.draw.graph)
 
-
 ; (defprotocol scoreGraphProperties
 ;   (setHeight [this height] )
 ;   (setTitle [this title]))
@@ -8,12 +7,12 @@
 ; (defn draw-note-property-graph [g notes property scale-y {:keys [scale-x] :or {scale-x 1} :as options}]
 ;   (let [gcx (.create g)]
 ;     (doseq [i (range (count notes))]
-;       (.translate gcx (double (* (:x-offset i notes) scale-x)) (double 0))
 ;       (let [note (nth notes i)
 ;             note+1 (nth notes (inc i) nil)
 ;             y (* scale-y (- (get note property 0)))
 ;             ]
-;           (.fillOval gcx -2 (- y 2) 4 4)
+;         (.translate gcx (double (* (:x-offset note) scale-x)) (double 0))
+;         (.fillOval gcx -2 (- y 2) 4 4)
 ;         (when note+1
 ;           (let [y (* scale-y (- (get note property 0)))]
 ;             (.drawLine gcx 
