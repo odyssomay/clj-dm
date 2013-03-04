@@ -59,13 +59,16 @@
 ;; =====
 
 (let [error-env (atom {})]
-  (defn configure-error [& args]
-    (let [{:keys [text]} args
+  (defn show-error [& args]
+    (let [{:keys [text buttons]} args
           {:keys [error-text button-panel]} @error-env]
       (if text (ssw/config! error-text :text text))
       (ssw/config! button-panel
-                   :items [(ssw/action :name "Ignore")
-                           (ssw/action :name "Restart")])))
+                   :items (concat [(ssw/action :name "Ignore"
+                                               :handler (fn [_] (show-card :main)))]
+                                  buttons)
+                   ))
+    (show-card :error))
   
   (defn init-error []
     (let [error-title (ssw/label ":(")
@@ -110,8 +113,6 @@
 
 (defn show-progress-bar [] (show-card :progress-bar))
 (defn hide-progress-bar [] (show-card :main))
-
-(defn show-error [] (show-card :error))
 
 (let [arg-map (atom nil)]
   (defn set-arg-map [as] (reset! arg-map as))
