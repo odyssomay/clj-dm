@@ -13,7 +13,6 @@
           ["--watch" "Watch common-lisp files for changes and automatically reload them on change."
            :default false :flag true]
           ["--exit" "Exit after window has closed." :default true :flag true]
-          ["--return-thread" "Returns a startup thread." :default false :flag true]
           ["--cl-repl" "Starts a common-lisp repl. Note that the repl will be started on the command line." 
            :default false :flag true]
           )]

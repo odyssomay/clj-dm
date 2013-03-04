@@ -42,13 +42,7 @@
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
     (ssw/show! fr)
-    (let [t (util/thread (glue/init-dm))]
-      (if (global/get-arg :return-thread)
-        t
-        nil))))
+    (util/thread (glue/init-dm))
+    ))
 
-(defn reload-ui []
-  (.join (director-musices "--no-exit" "--return-thread"))
-  ;(score-ui/reload-ui)
-  ;(rule-ui/reload-ui)
-  )
+(defn reload-ui [] (director-musices "--no-exit"))
