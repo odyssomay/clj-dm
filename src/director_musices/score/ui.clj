@@ -49,7 +49,8 @@
   (let [opts-view (track-options-view id)
         sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         view (ssw-mig/mig-panel :items [[opts-view] [sc]]
-                                :constraints ["insets 0, gap 0" "" ""])
+                                :constraints ["insets 0, gap 0" "" ""]
+                                :background "white")
         ]
     ; (ssw/listen sc 
     ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
