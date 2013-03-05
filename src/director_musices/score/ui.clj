@@ -48,8 +48,8 @@
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        view (ssw-mig/mig-panel :items [[opts-view] ["hello"] [sc]]
-                                :constraints ["insets 0" "" ""])
+        view (ssw-mig/mig-panel :items [[opts-view] [sc]]
+                                :constraints ["insets 0, gap 0" "" ""])
         ]
     ; (ssw/listen sc 
     ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
@@ -82,7 +82,8 @@
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
-        p (ssw-mig/mig-panel :constraints ["insets 0"])
+        p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
+        s-p (ssw/scrollable p :border nil)
         score-views (for [i (range (glue/get-track-count))]
                       (let [sv (score-view i)
                             sc (:score-component sv)
@@ -103,7 +104,8 @@
                              (take (count score-views)
                                    (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
                  )
-    (ssw/config! (global/get-score-panel) :items [(ssw/scrollable p :border nil)])
+    (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
+    (ssw/config! (global/get-score-panel) :items [s-p])
     p))
 
 (defn reload-score-panel [] 
