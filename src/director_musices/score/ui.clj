@@ -4,6 +4,7 @@
               [global :as global]
               [glue :as glue])
             (director-musices.score.draw
+              [graph :as draw-graph]
               [track :as draw-track])
             (director-musices
               [global :as dm-global]
@@ -58,7 +59,10 @@
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        view (ssw-mig/mig-panel :items [[opts-view] [(draw-track/get-view tc)]]
+        gc (draw-graph/graph-component tc :length)
+        view (ssw-mig/mig-panel :items [[opts-view] [(draw-track/get-view tc) "wrap"]
+                                        [""] [(draw-graph/get-view gc)]
+                                        ]
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
         ]
