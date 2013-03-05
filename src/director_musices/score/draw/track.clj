@@ -1,20 +1,9 @@
 (ns director-musices.score.draw.track
   (:use [clojure.java.io :only [resource]])
-  (:require (director-musices.score.draw
-              [calculate :as calc]
-              interfaces)
+  (:require [director-musices.score.draw.calculate :as calc]
             [taoensso.timbre :as log]
             [seesaw [core :as ssw]
                     [graphics :as ssw-graphics]]))
-
-(defn abs [x] (if (< x 0) (- x ) x))
-
-(defn get-note-for-x [x sc] 
-  (let [options @(.getOptionsAtom sc)
-        x (* (/ 1 (* (:scale options) (:scale-x options)))
-             (- x (+ (if (:clef options) 35 0) 10)))
-        note-distances (reductions + (concat [0] (map :x-offset (:notes options))))]
-    (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
 
 (def line-separation calc/line-separation)
 
@@ -72,14 +61,16 @@
       (.drawOval g 14 3 1.5 1.5))))
 
 (defn draw-note-help-lines [g height]
-  (let [upper? (< height 0)
+  (let [gc (.create g)
+        upper? (< height 0)
         lower? (> height 8)]
+    (.setColor gc java.awt.Color/black)
     (if (or upper? lower?)
       (doseq [h (range (if upper? 2 10)  
                        (+ (java.lang.Math/abs height) (if lower? 2 0)) 
                        2)]
         (let [y (* h (/ line-separation 2) (if upper? -1 1))]
-          (.drawLine g -1.5 y 9 y))))))
+          (.drawLine gc -1.5 y 9 y))))))
 
 (defn set-hollow [g note]
   (when (:hollow? note)
@@ -103,12 +94,12 @@
       (let [height (:height note)]
         (let [gc (.create g)
               y-offset (:y-offset note)]
+          (set-hollow gc note)
           (draw-note-help-lines gc height)
           (.translate gc (double 0) (double y-offset))
           (draw-accidental gc note)
           (draw-dots gc note)
           (transform-for-note gc note options)
-          (set-hollow gc note)
           (draw-svg gc (str "score/" img ".svg")))))))
 
 (defn draw-notes [g notes {:keys [scale-x] :as options}]
@@ -132,6 +123,25 @@
              (.translate gc 0 -7)
              (draw-svg gc "score/gclef.svg")))))
 
+(defn get-track-component-width [{:keys [track scale scale-x clef]}]
+  (* scale
+     (+ (if clef 35 0) 10
+        (* scale-x
+           (let [ln (last (calc/get-notes track))]
+             (+ (:absolute-x-offset ln)
+                (:length ln)))))))
+
+(defn get-track-component-height [{:keys [track scale] :as state}]
+  (* scale (calc/get-height track)))
+
+(defn draw-lines [track g]
+  (let [width (calc/get-width track)
+        gc (.create g)]
+    (.setColor gc java.awt.Color/gray)
+    (doseq [line (range 5)]
+      (let [y (* line-separation line)]
+        (.drawLine gc 0 y width y)))))
+
 (defn highlight-note [g note {:keys [track scale-x scale] :as state}]
   (let [gc (.create g)]
     (ssw-graphics/anti-alias gc)
@@ -154,24 +164,17 @@
     (.drawLine gc 0 0 0 (* 4 line-separation))
     ))
 
-(defn get-track-component-width [{:keys [track scale scale-x clef]}]
-  (* scale
-     (+ (if clef 35 0) 10
-        (* scale-x
-           (let [ln (last (calc/get-notes track))]
-             (+ (:absolute-x-offset ln)
-                (:length ln)))))))
-
-(defn get-track-component-height [{:keys [track scale] :as state}]
-  (* scale (calc/get-height track)))
-
-(defn draw-lines [track g]
-  (let [width (calc/get-width track)
-        gc (.create g)]
-    (.setColor gc java.awt.Color/gray)
-    (doseq [line (range 5)]
-      (let [y (* line-separation line)]
-        (.drawLine gc 0 y width y)))))
+(defn draw-line-indicator [g state]
+  (if-let [position (:position-indicator state)]
+    (let [gc (.create g)]
+      (.translate gc 45.0 0.0)
+      (.setColor gc java.awt.Color/red)
+      (.translate gc 
+                  (double (* (- (get-track-component-width state) 45)
+                     position))
+                  (double 0))
+      (.drawLine gc 0 0 0 (get-track-component-height state))
+      )))
 
 (defn paint [g state]
   (let [gc (.create g)
@@ -206,6 +209,7 @@
 
 (defn track-component [track & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
   (let [state (atom (merge {:scale 1 :scale-x 1
+                            :position-indicator nil
                             :track (calc/calculate-track track)}
                            opts))
         image-atom (atom (create-image @state))
@@ -214,8 +218,10 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
-              (highlight-note g (nth (calc/get-notes (get-track)) 3)
-                              @state))
+              ;(highlight-note g (nth (calc/get-notes (get-track)) 3)
+              ;                @state)
+              ;(draw-line-indicator g @state)
+              )
             (getPreferredSize []
               (let [t (get-track)]
                 (java.awt.Dimension.
@@ -230,16 +236,23 @@
      :state state}))
 
 ;; =====
-;;
+;; API
 ;; =====
 (defn set-scale-x [component-m scale-x]
   (swap! (:state component-m) assoc :scale-x scale-x))
-
 (defn get-scale-x [component-m] (:scale-x @(:state component-m)))
-
 (defn set-scale [component-m scale]
   (swap! (:state component-m) assoc :scale scale))
-
 (defn get-scale [component-m] (:scale @(:state component-m)))
-
 (defn get-view [component-m] (:view component-m))
+(defn set-position-indicator [component-m position]
+  (swap! (:state component-m) assoc :position-indicator position))
+
+(defn abs [x] (if (< x 0) (- x ) x))
+
+(defn get-note-for-x [component-m x]
+  (let [{:keys [track scale scale-x]} @(:state component-m)
+        x (* (/ 1 (* scale scale-x))
+             (- x (+ (if (:clef track) 35 0) 10)))
+        note-distances (map :absolute-x-offset (:notes track))]
+    (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
