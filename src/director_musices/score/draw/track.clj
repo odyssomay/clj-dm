@@ -161,7 +161,7 @@
         get-lowest (fn [] (- (apply min (cons 0 (get-heights))) 30))
         get-highest (fn [] (+ (apply max (cons (* 5 line-separation) (get-heights))) 10))
         get-height (fn [] (- (get-highest) (get-lowest)))
-        c (proxy [javax.swing.JComponent javax.swing.Scrollable 
+        c (proxy [javax.swing.JComponent
                   director_musices.score.draw.interfaces.scoreProperties] []
             (paintComponent [g]
               (let [gc (.create g)
@@ -186,12 +186,6 @@
               (java.awt.Dimension. 
                 (get-score-component-width (get-notes) @options-atom)
                 (* (:scale @options-atom) (get-height))))
-            ; scrollable
-            (getPreferredScrollableViewportSize [] (.getPreferredSize this))
-            (getScrollableBlockIncrement [_ _ _] 500)
-            (getScrollableTracksViewportHeight [] false)
-            (getScrollableTracksViewportWidth [] false)
-            (getScrollableUnitIncrement [_ _ _] 500)
             ; scoreProperties
             (setScale [scale] (swap! options-atom assoc :scale scale))
             (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x))
