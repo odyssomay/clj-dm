@@ -41,6 +41,7 @@
                            :divider-location 0.5))
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
+    (.setLocationRelativeTo fr nil)
     (ssw/show! fr)
     (util/thread (glue/init-dm))
     ))
