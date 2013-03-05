@@ -68,7 +68,7 @@
     {:clef \G :notes notes}))
 
 (defn get-segment [track-index segment-index]
-  (nth (get-track track-index) segment-index nil))
+  (nth (:notes (get-track track-index)) segment-index nil))
 
 (defn set-segment [track-index segment-index segment]
   (let [segment (if (map? segment)
