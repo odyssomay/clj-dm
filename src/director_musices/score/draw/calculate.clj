@@ -42,7 +42,7 @@
 
 (defn calculate-notes [notes]
   (-> (for [{:keys [dr ndr n] :as note} notes]
-        (-> (merge {:original note}
+        (-> (merge note
                    (when n
                      {:pitch (first n)
                       :length dr
