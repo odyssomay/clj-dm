@@ -20,10 +20,6 @@
 
 (def svg-universe (com.kitfox.svg.SVGUniverse.))
 
-(defn init-svg []
-  (doseq [id ["BlackNotehead" "whole" "quarter"]]
-    (.loadSVG svg-universe (resource (str "score/" id ".svg")))))
-
 (defn get-diagram [id]
   (.getDiagram svg-universe (.toURI (resource id))))
 
@@ -75,14 +71,6 @@
     (if (== dot 2)
       (.drawOval g 14 3 1.5 1.5))))
 
-(defn draw-lines [g]
-  (let [bounds (.getClipBounds g)
-        gc (.create g)]
-    (.setColor gc java.awt.Color/gray)
-    (doseq [line (range 5)]
-      (let [y (* line-separation line)]
-        (.drawLine gc (.x bounds) y (+ (.x bounds) (.width bounds)) y)))))
-
 (defn draw-note-help-lines [g height]
   (let [upper? (< height 0)
         lower? (> height 8)]
@@ -123,7 +111,7 @@
           (set-hollow gc note)
           (draw-svg gc (str "score/" img ".svg")))))))
 
-(defn draw-notes [g notes {:keys [scale-x] :or {scale-x 1} :as options}]
+(defn draw-notes [g notes {:keys [scale-x] :as options}]
   (let [gc (.create g)]
     (doseq [i (range (count notes))]
       (let [note (nth notes i)]
@@ -144,55 +132,114 @@
              (.translate gc 0 -7)
              (draw-svg gc "score/gclef.svg")))))
 
-(defn get-score-component-width [notes {:keys [scale scale-x clef]}]
+(defn highlight-note [g note {:keys [track scale-x scale] :as state}]
+  (let [gc (.create g)]
+    (ssw-graphics/anti-alias gc)
+    ;(.translate gc 0 20)
+    (.scale gc scale scale)
+    (.translate gc
+                (double 0.0) 
+                (double (- (calc/get-lowest track))))
+    (when-let [clef (:clef state)]
+      (.translate gc 5 0)
+      ;(draw-clef gc clef)
+      (.translate gc 30 0)
+      ;(draw-bar gc)
+      )
+    (.translate gc 10 0)
+    (.translate gc
+                (double (* scale-x (:absolute-x-offset note)))
+                (double 0))
+    (.setColor gc java.awt.Color/red)
+    (.drawLine gc 0 0 0 (* 4 line-separation))
+    ))
+
+(defn get-track-component-width [{:keys [track scale scale-x clef]}]
   (* scale
      (+ (if clef 35 0) 10
         (* scale-x
-           (let [ln (last notes)]
+           (let [ln (last (calc/get-notes track))]
              (+ (:absolute-x-offset ln)
                 (:length ln)))))))
 
+(defn get-track-component-height [{:keys [track scale] :as state}]
+  (* scale (calc/get-height track)))
+
+(defn draw-lines [track g]
+  (let [width (calc/get-width track)
+        gc (.create g)]
+    (.setColor gc java.awt.Color/gray)
+    (doseq [line (range 5)]
+      (let [y (* line-separation line)]
+        (.drawLine gc 0 y width y)))))
+
+(defn paint [g state]
+  (let [gc (.create g)
+        scale (:scale state)
+        scale-x (:scale-x state)
+        track (:track state)
+        notes (calc/get-notes track)]
+    (ssw-graphics/anti-alias gc)
+    (.scale gc scale scale)
+    (.translate gc
+                (double 0.0) 
+                (double (- (calc/get-lowest track))))
+    (draw-lines (:track state) gc)
+    (when-let [clef (:clef state)]
+      (.translate gc 5 0)
+      (draw-clef gc clef)
+      (.translate gc 30 0)
+      ;(draw-bar gc)
+      )
+    (.translate gc 10 0)
+    (draw-notes gc notes state)))
+
+(defn create-image [state]
+  (let [track (:track state)
+        img (java.awt.image.BufferedImage.
+              (get-track-component-width state)
+              (get-track-component-height state)
+              java.awt.image.BufferedImage/TYPE_INT_ARGB)
+        g (.getGraphics img)]
+    (paint g state)
+    img))
+
 (defn track-component [track & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
-  (let [options-atom (atom (merge {:scale 1 :scale-x 1
-                                   :notes (calc/calculate-notes (:notes track))} opts))
-        get-notes #(:notes @options-atom)
-        get-heights (fn [] (remove nil? (map #(if (:pitch %)
-                                                  (:y-offset %)) (get-notes))))
-        get-lowest (fn [] (- (apply min (cons 0 (get-heights))) 30))
-        get-highest (fn [] (+ (apply max (cons (* 5 line-separation) (get-heights))) 10))
-        get-height (fn [] (- (get-highest) (get-lowest)))
-        c (proxy [javax.swing.JComponent
-                  director_musices.score.draw.interfaces.scoreProperties] []
+  (let [state (atom (merge {:scale 1 :scale-x 1
+                            :track (calc/calculate-track track)}
+                           opts))
+        image-atom (atom (create-image @state))
+        update-image (fn [] (reset! image-atom (create-image @state)))
+        get-track #(:track @state)
+        c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
-              (let [gc (.create g)
-                    options @options-atom
-                    scale (:scale options)
-                    scale-x (:scale-x options)
-                    notes (get-notes)]
-                (ssw-graphics/anti-alias gc)
-                ;(.translate gc 0 20)
-                (.scale gc scale scale)
-                (.translate gc (double 0.0) (double (- (get-lowest))))
-                (draw-lines gc)
-                (when-let [clef (:clef options)]
-                  (.translate gc 5 0)
-                  (draw-clef gc clef)
-                  (.translate gc 30 0)
-                  ;(draw-bar gc)
-                  )
-                (.translate gc 10 0)
-                (draw-notes gc notes options)))
-            (getPreferredSize [] 
-              (java.awt.Dimension. 
-                (get-score-component-width (get-notes) @options-atom)
-                (* (:scale @options-atom) (get-height))))
-            ; scoreProperties
-            (setScale [scale] (swap! options-atom assoc :scale scale))
-            (setScaleX [scale-x] (swap! options-atom assoc :scale-x scale-x))
-            (setScaleFromHeight [height]
-              (swap! options-atom assoc :scale (/ height (get-height))))
-            (setNotes [notes] 
-              (swap! options-atom assoc :notes notes))
-            (getOptionsAtom [] options-atom))]
-    (add-watch options-atom (gensym) (fn [& _] (.revalidate c) (.repaint c)))
-    c))
+              (.drawImage g @image-atom 0 0 nil)
+              (highlight-note g (nth (calc/get-notes (get-track)) 3)
+                              @state))
+            (getPreferredSize []
+              (let [t (get-track)]
+                (java.awt.Dimension.
+                  (get-track-component-width @state)
+                  (* (:scale @state) (calc/get-height t))))))]
+    (add-watch state (gensym)
+               (fn [_ _ _ state]
+                 (update-image)
+                 (.revalidate c)
+                 (.repaint c)))
+    {:view c
+     :state state}))
+
+;; =====
+;;
+;; =====
+(defn set-scale-x [component-m scale-x]
+  (swap! (:state component-m) assoc :scale-x scale-x))
+
+(defn get-scale-x [component-m] (:scale-x @(:state component-m)))
+
+(defn set-scale [component-m scale]
+  (swap! (:state component-m) assoc :scale scale))
+
+(defn get-scale [component-m] (:scale @(:state component-m)))
+
+(defn get-view [component-m] (:view component-m))

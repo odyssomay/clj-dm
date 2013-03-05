@@ -47,8 +47,8 @@
 
 (defn score-view [id]
   (let [opts-view (track-options-view id)
-        sc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        view (ssw-mig/mig-panel :items [[opts-view] [sc]]
+        tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
+        view (ssw-mig/mig-panel :items [[opts-view] [(draw-track/get-view tc)]]
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
         ]
@@ -74,7 +74,7 @@
     ;                   (.add view c "span")
     ;                   (.revalidate view)))))
     ;(add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
-    {:score-component sc 
+    {:score-component tc 
      ;:view sc
      :view view
      }))
@@ -89,13 +89,13 @@
                       (let [sv (score-view i)
                             sc (:score-component sv)
                             ]
-                        (ssw/listen sc 
+                        (ssw/listen (draw-track/get-view sc) 
                                     :mouse-pressed (fn [e] 
                                                      (reset! mouse-position-x-start (.getX e))
-                                                     (reset! initial-scale-x (:scale-x @(.getOptionsAtom sc))))
+                                                     (reset! initial-scale-x (draw-track/get-scale-x sc)))
                                     :mouse-dragged (fn [e] 
                                                      (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
-                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (.setScaleX sc scale-x)))
+                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (draw-track/set-scale-x sc scale-x)))
                         [(:view sv) "span"]
                         ;(:view sv)
                         ))]
