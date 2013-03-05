@@ -12,7 +12,8 @@
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw]
-              [mig :as ssw-mig])))
+              [mig :as ssw-mig]))
+  (:import javax.swing.SwingUtilities))
 
 (def score-panel-reloader (atom nil))
 
@@ -45,6 +46,15 @@
                      :background "#DDD")
   )
 
+(defn edit-note [tc id mouse-evt]
+  (let [note-id (draw-track/get-note-for-x tc (.getX mouse-evt))
+        ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
+                                                       ", " "\n")
+                               (clojure.string/replace #"\{|\}" ""))
+                     :multi-line? true)]
+    (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                           :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}"))))))))
+
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
@@ -52,14 +62,15 @@
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
         ]
-    ; (ssw/listen sc 
-    ;             :mouse-clicked (fn [evt] (let [note-id (draw-score/get-note-for-x (.getX evt) sc)
-    ;                                            ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
-    ;                                                                                           ", " "\n")
-    ;                                                                 (clojure.string/replace #"\{|\}" ""))
-    ;                                                         :multi-line? true)]
-    ;                                        (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-    ;                                                               :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}")))))))))
+    (ssw/listen (draw-track/get-view tc)
+                :mouse-clicked
+                (fn [evt]
+                  (let [popup (ssw/popup :items [(ssw/action :name "Edit note..."
+                                                             :handler (fn [_] (edit-note tc id evt)))
+                                                 (ssw/action :name "Show Graph...")])]
+                    (cond
+                      (SwingUtilities/isRightMouseButton evt)
+                      (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
     ; (ssw/listen graph-label :mouse-clicked
     ;             (fn [_]
     ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
@@ -106,6 +117,7 @@
                                    (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
                  )
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
+    (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])
     p))
 
