@@ -1,5 +1,6 @@
 (ns director-musices.logging
-  (:require [clojure.string :as clj-str]
+  (:require [director-musices.global :as global]
+            [clojure.string :as clj-str]
             [seesaw.core :as ssw]
             [taoensso.timbre :as log]))
 
@@ -61,4 +62,6 @@
   (init-cl-log-config)
   (init-log-frame))
 
-(defn show-log-frame [& _] (ssw/show! log-frame))
+(defn show-log-frame [& _]
+  (.setLocationRelativeTo log-frame (global/get-frame))
+  (ssw/show! log-frame))
