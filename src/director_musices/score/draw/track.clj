@@ -265,6 +265,7 @@
     (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
 
 (defn get-track [component-m] (:track @(:state component-m)))
-(defn set-track [component-m track] (println "Not implemented setting track :("))
+(defn set-track [component-m track]
+  (swap! (:state component-m) assoc :track (calc/calculate-track track)))
 
 (defn get-notes [component-m] (:notes (get-track component-m)))

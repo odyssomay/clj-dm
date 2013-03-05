@@ -88,9 +88,9 @@
     ;                   (.add view remove-label)
     ;                   (.add view c "span")
     ;                   (.revalidate view)))))
-    ;(add-watch score-panel-reloader (gensym) (fn [& _] (.setNotes sc (convert-track (glue/get-track id)))))
-    {:score-component tc 
-     ;:view sc
+    (add-watch score-panel-reloader (gensym)
+               (fn [& _] (draw-track/set-track tc (glue/get-track id))))
+    {:score-component tc
      :view view
      }))
 
@@ -125,7 +125,7 @@
     (ssw/config! (global/get-score-panel) :items [s-p])
     p))
 
-(defn reload-score-panel [] 
+(defn reload-score-panel []
   (swap! score-panel-reloader not))
 
 ;; =====

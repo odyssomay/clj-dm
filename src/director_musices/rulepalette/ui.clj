@@ -34,7 +34,8 @@
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction]
   (glue/apply-rules (rules->string (map deref (:rules rulepalette)))
-                    syncrule rule-interaction))
+                    syncrule rule-interaction)
+  (score-ui/reload-score-panel))
 
 (defn- parameter-view [rule-atom]
   (let [{:keys [v options]} @rule-atom
