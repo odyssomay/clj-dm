@@ -123,6 +123,8 @@
         width (.getWidth track-view)]
     (ssw-graphics/anti-alias gc)
     
+    (.translate gc 0 5)
+    
     (let [middle (int (/ height 2))]
       (.translate gc 0 middle))
     
@@ -136,12 +138,22 @@
     )
   )
 
-(defn graph-component [track-component property & {:as graph-opts}]
+(defn calculate-scale-y [track-component property height]
+  (let [notes (draw-track/get-notes track-component)
+        property-max (reduce max (remove nil? (concat [0] (map #(get % property nil) notes))))
+        property-min (reduce min (remove nil? (concat [0] (map #(get % property nil) notes))))
+        property-diff (- property-max property-min)]
+    (if (== property-diff 0)
+      1
+      (/ (/ height 2)
+         property-diff))))
+
+(defn graph-component [track-component property & {:keys [height] :or {height 100} :as graph-opts}]
   (let [state (atom (merge {:track-component track-component
                             :track-view (draw-track/get-view track-component)
                             :property property
-                            :scale-y 0.01
-                            :height 100}
+                            :scale-y (calculate-scale-y track-component property height)
+                            :height height}
                            graph-opts))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
@@ -151,7 +163,8 @@
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize (draw-track/get-view track-component)))
-                (:height @state))))]
+                (+ (:height @state) 10)
+                )))]
     {:view c}))
 
 (defn get-view [tgc] (:view tgc))
