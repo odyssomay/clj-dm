@@ -51,6 +51,25 @@
             ))
       add-absolute-lengths))
 
+(defn add-track-heights [track]
+  (let [{:keys [notes]} track
+        heights (remove nil? (map #(if (:pitch %)
+                                       (:y-offset %))
+                                  notes))
+        lowest (- (reduce min (cons 0 heights))
+                  30)
+        highest (+ (reduce max (cons (* 5 line-separation) heights))
+                   10)
+        last-note (last notes)
+        width (+ (:absolute-x-offset last-note)
+                 (:length last-note))]
+    (assoc track
+      :size {:lowest lowest
+             :highest highest
+             :height (- highest lowest)
+             :width width
+             })))
+
 (defn add-track-width [track]
   (let [notes (:notes track)
         ln (last notes)]
@@ -59,7 +78,17 @@
 (defn calculate-track [track]
   (-> track
       (update-in [:notes] calculate-notes)
-      add-track-width))
+      add-track-width
+      add-track-heights))
+
+;; =====
+;; Helper functions
+;; =====
+(defn get-notes [track] (:notes track))
+(defn get-height  [track] (get-in track [:size :height]))
+(defn get-lowest  [track] (get-in track [:size :lowest]))
+(defn get-highest [track] (get-in track [:size :highest]))
+(defn get-width   [track] (get-in track [:size :width]))
 
 ;; =====
 ;; Testing
