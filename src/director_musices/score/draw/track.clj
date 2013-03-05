@@ -183,6 +183,7 @@
         track (:track state)
         notes (calc/get-notes track)]
     (ssw-graphics/anti-alias gc)
+    (.setColor gc java.awt.Color/black)
     (.scale gc scale scale)
     (.translate gc
                 (double 0.0) 
@@ -238,13 +239,19 @@
 ;; =====
 ;; API
 ;; =====
+(defn get-state [component-m] @(:state component-m))
+(defn get-state-atom [component-m] (:state component-m))
+
 (defn set-scale-x [component-m scale-x]
   (swap! (:state component-m) assoc :scale-x scale-x))
 (defn get-scale-x [component-m] (:scale-x @(:state component-m)))
+
 (defn set-scale [component-m scale]
   (swap! (:state component-m) assoc :scale scale))
 (defn get-scale [component-m] (:scale @(:state component-m)))
+
 (defn get-view [component-m] (:view component-m))
+
 (defn set-position-indicator [component-m position]
   (swap! (:state component-m) assoc :position-indicator position))
 
@@ -256,3 +263,8 @@
              (- x (+ (if (:clef track) 35 0) 10)))
         note-distances (map :absolute-x-offset (:notes track))]
     (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
+
+(defn get-track [component-m] (:track @(:state component-m)))
+(defn set-track [component-m track] (println "Not implemented setting track :("))
+
+(defn get-notes [component-m] (:notes (get-track component-m)))
