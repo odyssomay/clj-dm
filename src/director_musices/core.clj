@@ -35,6 +35,7 @@
                  :on-close (if (global/get-arg :exit) :exit :hide)
                  )
     (ssw/config! (global/get-main-panel)
+                 :north player/player-panel
                  :center (ssw/top-bottom-split
                            (score-global/get-score-panel)
                            (rule-global/get-rulepalette-panel)
