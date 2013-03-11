@@ -36,27 +36,45 @@
     )
   )
 
+(defn guess-interval [furthest expected-lines]
+  (let [magnitudes (map #(Math/pow 10 %) (range -10 10))
+        nr-lines (map #(let [lines (quot furthest %)]
+                         {:magnitude %
+                          :lines lines
+                          :diff (Math/abs (- lines expected-lines))})
+                      magnitudes)
+        interval (first (sort-by :diff nr-lines))
+        ]
+    ;(first )
+    ;(println interval)
+    (assoc interval :interval (:magnitude interval))
+    ))
+
 (defn draw-height-lines [g state]
   (let [{:keys [scale-y height graph-data]} state
-        {:keys [diff]} graph-data
+        {:keys [diff furthest]} graph-data
         expected-lines 10
-        furthest (max (:max graph-data)
-                      (- (:min graph-data)))
-        interval (/ furthest expected-lines)
+        {:keys [interval lines]}
+        (guess-interval furthest expected-lines)
+        ;interval (/ furthest expected-lines)
         scaled-interval (* scale-y interval)
-        indices (range 1 (inc expected-lines))
+        indices (range 1 (inc lines))
         gc (.create g)]
+    ;(guess-interval furthest expected-lines)
     (.translate gc 40 0)
     (.setColor gc java.awt.Color/black)
-    (.drawLine gc 0 0 0 (/ height 2))
-    (.drawLine gc 0 0 0 (/ height -2))
+    (let [h (/ height 2)];(* scale-y interval lines)]
+      (.drawLine gc 0 0 0 h)
+      (.drawLine gc 0 0 0 (- h)))
     (doseq [i indices]
       (let [y (* interval i)
             sy (* scaled-interval i)
             long? (zero? (rem i 2))
             w (if long? 5 2)]
-        (draw-height-line state gc y sy long? w)
-        (draw-height-line state gc (- y) (- sy) long? w)
+        ;(when (<= sy (/ height 2))
+          (draw-height-line state gc y sy long? w)
+          (draw-height-line state gc (- y) (- sy) long? w)
+         ; )
         ))
     ))
 
@@ -91,7 +109,9 @@
         property-diff (- property-max property-min)]
     {:max property-max
      :min property-min
-     :diff property-diff}))
+     :diff property-diff
+     :furthest (max property-max
+                    (- property-min))}))
 
 (defn update-graph-data [state]
   (let [{:keys [track-component property]} state]
@@ -99,12 +119,12 @@
 
 (defn update-scale-y [state]
   (let [{:keys [graph-data height]} state
-        {:keys [diff]} graph-data]
+        {:keys [diff furthest]} graph-data]
     (assoc state :scale-y
       (if (== diff 0)
         1
         (/ (/ height 2)
-           diff)))))
+           furthest)))))
 
 (defn update-state [state]
   (-> state
