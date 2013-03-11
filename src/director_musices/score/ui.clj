@@ -64,8 +64,17 @@
                                (clojure.string/replace #"\{|\}" ""))
                      :multi-line? true)]
     (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                           :success-fn (fn [& _] (glue/set-segment id note-id
-                                                                   (read-string (str "{" (.getText ta) "}"))))))))
+                           :success-fn
+                           (fn [& _]
+                             (glue/set-segment id note-id
+                                               (read-string (str "{" (.getText ta) "}"))))))))
+
+(defn show-graph [view tc]
+  (if-let [choice (ssw/input "what type?" :choices [:sl :dr] 
+                             :to-string #(subs (str %) 1))]
+    (let [c (draw-graph/graph-component tc choice)]
+      (.add view (draw-graph/get-view c) "span")
+      )))
 
 (defn score-view [id]
   (let [opts-view (track-options-view id)
@@ -83,7 +92,8 @@
                 (fn [evt]
                   (let [popup (ssw/popup :items [(ssw/action :name "Edit note..."
                                                              :handler (fn [_] (edit-note tc id evt)))
-                                                 (ssw/action :name "Show Graph...")])]
+                                                 (ssw/action :name "Show Graph..."
+                                                             :handler (fn [_] (show-graph view tc)))])]
                     (cond
                       (SwingUtilities/isRightMouseButton evt)
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
