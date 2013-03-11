@@ -78,7 +78,9 @@
                                             :handler apply-this)
                                 "span"]
                                [(ssw/action :name "Apply & Play"
-                                            :handler (fn [_] (apply) (player/start!)))
+                                            :handler (fn [_]
+                                                       (apply-this)
+                                                       (player/start!)))
                                 "span"]
                                ])))
 
