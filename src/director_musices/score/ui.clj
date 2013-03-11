@@ -35,7 +35,8 @@
     (-> (ssw/dialog :content p :option-type :ok-cancel
                     :success-fn (fn [_] 
                                   (doseq [item items]
-                                    (glue/set-track-property track-id (.getText (ffirst item)) (.getText (first (second item)))))))
+                                    (glue/set-track-property track-id (.getText (ffirst item))
+                                                             (.getText (first (second item)))))))
       ssw/pack!
       ssw/show!)
     ))
@@ -54,7 +55,8 @@
                                (clojure.string/replace #"\{|\}" ""))
                      :multi-line? true)]
     (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                           :success-fn (fn [& _] (glue/set-segment id note-id (read-string (str "{" (.getText ta) "}"))))))))
+                           :success-fn (fn [& _] (glue/set-segment id note-id
+                                                                   (read-string (str "{" (.getText ta) "}"))))))))
 
 (defn score-view [id]
   (let [opts-view (track-options-view id)
@@ -77,7 +79,9 @@
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
     ; (ssw/listen graph-label :mouse-clicked
     ;             (fn [_]
-    ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] :to-string #(subs (str %) 1))] ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
+    ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] 
+    ;                                          :to-string #(subs (str %) 1))]
+    ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
     ;                 (let [c (draw-score/score-graph-component choice sc :height 150)
     ;                       remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
     ;                   (ssw/listen remove-label :mouse-clicked
@@ -109,7 +113,9 @@
                                                      (reset! mouse-position-x-start (.getX e))
                                                      (reset! initial-scale-x (draw-track/get-scale-x sc)))
                                     :mouse-dragged (fn [e] 
-                                                     (reset! new-scale-x (* @initial-scale-x (/ (.getX e) @mouse-position-x-start)))))
+                                                     (reset! new-scale-x (* @initial-scale-x
+                                                                            (/ (.getX e)
+                                                                               @mouse-position-x-start)))))
                         (add-watch new-scale-x i (fn [_ _ _ scale-x] (draw-track/set-scale-x sc scale-x)))
                         [(:view sv) "span"]
                         ;(:view sv)
