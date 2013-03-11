@@ -45,8 +45,6 @@
                       magnitudes)
         interval (first (sort-by :diff nr-lines))
         ]
-    ;(first )
-    ;(println interval)
     (assoc interval :interval (:magnitude interval))
     ))
 
