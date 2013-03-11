@@ -42,11 +42,20 @@
     ))
 
 (defn track-options-view [id]
-  (ssw-mig/mig-panel :items [[(str "Track " id)]]
-                     :background "green"
-                     :size [100 :by 150]
-                     :background "#DDD")
-  )
+  (let [property-display
+        (for [property ["trackname" "midi-channel"
+                        "midi-initial-volume" "midi-initial-program"
+                        "midi-bank-msb" "midi-bank-lsb"
+                        "midi-pan" "midi-reverb" 
+                        ;"synth" 
+                        "instrument-type"
+                        "track-delay"]]
+          [[(ssw/label :text property)]
+           [(ssw/label :text (str (glue/get-track-property id property))) "gapleft 20, wrap"]])]
+    (ssw-mig/mig-panel :items (reduce concat
+                                      [[(str "Track " id) "span"]]
+                                      property-display)
+                       :background "#DDD")))
 
 (defn edit-note [tc id mouse-evt]
   (let [note-id (draw-track/get-note-for-x tc (.getX mouse-evt))
@@ -61,9 +70,10 @@
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        gc (draw-graph/graph-component tc :length)
-        view (ssw-mig/mig-panel :items [[opts-view] [(draw-track/get-view tc) "wrap"]
-                                        [""] [(draw-graph/get-view gc)]
+        gc (draw-graph/graph-component tc :sl)
+        view (ssw-mig/mig-panel :items [[opts-view "dock west"]
+                                        [(draw-track/get-view tc) "span"]
+                                        [(draw-graph/get-view gc) "span"]
                                         ]
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
