@@ -21,6 +21,45 @@
                        (* scale-y (- (get note+1 property 0)))))
         ))))
 
+(defn draw-height-line [state g y sy long? w]
+  (.setColor g java.awt.Color/black)
+  (.drawLine g 0 sy (- w) sy)
+  (when long?
+    (.drawString g (str (float (- y)))
+                 (+ -30 (if (< y 0) 4 0))
+                 (+ (int sy)
+                    4))
+    (.setColor g (java.awt.Color. 200 200 200))
+    (.drawLine g 1 sy
+               (.getWidth (:track-view state))
+               sy)
+    )
+  )
+
+(defn draw-height-lines [g state]
+  (let [{:keys [scale-y height graph-data]} state
+        {:keys [diff]} graph-data
+        expected-lines 10
+        furthest (max (:max graph-data)
+                      (- (:min graph-data)))
+        interval (/ furthest expected-lines)
+        scaled-interval (* scale-y interval)
+        indices (range 1 (inc expected-lines))
+        gc (.create g)]
+    (.translate gc 40 0)
+    (.setColor gc java.awt.Color/black)
+    (.drawLine gc 0 0 0 (/ height 2))
+    (.drawLine gc 0 0 0 (/ height -2))
+    (doseq [i indices]
+      (let [y (* interval i)
+            sy (* scaled-interval i)
+            long? (zero? (rem i 2))
+            w (if long? 5 2)]
+        (draw-height-line state gc y sy long? w)
+        (draw-height-line state gc (- y) (- sy) long? w)
+        ))
+    ))
+
 (defn paint [g state]
   (.setColor g java.awt.Color/red)
   ;(.fillRect g 0 0 100 100)
@@ -36,7 +75,7 @@
     
     (.setColor gc java.awt.Color/black)
     (.drawLine gc 0 0 width 0)
-    
+    (draw-height-lines gc state)
     (.setColor gc java.awt.Color/red)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
     ; (.drawLine gc 10 0 10 100)
@@ -44,42 +83,57 @@
     )
   )
 
-(defn calculate-scale-y [track-component property height]
+(defn graph-data [track-component property]
   (let [notes (draw-track/get-notes track-component)
         property-vals (remove nil? (concat [0] (map #(get % property nil) notes)))
         property-max (reduce max property-vals)
         property-min (reduce min property-vals)
         property-diff (- property-max property-min)]
-    (if (== property-diff 0)
-      1
-      (/ (/ height 2)
-         property-diff))))
+    {:max property-max
+     :min property-min
+     :diff property-diff}))
 
-(defn graph-component [track-component property & {:keys [height] :or {height 100} :as graph-opts}]
-  (let [state (atom (merge {:track-component track-component
-                            :track-view (draw-track/get-view track-component)
-                            :property property
-                            :scale-y (calculate-scale-y track-component property height)
-                            :height height}
+(defn update-graph-data [state]
+  (let [{:keys [track-component property]} state]
+    (assoc state :graph-data (graph-data track-component property))))
+
+(defn update-scale-y [state]
+  (let [{:keys [graph-data height]} state
+        {:keys [diff]} graph-data]
+    (assoc state :scale-y
+      (if (== diff 0)
+        1
+        (/ (/ height 2)
+           diff)))))
+
+(defn update-state [state]
+  (-> state
+      update-graph-data
+      update-scale-y))
+
+(defn graph-component [track-component property & {:as graph-opts}]
+  (let [state (atom (merge (update-state
+                             {:track-component track-component
+                              :graph-data (graph-data track-component property)
+                              :track-view (draw-track/get-view track-component)
+                              :property property
+                              :height 100})
                            graph-opts))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               ;(proxy-super paintComponent g)
               ;(.clearRect g 0 0 (.getWidth this) (.getHeight this))
-              (paint g @state))
+              (paint g @state)
+              )
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize (draw-track/get-view track-component)))
                 (+ (:height @state) 10)
                 )))
-        refresh (fn []
-                  (swap! state (fn [state]
-                                 (assoc state :scale-y
-                                   (calculate-scale-y track-component
-                                                      (:property state)
-                                                      (:height state))))))
+        refresh (fn [] (swap! state update-state))
         ]
     (draw-track/on-state-change track-component refresh)
+    (add-watch state (gensym) (fn [& _] (.revalidate c) (.repaint c)))
     {:view c}))
 
 (defn get-view [tgc] (:view tgc))
