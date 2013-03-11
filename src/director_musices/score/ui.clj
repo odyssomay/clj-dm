@@ -69,20 +69,34 @@
                              (glue/set-segment id note-id
                                                (read-string (str "{" (.getText ta) "}"))))))))
 
-(defn show-graph [view tc]
+(defn show-graph [view tc type]
+  (let [gc (draw-graph/graph-component tc type)
+        c (draw-graph/get-view gc)
+        remove-graph #(do
+                        (.remove view c)
+                        (.revalidate view)
+                        (.repaint view))]
+    (ssw/listen c :mouse-clicked
+                (fn [evt]
+                  (when (SwingUtilities/isRightMouseButton evt)
+                    (let [popup (ssw/popup :items [(ssw/action :name "Remove graph"
+                                                               :handler (fn [_] (remove-graph)))])]
+                      (.show popup (.getSource evt) (.getX evt) (.getY evt))
+                      ))))
+    (.add view c "span")
+    (.revalidate view)
+    ))
+
+(defn ask-and-show-graph [view tc]
   (if-let [choice (ssw/input "what type?" :choices [:sl :dr] 
                              :to-string #(subs (str %) 1))]
-    (let [c (draw-graph/graph-component tc choice)]
-      (.add view (draw-graph/get-view c) "span")
-      )))
+    (show-graph view tc choice)))
 
 (defn score-view [id]
   (let [opts-view (track-options-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
-        gc (draw-graph/graph-component tc :sl)
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
                                         [(draw-track/get-view tc) "span"]
-                                        [(draw-graph/get-view gc) "span"]
                                         ]
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
@@ -93,10 +107,11 @@
                   (let [popup (ssw/popup :items [(ssw/action :name "Edit note..."
                                                              :handler (fn [_] (edit-note tc id evt)))
                                                  (ssw/action :name "Show Graph..."
-                                                             :handler (fn [_] (show-graph view tc)))])]
+                                                             :handler (fn [_] (ask-and-show-graph view tc)))])]
                     (cond
                       (SwingUtilities/isRightMouseButton evt)
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
+    (show-graph view tc :sl)
     ; (ssw/listen graph-label :mouse-clicked
     ;             (fn [_]
     ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] 
