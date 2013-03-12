@@ -99,7 +99,7 @@
     ; (.drawLine gc 10 0 10 100)
     (draw-note-property-graph gc state (:property-values state))
     (when (:prev-property-values state)
-      (.setColor gc (java.awt.Color. 255 150 150))
+      (.setColor gc (java.awt.Color. 120 120 120))
       (draw-note-property-graph gc state (:prev-property-values state)))))
 
 (defn graph-data [track-component property]
