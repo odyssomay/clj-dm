@@ -94,10 +94,16 @@
 (defn get-defined-synths []
   (map str (.copyToArray (glue/eval-dm "*defined-synth-names*"))))
 
+(defn- property-acc [id property]
+  (str "(" property " (nth " id " (track-list *active-score*)))"))
+
+(defn get-track-synth-program-list [id]
+  (map str (.copyToArray (glue/eval-dm (str "(program-list " (property-acc id "synth") ")")))))
+
 (defn get-track-property [id property]
   (case property
     "synth" (first (get-defined-synths))
-    (.javaInstance (glue/eval-dm (str "(" property " (nth " id " (track-list *active-score*)))")))))
+    (.javaInstance (glue/eval-dm (property-acc id property)))))
 
 (defn set-track-property [id property value]
   (let [type (case property
@@ -109,4 +115,4 @@
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
                 :native (str value))]
-    (glue/eval-dm (str "(setf (" property " (nth " id " (track-list *active-score*))) " value ")"))))
+    (println (str "(setf " (property-acc id property) " " value ")"))))
