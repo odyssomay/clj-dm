@@ -27,7 +27,8 @@
    {:display-name "Midi volume"
     :property "midi-initial-volume"}
    {:display-name "Midi program"
-    :property "midi-initial-program"}
+    :property "midi-initial-program"
+    :type :midi-program-list}
    {:display-name "Track delay"
     :property "track-delay"}
    {:display-name "Synth"
@@ -40,7 +41,10 @@
         value (glue/get-track-property id property)
         c (case type
             :string (ssw/text :text (str value) :columns 5)
-            :synth (ssw/combobox :model (glue/get-defined-synths))
+            :synth (ssw/combobox :id :synth :model (glue/get-defined-synths))
+            :midi-program-list
+            (ssw/combobox :id :program-list
+                          :model (glue/get-track-synth-program-list id))
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
@@ -48,12 +52,16 @@
         listen-property (case type
                           :string :document
                           :synth :selection
+                          :midi-program-list :selection
                           :change)
         update-property (fn [value]
-                          (glue/set-track-property id property value))]
+                          (glue/set-track-property id property value)
+                          (case type
+                            :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
+                                                :model (glue/get-track-synth-program-list id))
+                            nil))]
     (ssw/listen c listen-property (fn [& _] (update-property (get-value c))))
-    c
-    ))
+    c))
 
 (defn track-properties-view [id]
   (let [property-display
@@ -62,11 +70,10 @@
                 c (track-property-editor id property-map)]
             [[(ssw/label :text display-name) "gapright 20"]
              [c "growx, wrap"]
-             ]))]
-    ;(println (glue/get-track-property id "synth"))
-    (prn (glue/get-defined-synths))
-    (ssw-mig/mig-panel :items (reduce concat property-display)
-                       :background "#DDD")))
+             ]))
+        view (ssw-mig/mig-panel :items (reduce concat property-display)
+                                :background "#DDD")]
+    view))
 
 (defn edit-note [tc id mouse-evt]
   (let [note-id (draw-track/get-note-for-x tc (.getX mouse-evt))
