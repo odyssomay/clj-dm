@@ -96,7 +96,7 @@
 
 (defn get-track-property [id property]
   (case property
-    :synth (first (get-defined-synths))
+    "synth" (first (get-defined-synths))
     (.javaInstance (glue/eval-dm (str "(" property " (nth " id " (track-list *active-score*)))")))))
 
 (defn set-track-property [id property value]
