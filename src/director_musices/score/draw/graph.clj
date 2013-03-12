@@ -5,19 +5,22 @@
 (defn draw-note-property-graph [g state property-values]
   (let [gc (.create g)
         {:keys [track-component scale-y]} state
+        notes (draw-track/get-notes track-component)
         scale-x (draw-track/get-scale-x track-component)]
     (doseq [i (range (count property-values))]
-      (let [value (nth property-values i)
+      (let [note (nth notes i)
+            next-note (nth notes (inc i) nil)
+            value (nth property-values i)
             next-value (nth property-values (inc i) nil)
-            y (* scale-y (- (:value value)))
+            y (* scale-y (- value))
             ]
-        (.translate gc (double (* (:x-offset value) scale-x)) (double 0))
+        (.translate gc (double (* (:x-offset note) scale-x)) (double 0))
         (.fillOval gc -2 (- y 2) 4 4)
         (when next-value
             (.drawLine gc
                        0 y
-                       (* (:x-offset next-value) scale-x)
-                       (* scale-y (- (:value next-value)))))
+                       (* (:x-offset next-note) scale-x)
+                       (* scale-y (- next-value))))
         ))))
 
 (defn draw-height-line [state g y sy long? w]
@@ -132,8 +135,7 @@
 (defn calculate-property-values [state]
   (let [{:keys [track-component property]} state
         notes (draw-track/get-notes track-component)
-        property-vals (map #(hash-map :x-offset (:x-offset %)
-                                      :value (get % property 0)) notes)]
+        property-vals (map #(get % property 0) notes)]
     property-vals))
 
 (defn update-property-values [state]
