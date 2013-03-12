@@ -109,10 +109,12 @@
   (let [type (case property
                "trackname" :string
                "instrument-type" :string
+               "midi-inital-program" :mip
                "synth" :synth
                :native)
         value (case type
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
+                :mip 1
                 :native (str value))]
-    (println (str "(setf " (property-acc id property) " " value ")"))))
+    (glue/eval-dm (str "(setf " (property-acc id property) " " value ")"))))
