@@ -2,23 +2,22 @@
   (:require [director-musices.score.draw.track :as draw-track]
             (seesaw [graphics :as ssw-graphics])))
 
-(defn draw-note-property-graph [g state]
+(defn draw-note-property-graph [g state property-values]
   (let [gc (.create g)
-        {:keys [track-component scale-y property]} state
-        scale-x (draw-track/get-scale-x track-component)
-        notes (draw-track/get-notes track-component)]
-    (doseq [i (range (count notes))]
-      (let [note (nth notes i)
-            note+1 (nth notes (inc i) nil)
-            y (* scale-y (- (get note property 0)))
+        {:keys [track-component scale-y]} state
+        scale-x (draw-track/get-scale-x track-component)]
+    (doseq [i (range (count property-values))]
+      (let [value (nth property-values i)
+            next-value (nth property-values (inc i) nil)
+            y (* scale-y (- (:value value)))
             ]
-        (.translate gc (double (* (:x-offset note) scale-x)) (double 0))
+        (.translate gc (double (* (:x-offset value) scale-x)) (double 0))
         (.fillOval gc -2 (- y 2) 4 4)
-        (when note+1
+        (when next-value
             (.drawLine gc
                        0 y
-                       (* (:x-offset note+1) scale-x)
-                       (* scale-y (- (get note+1 property 0)))))
+                       (* (:x-offset next-value) scale-x)
+                       (* scale-y (- (:value next-value)))))
         ))))
 
 (defn draw-height-line [state g y sy long? w]
@@ -95,9 +94,10 @@
     (.setColor gc java.awt.Color/red)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
     ; (.drawLine gc 10 0 10 100)
-    (draw-note-property-graph gc state)
-    )
-  )
+    (draw-note-property-graph gc state (:property-values state))
+    (when (:prev-property-values state)
+      (.setColor gc (java.awt.Color. 255 150 150))
+      (draw-note-property-graph gc state (:prev-property-values state)))))
 
 (defn graph-data [track-component property]
   (let [notes (draw-track/get-notes track-component)
@@ -129,13 +129,28 @@
       update-graph-data
       update-scale-y))
 
+(defn calculate-property-values [state]
+  (let [{:keys [track-component property]} state
+        notes (draw-track/get-notes track-component)
+        property-vals (map #(hash-map :x-offset (:x-offset %)
+                                      :value (get % property 0)) notes)]
+    property-vals))
+
+(defn update-property-values [state]
+  (let [{:keys [property-values]} state]
+    (assoc state
+      :prev-property-values property-values
+      :property-values (calculate-property-values state))))
+
 (defn graph-component [track-component property & {:as graph-opts}]
-  (let [state (atom (merge (update-state
+  (let [state (atom (merge (->
                              {:track-component track-component
                               :graph-data (graph-data track-component property)
                               :track-view (draw-track/get-view track-component)
                               :property property
-                              :height 100})
+                              :height 100}
+                             update-state
+                             update-property-values)
                            graph-opts))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
@@ -149,9 +164,15 @@
                 (+ (:height @state) 10)
                 )))
         refresh (fn [] (swap! state update-state))
+        update-property-values! (fn [] (swap! state update-property-values))
         ]
     (draw-track/on-state-change track-component refresh)
+    (draw-track/on-track-change track-component update-property-values!)
     (add-watch state (gensym) (fn [& _] (.revalidate c) (.repaint c)))
     {:view c}))
+
+;; =====
+;; API
+;; =====
 
 (defn get-view [tgc] (:view tgc))
