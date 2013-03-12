@@ -91,15 +91,22 @@
 (defn get-track-count []
   (.javaInstance (glue/eval-dm "(length (track-list *active-score*))")))
 
+(defn get-defined-synths []
+  (map str (.copyToArray (glue/eval-dm "*defined-synth-names*"))))
+
 (defn get-track-property [id property]
-  (.javaInstance (glue/eval-dm (str "(" property " (nth " id " (track-list *active-score*)))"))))
+  (case property
+    :synth (first (get-defined-synths))
+    (.javaInstance (glue/eval-dm (str "(" property " (nth " id " (track-list *active-score*)))")))))
 
 (defn set-track-property [id property value]
   (let [type (case property
                "trackname" :string
                "instrument-type" :string
+               "synth" :synth
                :native)
         value (case type
                 :string (str "\"" value "\"")
+                :synth (str "(make-synth \"" value "\")")
                 :native (str value))]
     (glue/eval-dm (str "(setf (" property " (nth " id " (track-list *active-score*))) " value ")"))))

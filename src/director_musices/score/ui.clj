@@ -30,6 +30,9 @@
     :property "midi-initial-program"}
    {:display-name "Track delay"
     :property "track-delay"}
+   {:display-name "Synth"
+    :property "synth"
+    :type :synth}
    ])
 
 (defn track-property-editor [id property-map]
@@ -37,12 +40,14 @@
         value (glue/get-track-property id property)
         c (case type
             :string (ssw/text :text (str value) :columns 5)
+            :synth (ssw/combobox :model (glue/get-defined-synths))
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
                     ssw/selection)
         listen-property (case type
                           :string :document
+                          :synth :selection
                           :change)
         update-property (fn [value]
                           (glue/set-track-property id property value))]
@@ -58,6 +63,8 @@
             [[(ssw/label :text display-name) "gapright 20"]
              [c "growx, wrap"]
              ]))]
+    ;(println (glue/get-track-property id "synth"))
+    (prn (glue/get-defined-synths))
     (ssw-mig/mig-panel :items (reduce concat property-display)
                        :background "#DDD")))
 
