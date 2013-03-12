@@ -109,7 +109,7 @@
   (let [type (case property
                "trackname" :string
                "instrument-type" :string
-               "midi-inital-program" :mip
+               "midi-initial-program" :mip
                "synth" :synth
                :native)
         value (case type
