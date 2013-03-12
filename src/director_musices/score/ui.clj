@@ -18,43 +18,47 @@
 
 (def score-panel-reloader (atom nil))
 
-(defn track-options-dialog [track-id]
-  (let [p (ssw-mig/mig-panel)
-        items
-        (for [property ["trackname" "midi-channel"
-                        "midi-initial-volume" "midi-initial-program"
-                        "midi-bank-msb" "midi-bank-lsb"
-                        "midi-pan" "midi-reverb" 
-                        ;"synth" 
-                        "instrument-type"
-                        "track-delay"]]
-          [[(ssw/label :text property)] [(ssw/text :text (str (glue/get-track-property track-id property))
-                                                   :columns 15) 
-                                         "wrap"]])]
-    (ssw/config! p :items (reduce concat items))
-    (-> (ssw/dialog :content p :option-type :ok-cancel
-                    :success-fn (fn [_] 
-                                  (doseq [item items]
-                                    (glue/set-track-property track-id (.getText (ffirst item))
-                                                             (.getText (first (second item)))))))
-      ssw/pack!
-      ssw/show!)
+(def track-properties
+  [{:display-name "Track"
+    :property "trackname"
+    :type :string}
+   {:display-name "Midi channel"
+    :property "midi-channel"}
+   {:display-name "Midi volume"
+    :property "midi-initial-volume"}
+   {:display-name "Midi program"
+    :property "midi-initial-program"}
+   {:display-name "Track delay"
+    :property "track-delay"}
+   ])
+
+(defn track-property-editor [id property-map]
+  (let [{:keys [type property display-name]} property-map
+        value (glue/get-track-property id property)
+        c (case type
+            :string (ssw/text :text (str value) :columns 5)
+            (ssw/spinner :model value))
+        get-value (case type
+                    :string ssw/text
+                    ssw/selection)
+        listen-property (case type
+                          :string :document
+                          :change)
+        update-property (fn [value]
+                          (glue/set-track-property id property value))]
+    (ssw/listen c listen-property (fn [& _] (update-property (get-value c))))
+    c
     ))
 
-(defn track-options-view [id]
+(defn track-properties-view [id]
   (let [property-display
-        (for [property ["trackname" "midi-channel"
-                        "midi-initial-volume" "midi-initial-program"
-                        "midi-bank-msb" "midi-bank-lsb"
-                        "midi-pan" "midi-reverb" 
-                        ;"synth" 
-                        "instrument-type"
-                        "track-delay"]]
-          [[(ssw/label :text property)]
-           [(ssw/label :text (str (glue/get-track-property id property))) "gapleft 20, wrap"]])]
-    (ssw-mig/mig-panel :items (reduce concat
-                                      [[(str "Track " id) "span"]]
-                                      property-display)
+        (for [property-map track-properties]
+          (let [{:keys [display-name]} property-map
+                c (track-property-editor id property-map)]
+            [[(ssw/label :text display-name) "gapright 20"]
+             [c "growx, wrap"]
+             ]))]
+    (ssw-mig/mig-panel :items (reduce concat property-display)
                        :background "#DDD")))
 
 (defn edit-note [tc id mouse-evt]
@@ -93,7 +97,7 @@
     (show-graph view tc choice)))
 
 (defn score-view [id]
-  (let [opts-view (track-options-view id)
+  (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
                                         [(draw-track/get-view tc) "span"]
