@@ -32,7 +32,7 @@
                  :title "Director Musices"
                  :menubar (menu/menubar)
                  :size [800 :by 600]
-                 :on-close (if (global/get-arg :exit) :exit :hide)
+                 :on-close (if (global/get-arg :exit) :exit :dispose)
                  )
     (ssw/config! (global/get-main-panel)
                  :north player/player-panel
