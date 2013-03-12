@@ -115,6 +115,7 @@
         value (case type
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
-                :mip (read-string (re-find #"[0-9]+" value))
+                :mip (do ;(println (glue/eval-dm (str "(program-name-to-number \"" value "\")")))
+                       (read-string (re-find #"[0-9]+" value)))
                 :native (str value))]
     (glue/eval-dm (str "(setf " (property-acc id property) " " value ")"))))
