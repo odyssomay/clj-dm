@@ -116,21 +116,6 @@
                       (SwingUtilities/isRightMouseButton evt)
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
     (show-graph view tc :sl)
-    ; (ssw/listen graph-label :mouse-clicked
-    ;             (fn [_]
-    ;               (if-let [choice (ssw/input "what type?" :choices [:dr/ndr :sl :dr] 
-    ;                                          :to-string #(subs (str %) 1))]
-    ; note: not possible to use (name) here, since (name :dr/ndr) => "ndr"
-    ;                 (let [c (draw-score/score-graph-component choice sc :height 150)
-    ;                       remove-label (ssw/label :icon (resource "icons/stats_delete_small.png"))]
-    ;                   (ssw/listen remove-label :mouse-clicked
-    ;                               (fn [_] 
-    ;                                 (.remove view remove-label)
-    ;                                 (.remove view c)
-    ;                                 (.revalidate view)))
-    ;                   (.add view remove-label)
-    ;                   (.add view c "span")
-    ;                   (.revalidate view)))))
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     {:score-component tc
@@ -253,6 +238,3 @@
                                             "Mozart-Amaj-newformat.mus")))
                    (ssw/action :name "Open from disk..."
                                :handler choose-and-open-score)])]))
-
-; (defn reload-ui []
-;   (load-score-from-path @global/score-path))
