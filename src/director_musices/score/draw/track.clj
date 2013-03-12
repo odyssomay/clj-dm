@@ -243,8 +243,15 @@
 (defn get-state-atom [component-m] (:state component-m))
 
 (defn on-state-change [component-m f]
-  (add-watch (:state component-m) (gensym)
+  (add-watch (:state component-m) (gensym :state-change-listener)
              (fn [& _] (f))))
+
+(defn on-track-change [component-m f]
+  (add-watch (:state component-m) (gensym :track-change-listener)
+             (fn [_ _ prev-state new-state]
+               (if (not= (:track prev-state)
+                         (:track new-state))
+                 (f)))))
 
 (defn set-scale-x [component-m scale-x]
   (swap! (:state component-m) assoc :scale-x scale-x))
