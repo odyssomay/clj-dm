@@ -176,17 +176,19 @@
       (player/update-player)
       (dm-global/hide-progress-bar))))
 
-(defn load-score-from-path [path]
-  (load-new-score-with
-    #(glue/load-active-score-from-file path)
-    path)
-  (global/set-score-path path))
+(defn- load-score-from-file-with [file f]
+  (let [path (.getCanonicalPath file)
+        name (.getName file)]
+    (load-new-score-with #(f path) name)
+    (global/set-score-path path)))
 
-(defn load-score-from-midi [path]
-  (load-new-score-with
-    #(glue/load-active-score-from-midi-file path)
-    path)
-  (global/set-score-path path))
+(defn load-score-from-file [file]
+  (load-score-from-file-with
+    file glue/load-active-score-from-file))
+
+(defn load-score-from-midi-file [f]
+  (load-score-from-file-with
+    file glue/load-active-score-from-midi-file))
 
 ;; =====
 ;; Menu functions
@@ -195,10 +197,7 @@
 (defn choose-and-open-score [& _]
   (ssw-chooser/choose-file
     :success-fn 
-    (fn [_ f]
-      (let [path (.getCanonicalPath f)]
-        (load-score-from-path path)
-        ))))
+    (fn [_ f] (load-score-from-file f))))
 
 (defn choose-and-save-performance [& _]
   (if-let [f (util/new-file-dialog)]
@@ -212,9 +211,7 @@
 
 (defn choose-and-open-midi [& _]
   (ssw-chooser/choose-file
-    :success-fn (fn [_ f]
-                  (let [path (.getCanonicalPath f)]
-                    (load-score-from-midi path)))))
+    :success-fn (fn [_ f] (load-score-from-midi-file f))))
 
 (defn choose-and-save-midi [& _]
   (if-let [f (util/new-file-dialog)]
@@ -231,10 +228,8 @@
                   "No score loaded"
                   [(ssw/action :name "Open test score"
                                :handler (fn [_]
-                                          (load-new-score-with
-                                            #(let [f (file (util/tmp-dir) "test-score.mus")]
-                                               (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
-                                               (glue/load-active-score-from-file (.getCanonicalPath f)))
-                                            "Mozart-Amaj-newformat.mus")))
+                                          (let [f (file (util/tmp-dir) "Mozart-Amaj-newformat.mus")]
+                                            (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
+                                            (load-score-from-file f))))
                    (ssw/action :name "Open from disk..."
                                :handler choose-and-open-score)])]))
