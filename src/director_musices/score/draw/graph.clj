@@ -97,10 +97,11 @@
     (.setColor gc java.awt.Color/red)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
     ; (.drawLine gc 10 0 10 100)
-    (draw-note-property-graph gc state (:property-values state))
     (when (:prev-property-values state)
       (.setColor gc (java.awt.Color. 120 120 120))
-      (draw-note-property-graph gc state (:prev-property-values state)))))
+      (draw-note-property-graph gc state (:prev-property-values state)))
+    (draw-note-property-graph gc state (:property-values state))
+    ))
 
 (defn graph-data [track-component property]
   (let [notes (draw-track/get-notes track-component)
