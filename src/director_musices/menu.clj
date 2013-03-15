@@ -61,6 +61,9 @@
      (ssw/action :name "Convert chord list to chord name"
                  :handler (fn [& _] (glue/eval-dm "(convert-chord-list-to-chord-name)")
                             (reload-score)))
+     (ssw/action :name "Distribute phrase analysis"
+                 :handler (fn [& _] (glue/eval-dm "(distribute-phrase-analysis)")
+                            (reload-score)))
      :separator
      (ssw/action :name "Transpose from major to minor"
                  :handler (fn [_] (glue/eval-dm "(transpose-from-major-to-minor)")
