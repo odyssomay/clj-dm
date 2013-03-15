@@ -1,9 +1,9 @@
-(ns director-musices.utils
+(ns director-musices.util
   (:use [clojure.java.io :only [file]])
-  (:require [clojure.tools.logging :as logger]
-            [seesaw 
+  (:require [seesaw 
              [core :as ssw]
-             [chooser :as ssw-chooser]]))
+             [chooser :as ssw-chooser]]
+            [taoensso.timbre :as log]))
 
 (defn find-i
   "Find the index of value in coll"
@@ -16,16 +16,6 @@
         (if (= (first c) value)
           i
           (recur (inc i) (rest c)))))))
-
-(defmacro log
-  ([level msg]
-   `(logger/log ~level ~msg))
-  ([level e msg]
-   `(logger/log ~level (str ~msg "\n    "
-                            ~e   "\n        "
-                            (apply str (interpose "\n        "
-                                                  (take 7 (.getStackTrace ~e))))
-                            "\n"))))
 
 (defn new-file-dialog [& [parent]]
   (let [filename (ssw/text)
@@ -52,3 +42,42 @@
      (ssw/show! d#)
      ~@body
      (ssw/dispose! d#)))
+
+(defn centered-component [c]
+  (ssw/border-panel :center (ssw/horizontal-panel :items [:fill-h c :fill-h])))
+
+(defmacro thread [& body]
+  `(let [t# (Thread. (fn [] ~@body))]
+     (.start t#)
+     t#))
+
+(defn tmp-dir []
+  (if-let [path (System/getProperty "java.io.tmpdir")]
+    (java.io.File. path)
+    (java.io.File. ".")))
+
+(defn watch-file [file on-change & [rate]]
+  (let [rate (if rate rate 500)
+        last-modified (atom (.lastModified file))
+        task (proxy [java.util.TimerTask] []
+               (run []
+                    (let [new-last-modified (.lastModified file)]
+                      (if (= 0 new-last-modified)
+                        (log/error "i/o error when retreiving last modification of file.")
+                        (when (> new-last-modified @last-modified)
+                          (on-change)
+                          (reset! last-modified new-last-modified))))))
+        ]
+    (.scheduleAtFixedRate 
+      (new java.util.Timer)
+      task 0 rate)))
+
+(defn start-panel [label-text items]
+  (let [l (ssw/label :text label-text :h-text-position :left)]
+    (.setAlignmentX l java.awt.Component/CENTER_ALIGNMENT)
+    (.setFont l (.deriveFont (.getFont l) (float 15.0)))
+    (centered-component
+      (ssw/vertical-panel 
+        :items [l [:fill-v 20]
+                (ssw/horizontal-panel
+                  :items items)]))))

@@ -2,12 +2,17 @@
 ; https://github.com/odyssomay/simip
 
 (ns director-musices.player
-  (:use [director-musices.glue :only [save-midi-to-path]]
-        [clojure.java.io :only [resource file]])
-  (:require [seesaw 
+  (:use [clojure.java.io :only [resource file]])
+  (:require (director-musices
+              [global :as global]
+              [util :as util])
+            [director-musices.score.glue :as score-glue]
+            [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
   (:import javax.sound.midi.MidiSystem))
+
+(global/native!)
 
 (def sequencer (atom nil))
 (def transmitter (atom nil))
@@ -69,7 +74,7 @@
       (.addChangeListener position-indicator
         (reify javax.swing.event.ChangeListener
           (stateChanged [_ _]
-            (if (and (not @position-is-updating?)
+            (when (and (not @position-is-updating?)
                      (sequencer-ready?))
               (.setMicrosecondPosition @sequencer (.getValue position-indicator))))))
       (.addChangeListener position-indicator
@@ -246,7 +251,17 @@
     ))
 
 (defn update-player []
-  (save-midi-to-path "buffer.midi")
-  (open-midi-file (file "buffer.midi"))
-  )
+  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
+    (score-glue/save-midi-to-path (.getCanonicalPath f))
+    (open-midi-file f)))
 
+(defn listen-to-position [f]
+  (.addChangeListener position-indicator
+    (reify javax.swing.event.ChangeListener
+      (stateChanged [_ e]
+        (f (/ (.getValue position-indicator)
+              (.getMaximum position-indicator)))))))
+        ; (let [s (.getSource e)
+        ;       m (.getMaximum s)
+        ;       v (.getValue s)]
+        ;   (f (/ v m)))))))

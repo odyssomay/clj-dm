@@ -1,7 +1,10 @@
 (ns director-musices.main
+  (:require (director-musices
+              [core :as core])
+            [seesaw.core :as ssw])
   (:gen-class))
 
-(javax.swing.UIManager/put "FileChooser.readOnly" true)
-
 (defn -main [& args]
-  (eval (list 'do '(use 'director-musices.core) (apply list 'director-musices args))))
+  (ssw/invoke-later
+    (javax.swing.UIManager/put "FileChooser.readOnly" true)
+    (apply core/director-musices args)))

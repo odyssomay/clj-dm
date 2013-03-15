@@ -1,0 +1,14 @@
+
+# for windows project
+lein.bat
+
+# ignore build files
+*.jar
+
+# ignore run files
+*.log
+*.midi
+
+# ignore lein stuff
+target
+.lein*
