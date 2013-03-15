@@ -129,7 +129,6 @@
                     (cond
                       (SwingUtilities/isRightMouseButton evt)
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
-    (show-graph view tc :sl)
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     {:score-component tc
