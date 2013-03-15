@@ -1,5 +1,6 @@
 (ns director-musices.menu
-  (:require [director-musices.logging :as logging]
+  (:require (director-musices [util :as util])
+            [director-musices.logging :as logging]
             (director-musices.common-lisp
               [glue :as glue])
             (director-musices.score
@@ -53,7 +54,12 @@
     :items
     [(ssw/action :name "Log" :handler logging/show-log-frame)
      :separator
-     (ssw/action :name "About")]))
+     (ssw/action :name "Director-musices website"
+                 :handler
+                 (fn [_] (util/open-website
+                           "https://github.com/odyssomay/clj-dm#readme")))
+     ;(ssw/action :name "About")
+     ]))
 
 (defn menubar []
   (ssw/menubar :items 
