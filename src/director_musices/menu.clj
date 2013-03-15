@@ -1,5 +1,7 @@
 (ns director-musices.menu
-  (:require (director-musices [util :as util])
+  (:require (director-musices
+              [global :as global]
+              [util :as util])
             [director-musices.logging :as logging]
             (director-musices.common-lisp
               [glue :as glue])
@@ -78,7 +80,12 @@
                  :handler
                  (fn [_] (util/open-website
                            "https://github.com/odyssomay/clj-dm#readme")))
-     ;(ssw/action :name "About")
+     (ssw/action :name "About"
+                 :handler
+                 (fn [_] (let [d (ssw/dialog :content "Director-musices version 1.0.2"
+                                             :options []
+                                             :parent (global/get-frame))]
+                           (-> d ssw/pack! ssw/show!))))
      ]))
 
 (defn menubar []
