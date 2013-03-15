@@ -65,6 +65,13 @@
                  :handler (fn [& _] (glue/eval-dm "(distribute-phrase-analysis)")
                             (reload-score)))
      :separator
+     (ssw/action :name "Print all score vars"
+                 :handler (fn [& _] (glue/eval-dm "(print-music)")
+                            (reload-score)))
+     (ssw/action :name "Print all score vars round"
+                 :handler (fn [& _] (glue/eval-dm "(print-music-round)")
+                            (reload-score)))
+     :separator
      (ssw/action :name "Transpose from major to minor"
                  :handler (fn [_] (glue/eval-dm "(transpose-from-major-to-minor)")
                             (reload-score)))
