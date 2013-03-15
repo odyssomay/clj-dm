@@ -1,5 +1,12 @@
 This is a ui for [director-musices](https://github.com/docfry/Director-Musices).
 
+## Installation
+
+1. Download the [jar](http://sourceforge.net/projects/clj-dm/files/release/cross-platform/director-musices-1.0.0-standalone.jar/download).
+2. Run it. This can either be done by double-clicking (on some systems),
+or running java -jar <filename> in a console. Real executables hopefully coming soon.
+
+
 ## Documentation
 
 Can be found [on the wiki](../../wiki).
