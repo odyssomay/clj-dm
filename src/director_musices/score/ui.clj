@@ -168,8 +168,12 @@
     (ssw/config! (global/get-score-panel) :items [s-p])
     p))
 
-(defn reload-score-panel []
+(defn- reload-score-panel_hidden []
   (swap! score-panel-reloader not))
+
+(defn reload-score []
+  (reload-score-panel_hidden)
+  (player/update-player))
 
 ;; =====
 ;; Loading
