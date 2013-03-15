@@ -81,3 +81,7 @@
         :items [l [:fill-v 20]
                 (ssw/horizontal-panel
                   :items items)]))))
+
+(defn open-website [url]
+  (.browse (java.awt.Desktop/getDesktop)
+           (java.net.URI. url)))
