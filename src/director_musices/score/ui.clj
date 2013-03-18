@@ -60,7 +60,9 @@
                             :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
                                                 :model (glue/get-track-synth-program-list id))
                             nil))]
-    (ssw/listen c listen-property (fn [& _] (update-property (get-value c))))
+    (ssw/listen c listen-property
+                (fn [& _] (update-property (get-value c))
+                  (player/update-later!)))
     c))
 
 (defn track-properties-view [id]

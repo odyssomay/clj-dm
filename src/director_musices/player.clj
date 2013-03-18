@@ -14,6 +14,8 @@
 
 (global/native!)
 
+(declare update-if-update?)
+
 (def sequencer (atom nil))
 (def transmitter (atom nil))
 (def output-device (atom nil))
@@ -28,6 +30,7 @@
 ;; Controls
 
 (defn start! []
+  (update-if-update?)
   (when (sequencer-ready?)
     (if (< (- (.getTickLength @sequencer) (.getTickPosition @sequencer)) 10)
       (.setTickPosition @sequencer 0))
@@ -48,7 +51,7 @@
 
 (def position-is-updating? (atom false))
 (def position-indicator (ssw/slider :min 0 :max 0))
-(def position-indicator-label (ssw/label :text "0:0/0:0" :border 5))
+(def position-indicator-label (ssw/label :text "00:00/00:00" :border 5))
 (def indicator-panel (ssw/card-panel :items [[(ssw/border-panel :west position-indicator-label
                                                                 :center position-indicator)
                                               "position"]
@@ -83,14 +86,21 @@
             (ssw/config! position-indicator-label :text
               (let [pos-in-seconds (/ (.getValue (.getSource e)) 1000000)
                     length-in-seconds (/ (.getMicrosecondLength @sequencer) 1000000)]
-                (str (quot pos-in-seconds 60) 
-                     ":" 
-                     (int (mod pos-in-seconds 60))
-                     "/"
-                     (quot length-in-seconds 60)
-                     ":"
-                     (int (mod length-in-seconds 60))
-                     ))))))
+                (format "%02d:%02d/%02d:%02d"
+                        (int (quot pos-in-seconds 60))
+                        (int (mod pos-in-seconds 60))
+                        (int (quot length-in-seconds 60))
+                        (int (mod length-in-seconds 60))
+                        )
+                ; (str (quot pos-in-seconds 60) 
+                ;      ":" 
+                ;      (int (mod pos-in-seconds 60))
+                ;      "/"
+                ;      (quot length-in-seconds 60)
+                ;      ":"
+                ;      (int (mod length-in-seconds 60))
+                ;      )
+                )))))
       )))
 
 (defn show-position-indicator []
@@ -254,6 +264,14 @@
   (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
     (score-glue/save-midi-to-path (.getCanonicalPath f))
     (open-midi-file f)))
+
+(let [update? (atom false)]
+  (defn update-later! []
+    (reset! update? true))
+  
+  (defn update-if-update? []
+    (when @update?
+      (update-player))))
 
 (defn listen-to-position [f]
   (.addChangeListener position-indicator
