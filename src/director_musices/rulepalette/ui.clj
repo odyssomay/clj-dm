@@ -13,13 +13,6 @@
               [mig :as ssw-mig]))
   )
 
-(let [r-cont-loaded? (atom nil)]
-  (defn load-rulepalette-container []
-    (when (not @r-cont-loaded?)
-      (ssw/config! (global/get-rulepalette-panel)
-                   :items [(global/get-rulepalette-container)])
-      (swap! r-cont-loaded? not))))
-
 (def slider-precision 1000)
 
 (defn rules->string [rules]
@@ -159,7 +152,7 @@
   (.add (global/get-rulepalette-container)
         (:name rulepalette)
         (rulepalette-view rulepalette))
-  (load-rulepalette-container))
+  (global/load-rulepalette-container))
 
 ;; =====
 ;; Default
