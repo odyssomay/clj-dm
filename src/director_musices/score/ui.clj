@@ -27,6 +27,8 @@
 ; "instrument-type"
 ; "track-delay"
 
+(def track-properties-bg "#DDD")
+
 (def track-properties
   [{:display-name "Track"
     :property "trackname"
@@ -70,7 +72,8 @@
                         :max   (:max property-map)
                         :major-tick-spacing (:spacing property-map)
                         :minor-tick-spacing (:minor-spacing property-map)
-                        :snap-to-ticks? (:snap? property-map))
+                        :snap-to-ticks? (:snap? property-map)
+                        :background track-properties-bg)
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
@@ -106,7 +109,7 @@
              [c "growx, wrap"]
              ]))
         view (ssw-mig/mig-panel :items (reduce concat property-display)
-                                :background "#DDD"
+                                :background track-properties-bg
                                 :constraints ["gap 1"])]
     view))
 
