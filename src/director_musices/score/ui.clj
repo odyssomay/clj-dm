@@ -46,11 +46,13 @@
    {:display-name "Pan"
     :property "midi-pan"
     :type :slider :min 0 :max 127
-    :value 64 :spacing 16 :minor-spacing 8}
+    :value 64 :spacing 16 :minor-spacing 8
+    :snap? true}
    {:display-name "Volume"
     :property "midi-initial-volume"
     :type :slider :min -39 :max 0
-    :value 0 :spacing 13 :minor-spacing 13}
+    :value 0 :spacing 13 :minor-spacing 13
+    :snap? false}
    ])
 
 (defn track-property-editor [id property-map]
@@ -67,7 +69,8 @@
                         :min   (:min property-map)
                         :max   (:max property-map)
                         :major-tick-spacing (:spacing property-map)
-                        :minor-tick-spacing (:minor-spacing property-map))
+                        :minor-tick-spacing (:minor-spacing property-map)
+                        :snap-to-ticks? (:snap? property-map))
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
@@ -84,8 +87,7 @@
                                                 :model (glue/get-track-synth-program-list id))
                             nil))]
     (when (= type :slider)
-      (let [update-c (fn [show?] (ssw/config! c :paint-labels? show? :paint-ticks? show?
-                                              :snap-to-ticks? show?))]
+      (let [update-c (fn [show?] (ssw/config! c :paint-labels? show? :paint-ticks? show?))]
         (update-c false)
         (ssw/listen c
                     :mouse-entered (fn [e] (update-c true))
