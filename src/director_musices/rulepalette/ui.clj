@@ -79,6 +79,10 @@
   (let [rule-interact-num (ssw/spinner :model 2)
         rule-interact? (ssw/checkbox :text "Rule interact:"
                                      :selected? false)
+        update-rule-interact
+        (fn [& _]
+          (ssw/config! rule-interact-num
+                       :enabled? (.isSelected rule-interact?)))
         sync-rule (ssw/combobox :model ["melodic-sync"
                                         "no-sync"
                                         "simple-mel-sync"])
@@ -87,6 +91,8 @@
                                (ssw/selection sync-rule)
                                (if (.isSelected rule-interact?)
                                  (ssw/selection rule-interact-num))))]
+    (ssw/listen rule-interact? :selection update-rule-interact)
+    (update-rule-interact)
     (ssw-mig/mig-panel
       :constraints ["gap 1"]
       :items [[(ssw/action :name "Apply"
