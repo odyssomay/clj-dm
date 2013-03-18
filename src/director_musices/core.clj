@@ -39,7 +39,9 @@
                  :center (ssw/top-bottom-split
                            (score-global/get-score-panel)
                            (rule-global/get-rulepalette-panel)
-                           :divider-location 0.5))
+                           :divider-location 0.5
+                           :resize-weight 0.5
+                           :one-touch-expandable? true))
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
     (.setLocationRelativeTo fr nil)
