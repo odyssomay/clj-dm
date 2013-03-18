@@ -49,7 +49,7 @@
    {:display-name "Pan"
     :property "midi-pan"
     :type :slider :min 0 :max 127
-    :value 64 :spacing 16 :minor-spacing 8
+    :value 64 :spacing 32 :minor-spacing 8
     :snap? true}
    {:display-name "Volume"
     :property "midi-initial-volume"
@@ -112,7 +112,7 @@
           (let [{:keys [display-name]} property-map
                 c (track-property-editor id property-map)]
             [[(ssw/label :text display-name) "gapright 20"]
-             [c "growx, wrap"]
+             [c "w 125!, wrap"]
              ]))
         view (ssw-mig/mig-panel :items (reduce concat property-display)
                                 :background track-properties-bg
