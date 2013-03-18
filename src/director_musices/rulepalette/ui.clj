@@ -76,16 +76,32 @@
     ))))
 
 (defn- options-view [rulepalette]
-  (let [apply-this (fn [& _] (apply-rulepalette rulepalette "melodic-sync" nil))]
-    (ssw-mig/mig-panel :items [[(ssw/action :name "Apply"
-                                            :handler apply-this)
-                                "span"]
-                               [(ssw/action :name "Apply & Play"
-                                            :handler (fn [_]
-                                                       (apply-this)
-                                                       (player/start!)))
-                                "span"]
-                               ])))
+  (let [rule-interact-num (ssw/spinner :model 2)
+        rule-interact? (ssw/checkbox :text "Rule interact:"
+                                     :selected? false)
+        sync-rule (ssw/combobox :model ["melodic-sync"
+                                        "no-sync"
+                                        "simple-mel-sync"])
+        apply-this (fn [& _] (apply-rulepalette
+                               rulepalette
+                               (ssw/selection sync-rule)
+                               (if (.isSelected rule-interact?)
+                                 (ssw/selection rule-interact-num))))]
+    (ssw-mig/mig-panel
+      :constraints ["gap 1"]
+      :items [[(ssw/action :name "Apply"
+                           :handler apply-this)
+               "span, growx"]
+              [(ssw/action :name "Apply & Play"
+                           :handler (fn [_]
+                                      (apply-this)
+                                      (player/start!)))
+               "span, growx"]
+              [rule-interact? "span"]
+              [rule-interact-num "w 50!, align right, span"]
+              ["Sync:" "span"]
+              [sync-rule "growx, span"]
+              ])))
 
 (defn rulepalette-view [rulepalette]
   (ssw/scrollable
