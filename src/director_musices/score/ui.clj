@@ -66,10 +66,8 @@
             (ssw/slider :value (:value property-map)
                         :min   (:min property-map)
                         :max   (:max property-map)
-                        :paint-ticks? true
                         :major-tick-spacing (:spacing property-map)
-                        :minor-tick-spacing (:minor-spacing property-map)
-                        :snap-to-ticks? true)
+                        :minor-tick-spacing (:minor-spacing property-map))
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
@@ -85,6 +83,13 @@
                             :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
                                                 :model (glue/get-track-synth-program-list id))
                             nil))]
+    (when (= type :slider)
+      (let [update-c (fn [show?] (ssw/config! c :paint-labels? show? :paint-ticks? show?
+                                              :snap-to-ticks? show?))]
+        (update-c false)
+        (ssw/listen c
+                    :mouse-entered (fn [e] (update-c true))
+                    :mouse-exited (fn [e] (update-c false)))))
     (ssw/listen c listen-property
                 (fn [& _] (update-property (get-value c))
                   (player/update-later!)))
