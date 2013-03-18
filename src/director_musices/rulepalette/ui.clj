@@ -16,7 +16,8 @@
 (let [r-cont-loaded? (atom nil)]
   (defn load-rulepalette-container []
     (when (not @r-cont-loaded?)
-      (ssw/config! (global/get-rulepalette-panel) :items [(global/get-rulepalette-container)])
+      (ssw/config! (global/get-rulepalette-panel)
+                   :items [(global/get-rulepalette-container)])
       (swap! r-cont-loaded? not))))
 
 (def slider-precision 1000)
@@ -64,7 +65,9 @@
 (defn- rule-view [rule-atom]
   (let [{:keys [name parameterless? enabled? v options]} @rule-atom
         enabled? (ssw/checkbox :selected? enabled?)]
-    (ssw/listen enabled? :selection (fn [_] (swap! rule-atom assoc :enabled? (.isSelected enabled?))))
+    (ssw/listen enabled? :selection
+                (fn [_] (swap! rule-atom assoc
+                               :enabled? (.isSelected enabled?))))
     ;(add-watch rule-atom nil (fn [_ _ _ v] (println "new value:" (pr-str v))))
     (concat [[enabled?] [name]]
             (if parameterless?
@@ -88,9 +91,10 @@
   (ssw/scrollable
     (ssw/horizontal-panel
       :items [(options-view rulepalette)
-              (ssw-mig/mig-panel :items (reduce concat (map rule-view (:rules rulepalette)))
-                                 :constraints ["gap 0"]
-                                 )]
+              (ssw-mig/mig-panel
+                :items (reduce concat (map rule-view (:rules rulepalette)))
+                :constraints ["gap 0"]
+                )]
       ;:align :leading
       )
     :border nil))
