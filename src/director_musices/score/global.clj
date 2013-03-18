@@ -4,7 +4,8 @@
 
 (let [score-loaded? (atom false)
       score-path (atom "")
-      score-panel-atom (atom nil)]
+      score-panel-atom (atom nil)
+      scale-atom (atom 1.0)]
   (add-watch score-path nil (fn [& _] (reset! score-loaded? true)))
   
   (defn get-score-loaded? [] @score-loaded?)
@@ -16,4 +17,12 @@
   (defn init []
     (reset! score-panel-atom (ssw/horizontal-panel)))
   
-  (defn get-score-panel [] @score-panel-atom))
+  (defn get-score-panel [] @score-panel-atom)
+  
+  (defn scale! [scale] (reset! scale-atom scale))
+  
+  (defn on-scale-change [f]
+    (f @scale-atom)
+    (add-watch scale-atom (gensym)
+               (fn [_ _ _ new-scale] (f new-scale))))
+  )

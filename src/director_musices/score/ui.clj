@@ -174,6 +174,7 @@
                       (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
+    (global/on-scale-change #(draw-track/set-scale tc %))
     {:score-component tc
      :view view
      }))

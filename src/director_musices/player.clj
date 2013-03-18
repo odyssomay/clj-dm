@@ -6,7 +6,9 @@
   (:require (director-musices
               [global :as global]
               [util :as util])
-            [director-musices.score.glue :as score-glue]
+            (director-musices.score
+              [global :as score-global]
+              [glue :as score-glue])
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
@@ -224,25 +226,29 @@
         (.setFocusable plb true)
         (.setFocusable pab false)
         (.requestFocusInWindow plb)))
-    (ssw/toolbar 
-      :floatable? false
-      :items 
+    (ssw/toolbar
+      :floatable? true
+      :items
       [plb pab
        :separator
        (ssw/action :icon (resource "icons/stop.png")
                    :handler (fn [_] (stop!))
                    :tip "stop")
        :separator
-;       (ssw/action :icon (resource "icons/document.png")
-;                   :handler (fn [_] (choose-midi-file))
-;                   :tip "Open midi file")
-;       (ssw/action :icon (resource "icons/document_refresh.png")
-;                   :handler (fn [_] (if-not (reload-midi-file)
-;                                      (choose-midi-file)))
-;                   :tip "Reload selected file")
        (ssw/action :icon (resource "icons/gear.png")
                    :handler (fn [_] (choose-midi-device))
-                   :tip "Select midi device")])))
+                   :tip "Select midi device")
+       :separator
+       (ssw/slider :value 100
+                   :min 30
+                   :max 300
+                   :listen [:change (fn [e]
+                                      (score-global/scale!
+                                        (double (/ (.getValue (.getSource e))
+                                                   100)))
+                                      )])
+       ]
+      )))
 
 (defn disable-focus [content]
   (let [cs (.getComponents content)]
