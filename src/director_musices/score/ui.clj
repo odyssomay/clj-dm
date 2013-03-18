@@ -49,8 +49,8 @@
     :value 64 :spacing 16 :minor-spacing 8}
    {:display-name "Volume"
     :property "midi-initial-volume"
-    :type :slider :min -64 :max 0
-    :value 0 :spacing 16 :minor-spacing 8}
+    :type :slider :min -39 :max 0
+    :value 0 :spacing 13 :minor-spacing 13}
    ])
 
 (defn track-property-editor [id property-map]
