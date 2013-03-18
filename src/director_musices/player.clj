@@ -239,6 +239,7 @@
                    :handler (fn [_] (choose-midi-device))
                    :tip "Select midi device")
        :separator
+       "scale"
        (ssw/slider :value 100
                    :min 30
                    :max 300
