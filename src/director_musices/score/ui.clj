@@ -111,17 +111,21 @@
     view))
 
 (defn edit-note [tc id mouse-evt]
-  (let [note-id (draw-track/get-note-for-x tc (.getX mouse-evt))
+  (let [note (draw-track/get-note-for-x tc (.getX mouse-evt))
+        note-id (:index note)
         ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
                                                        ", " "\n")
                                (clojure.string/replace #"\{|\}" ""))
-                     :multi-line? true)]
-    (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                     :multi-line? true)
+        dialog (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
                            :parent (dm-global/get-frame)
                            :success-fn
                            (fn [& _]
                              (glue/set-segment id note-id
-                                               (read-string (str "{" (.getText ta) "}"))))))))
+                                               (read-string (str "{" (.getText ta) "}")))))]
+    (ssw/listen dialog :window-closed (fn [& _] (draw-track/stop-note-highlight! tc)))
+    (draw-track/highlight-note! tc note)
+    (ssw/show! dialog)))
 
 (defn show-graph [view tc type]
   (let [gc (draw-graph/graph-component tc type)

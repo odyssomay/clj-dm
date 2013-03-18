@@ -219,6 +219,8 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
+              (when-let [hnote (:highlighted-note @state)]
+                (highlight-note g hnote @state))
               ;(highlight-note g (nth (calc/get-notes (get-track)) 3)
               ;                @state)
               ;(draw-line-indicator g @state)
@@ -270,13 +272,19 @@
 
 (defn get-note-for-x [component-m x]
   (let [{:keys [track scale scale-x]} @(:state component-m)
+        notes (:notes track)
         x (* (/ 1 (* scale scale-x))
-             (- x (+ (if (:clef track) 35 0) 10)))
-        note-distances (map :absolute-x-offset (:notes track))]
-    (ffirst (sort-by second (map-indexed #(vec [%1 (abs (- x %2))]) note-distances)))))
+             (- x (+ (if (:clef track) 35 0) 10)))]
+    (first (sort-by #(abs (- x (:absolute-x-offset %))) notes))))
 
 (defn get-track [component-m] (:track @(:state component-m)))
 (defn set-track [component-m track]
   (swap! (:state component-m) assoc :track (calc/calculate-track track)))
 
 (defn get-notes [component-m] (:notes (get-track component-m)))
+
+(defn highlight-note! [component-m note]
+  (swap! (:state component-m) assoc :highlighted-note note))
+
+(defn stop-note-highlight! [component-m]
+  (swap! (:state component-m) dissoc :highlighted-note))
