@@ -75,11 +75,17 @@
         ln (last notes)]
     (assoc track :width (+ (:absolute-x-offset ln) (:length ln)))))
 
+(defn add-note-indices [track]
+  (let [notes (->> (:notes track)
+                   (map-indexed (fn [index note] (assoc note :index index))))]
+    (assoc track :notes notes)))
+
 (defn calculate-track [track]
   (-> track
       (update-in [:notes] calculate-notes)
       add-track-width
-      add-track-heights))
+      add-track-heights
+      add-note-indices))
 
 ;; =====
 ;; Helper functions
