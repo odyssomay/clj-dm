@@ -94,12 +94,11 @@
     (.setColor gc java.awt.Color/black)
     (.drawLine gc 0 0 width 0)
     (draw-height-lines gc state)
-    (.setColor gc java.awt.Color/red)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
-    ; (.drawLine gc 10 0 10 100)
     (when (:prev-property-values state)
       (.setColor gc (java.awt.Color. 120 120 120))
       (draw-note-property-graph gc state (:prev-property-values state)))
+    (.setColor gc java.awt.Color/red)
     (draw-note-property-graph gc state (:property-values state))
     ))
 
