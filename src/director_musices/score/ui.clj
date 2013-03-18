@@ -85,6 +85,7 @@
                                (clojure.string/replace #"\{|\}" ""))
                      :multi-line? true)]
     (ssw/show! (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
+                           :parent (dm-global/get-frame)
                            :success-fn
                            (fn [& _]
                              (glue/set-segment id note-id
