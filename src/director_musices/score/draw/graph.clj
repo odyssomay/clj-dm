@@ -86,6 +86,9 @@
         width (.getWidth track-view)]
     (ssw-graphics/anti-alias gc)
     
+    (let [scale (draw-track/get-scale track-component)]
+      (.scale gc scale scale))
+    
     (.translate gc 0 5)
     
     (let [middle (int (/ height 2))]
@@ -155,15 +158,12 @@
                              update-property-values)
                            graph-opts))
         c (proxy [javax.swing.JComponent] []
-            (paintComponent [g]
-              ;(proxy-super paintComponent g)
-              ;(.clearRect g 0 0 (.getWidth this) (.getHeight this))
-              (paint g @state)
-              )
+            (paintComponent [g] (paint g @state))
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize (draw-track/get-view track-component)))
-                (+ (:height @state) 10)
+                (* (draw-track/get-scale track-component)
+                   (+ (:height @state) 10))
                 )))
         refresh (fn [] (swap! state update-state))
         update-property-values! (fn [] (swap! state update-property-values))
