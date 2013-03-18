@@ -24,7 +24,6 @@
   (logging/init)
   (cli/parse-args args)
   (global/init)
-  (player/init)
   (rule-ui/init)
   (score-ui/init)
   (let [arg? (fn [arg] (some #(= % arg) args))

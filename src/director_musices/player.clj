@@ -207,9 +207,8 @@
 ;; =====
 ;; Init
 ;; =====
-(defn init []
-  (open-sequencer (first (get-sequencers)))
-  (open-output-device (first (get-output-devices))))
+(open-sequencer (first (get-sequencers)))
+(open-output-device (first (get-output-devices)))
 
 ;; =====
 ;; Update
