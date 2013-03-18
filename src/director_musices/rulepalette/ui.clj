@@ -105,14 +105,13 @@
 
 (defn rulepalette-view [rulepalette]
   (ssw/scrollable
-    (ssw/horizontal-panel
-      :items [(options-view rulepalette)
-              (ssw-mig/mig-panel
-                :items (reduce concat (map rule-view (:rules rulepalette)))
-                :constraints ["gap 0"]
-                )]
-      ;:align :leading
-      )
+    (ssw-mig/mig-panel
+      :items [[(options-view rulepalette) "dock west"]
+              [(ssw-mig/mig-panel
+                 :items (reduce concat (map rule-view (:rules rulepalette)))
+                 :constraints ["gap 0"]
+                 )
+               "span"]])
     :border nil))
 
 ;; =====
