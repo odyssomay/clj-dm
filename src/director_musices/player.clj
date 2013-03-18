@@ -7,7 +7,6 @@
               [global :as global]
               [util :as util])
             (director-musices.score
-              [global :as score-global]
               [glue :as score-glue])
             [seesaw 
              [core :as ssw]
@@ -205,73 +204,16 @@
       (-> dialog ssw/pack! ssw/show!)
       (show-position-indicator))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Main UI
+;; =====
+;; Init
+;; =====
+(defn init []
+  (open-sequencer (first (get-sequencers)))
+  (open-output-device (first (get-output-devices))))
 
-(def controls-panel
-  (let [pla (ssw/action :icon (resource "icons/play.png") :tip "play")
-        paa (ssw/action :icon (resource "icons/pause.png") :tip "pause")
-        plb (ssw/button :action pla)
-        pab (ssw/button :action paa)]
-    (ssw/config! pla :handler
-      (fn [_]
-        (if-not (start!)
-          (choose-midi-file))
-        (.setFocusable plb false)
-        (.setFocusable pab true)
-        (.requestFocusInWindow pab)))
-    (ssw/config! paa :handler
-      (fn [_]
-        (pause!)
-        (.setFocusable plb true)
-        (.setFocusable pab false)
-        (.requestFocusInWindow plb)))
-    (ssw/toolbar
-      :floatable? true
-      :items
-      [plb pab
-       :separator
-       (ssw/action :icon (resource "icons/stop.png")
-                   :handler (fn [_] (stop!))
-                   :tip "stop")
-       :separator
-       (ssw/action :icon (resource "icons/gear.png")
-                   :handler (fn [_] (choose-midi-device))
-                   :tip "Select midi device")
-       :separator
-       "scale"
-       (ssw/slider :value 100
-                   :min 20
-                   :max 180
-                   :major-tick-spacing 40
-                   :minor-tick-spacing 10
-                   :snap-to-ticks? true
-                   :paint-ticks? true
-                   :size [200 :by 30]
-                   :listen [:change (fn [e]
-                                      (score-global/scale!
-                                        (double (/ (.getValue (.getSource e))
-                                                   100)))
-                                      )])
-       ]
-      )))
-
-(defn disable-focus [content]
-  (let [cs (.getComponents content)]
-    (if (> (count cs) 0)
-      (dorun (map disable-focus cs))
-      (if-not (= (.getToolTipText content) "play")
-        (.setFocusable content false)))))
-
-(def player-panel
-  (let [content (ssw/border-panel :center controls-panel
-                                  :south indicator-panel)]
-    (open-sequencer (first (get-sequencers)))
-    (open-output-device (first (get-output-devices)))
-    (disable-focus content)
-    content
-    ))
-
+;; =====
+;; Update
+;; =====
 (defn update-player []
   (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
     (score-glue/save-midi-to-path (.getCanonicalPath f))

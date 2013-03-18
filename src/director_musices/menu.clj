@@ -1,11 +1,14 @@
 (ns director-musices.menu
+  (:use [clojure.java.io :only [resource]])
   (:require (director-musices
               [global :as global]
+              [player :as player]
               [util :as util])
             [director-musices.logging :as logging]
             (director-musices.common-lisp
               [glue :as glue])
             (director-musices.score
+              [global :as score-global]
               [menu :as score-menu]
               [ui :as score-ui])
             [seesaw.core :as ssw]
@@ -106,3 +109,40 @@
                 edit-menu
                 help-menu
                 ]))
+
+(defn toolbar []
+  (ssw/toolbar
+    :floatable? true
+    :items
+    [(ssw/action :icon (resource "icons/play.png") :tip "play"
+                 :handler (fn [_] (player/start!)))
+     (ssw/action :icon (resource "icons/pause.png") :tip "pause"
+                 :handler (fn [_] (player/pause!)))
+     :separator
+     (ssw/action :icon (resource "icons/stop.png")
+                 :handler (fn [_] (player/stop!))
+                 :tip "stop")
+     :separator
+     (ssw/action :icon (resource "icons/gear.png")
+                 :handler (fn [_] (player/choose-midi-device))
+                 :tip "Select midi device")
+     :separator
+     "scale"
+     (ssw/slider :value 100
+                 :min 20
+                 :max 180
+                 :major-tick-spacing 40
+                 :minor-tick-spacing 10
+                 :snap-to-ticks? true
+                 :paint-ticks? true
+                 :size [200 :by 30]
+                 :listen [:change (fn [e]
+                                    (score-global/scale!
+                                      (double (/ (.getValue (.getSource e))
+                                                 100)))
+                                    )])
+     ]))
+
+(defn toolbar-panel []
+  (ssw/border-panel :center (toolbar)
+                    :south player/indicator-panel))
