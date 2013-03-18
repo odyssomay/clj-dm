@@ -47,6 +47,7 @@
                                 (glue/eval-dm (str "(set-first 'key \"" k "\")"))
                                 (glue/eval-dm (str "(set-first 'modus \"" m "\")"))))
                             (reload-score)))
+     :separator
      (ssw/action :name "Remove Parameter"
                  :handler (fn [& _] (when-let [raw (ssw/input "Remove parameter" :title "Remove parameter")]
                                       (let [p (read-string raw)]
@@ -92,10 +93,11 @@
                            "https://github.com/odyssomay/clj-dm#readme")))
      (ssw/action :name "About"
                  :handler
-                 (fn [_] (let [d (ssw/dialog :content "Director-musices version 1.0.2"
-                                             :options []
-                                             :parent (global/get-frame))]
-                           (-> d ssw/pack! ssw/show!))))
+                 (fn [_] (let [d (ssw/custom-dialog :content "Director-musices version 1.0.2")]
+                           (doto d
+                             ssw/pack!
+                             (.setLocationRelativeTo (global/get-frame))
+                             ssw/show!))))
      ]))
 
 (defn menubar []
