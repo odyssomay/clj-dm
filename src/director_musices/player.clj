@@ -241,8 +241,13 @@
        :separator
        "scale"
        (ssw/slider :value 100
-                   :min 30
-                   :max 300
+                   :min 20
+                   :max 180
+                   :major-tick-spacing 40
+                   :minor-tick-spacing 10
+                   :snap-to-ticks? true
+                   :paint-ticks? true
+                   :size [200 :by 30]
                    :listen [:change (fn [e]
                                       (score-global/scale!
                                         (double (/ (.getValue (.getSource e))
