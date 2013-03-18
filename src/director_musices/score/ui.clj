@@ -34,6 +34,11 @@
    {:display-name "Synth"
     :property "synth"
     :type :synth}
+   {:display-name "Pan"
+    :property "midi-pan"
+    :type :slider
+    :min 0 :max 127
+    :value 64}
    ])
 
 (defn track-property-editor [id property-map]
@@ -45,6 +50,10 @@
             :midi-program-list
             (ssw/combobox :id :program-list
                           :model (glue/get-track-synth-program-list id))
+            :slider
+            (ssw/slider :value (:value property-map)
+                        :min   (:min property-map)
+                        :max   (:max property-map))
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
