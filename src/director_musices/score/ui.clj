@@ -278,6 +278,11 @@
   (if-let [f (util/new-file-dialog)]
     (glue/save-midi-to-path (.getCanonicalPath f))))
 
+(defn open-test-score [& _]
+  (let [f (file (util/tmp-dir) "Mozart-Amaj-newformat.mus")]
+    (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
+    (load-score-from-file f)))
+
 ;; =====
 ;; Init
 ;; =====
@@ -288,9 +293,6 @@
                [(util/start-panel
                   "No score loaded"
                   [(ssw/action :name "Open test score"
-                               :handler (fn [_]
-                                          (let [f (file (util/tmp-dir) "Mozart-Amaj-newformat.mus")]
-                                            (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
-                                            (load-score-from-file f))))
+                               :handler open-test-score)
                    (ssw/action :name "Open from disk..."
                                :handler choose-and-open-score)])]))
