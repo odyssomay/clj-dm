@@ -30,21 +30,22 @@
 (def track-properties-bg "#DDD")
 
 (def track-properties
-  [{:display-name "Track"
+  [{:display-name "Active"
+    :property "active-p"
+    :type :bool}
+   {:display-name "Track"
     :property "trackname"
     :type :string}
    {:display-name "Midi channel"
     :property "midi-channel"}
-   {:display-name "Midi volume"
-    :property "midi-initial-volume"}
-   {:display-name "Midi program"
+   {:display-name "Synth"
+    :property "synth"
+    :type :synth}
+   {:display-name "Program"
     :property "midi-initial-program"
     :type :midi-program-list}
    {:display-name "Track delay"
     :property "track-delay"}
-   {:display-name "Synth"
-    :property "synth"
-    :type :synth}
    {:display-name "Pan"
     :property "midi-pan"
     :type :slider :min 0 :max 127
@@ -61,6 +62,9 @@
   (let [{:keys [type property display-name]} property-map
         value (glue/get-track-property id property)
         c (case type
+            :bool (ssw/checkbox :selected? value
+                                :background track-properties-bg
+                                :halign :right)
             :string (ssw/text :text (str value) :columns 5)
             :synth (ssw/combobox :id :synth :model (glue/get-defined-synths))
             :midi-program-list
@@ -77,10 +81,12 @@
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
+                    :bool #(.isSelected %)
                     ssw/selection)
         listen-property (case type
                           :string :document
                           :synth :selection
+                          :bool :selection
                           :midi-program-list :selection
                           :change)
         update-property (fn [value]

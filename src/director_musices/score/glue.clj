@@ -35,6 +35,7 @@
 (defn clj->value [v]
   (condp = v
     true 'T
+    false 'NIL
     nil 'NIL
     v))
 
@@ -103,16 +104,19 @@
 (defn get-track-property [id property]
   (case property
     "synth" (first (get-defined-synths))
+    "active-p" (value->clj (glue/eval-dm (property-acc id property)))
     (.javaInstance (glue/eval-dm (property-acc id property)))))
 
 (defn set-track-property [id property value]
   (let [type (case property
+               "active-p" :bool
                "trackname" :string
                "instrument-type" :string
                "midi-initial-program" :mip
                "synth" :synth
                :native)
         value (case type
+                :bool (clj->value value)
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
                 :mip (do ;(println (glue/eval-dm (str "(program-name-to-number \"" value "\")")))
