@@ -74,7 +74,8 @@
              [c "growx, wrap"]
              ]))
         view (ssw-mig/mig-panel :items (reduce concat property-display)
-                                :background "#DDD")]
+                                :background "#DDD"
+                                :constraints ["gap 1"])]
     view))
 
 (defn edit-note [tc id mouse-evt]

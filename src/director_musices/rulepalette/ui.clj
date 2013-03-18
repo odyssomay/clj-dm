@@ -58,7 +58,7 @@
         (changedUpdate [_ _])
         (insertUpdate [_ _] (update-options))
         (removeUpdate [_ _] (update-options))))
-    [[value-text] [slider] [options-text "wrap"]]
+    [[value-text "gapleft 3"] [slider] [options-text "wrap"]]
     ))
 
 (defn- rule-view [rule-atom]
@@ -88,7 +88,9 @@
   (ssw/scrollable
     (ssw/horizontal-panel
       :items [(options-view rulepalette)
-              (ssw-mig/mig-panel :items (reduce concat (map rule-view (:rules rulepalette))))]
+              (ssw-mig/mig-panel :items (reduce concat (map rule-view (:rules rulepalette)))
+                                 :constraints ["gap 0"]
+                                 )]
       ;:align :leading
       )
     :border nil))
