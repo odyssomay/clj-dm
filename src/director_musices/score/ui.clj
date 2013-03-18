@@ -18,6 +18,15 @@
 
 (def score-panel-reloader (atom nil))
 
+; All properties:
+; "trackname" "midi-channel"
+; "midi-initial-volume" "midi-initial-program"
+; "midi-bank-msb" "midi-bank-lsb"
+; "midi-pan" "midi-reverb" 
+; "synth" 
+; "instrument-type"
+; "track-delay"
+
 (def track-properties
   [{:display-name "Track"
     :property "trackname"
@@ -36,9 +45,12 @@
     :type :synth}
    {:display-name "Pan"
     :property "midi-pan"
-    :type :slider
-    :min 0 :max 127
-    :value 64}
+    :type :slider :min 0 :max 127
+    :value 64 :spacing 16 :minor-spacing 8}
+   {:display-name "Volume"
+    :property "midi-initial-volume"
+    :type :slider :min -64 :max 0
+    :value 0 :spacing 16 :minor-spacing 8}
    ])
 
 (defn track-property-editor [id property-map]
@@ -53,7 +65,11 @@
             :slider
             (ssw/slider :value (:value property-map)
                         :min   (:min property-map)
-                        :max   (:max property-map))
+                        :max   (:max property-map)
+                        :paint-ticks? true
+                        :major-tick-spacing (:spacing property-map)
+                        :minor-tick-spacing (:minor-spacing property-map)
+                        :snap-to-ticks? true)
             (ssw/spinner :model value))
         get-value (case type
                     :string ssw/text
