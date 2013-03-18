@@ -145,23 +145,20 @@
 (defn highlight-note [g note {:keys [track scale-x scale] :as state}]
   (let [gc (.create g)]
     (ssw-graphics/anti-alias gc)
-    ;(.translate gc 0 20)
     (.scale gc scale scale)
-    (.translate gc
-                (double 0.0) 
+    (.translate gc (double 0.0) 
                 (double (- (calc/get-lowest track))))
-    (when-let [clef (:clef state)]
+    (when (:clef state)
       (.translate gc 5 0)
-      ;(draw-clef gc clef)
-      (.translate gc 30 0)
-      ;(draw-bar gc)
-      )
+      (.translate gc 30 0))
     (.translate gc 10 0)
     (.translate gc
                 (double (* scale-x (:absolute-x-offset note)))
-                (double 0))
+                (double (:y-offset note)))
+    (.setColor gc (java.awt.Color. 255 0 0 100))
+    (.fillRect gc -1 -1 11 10)
     (.setColor gc java.awt.Color/red)
-    (.drawLine gc 0 0 0 (* 4 line-separation))
+    (.drawRect gc -1 -1 11 10)
     ))
 
 (defn draw-line-indicator [g state]
@@ -220,11 +217,7 @@
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
               (when-let [hnote (:highlighted-note @state)]
-                (highlight-note g hnote @state))
-              ;(highlight-note g (nth (calc/get-notes (get-track)) 3)
-              ;                @state)
-              ;(draw-line-indicator g @state)
-              )
+                (highlight-note g hnote @state)))
             (getPreferredSize []
               (let [t (get-track)]
                 (java.awt.Dimension.
