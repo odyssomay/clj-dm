@@ -39,14 +39,19 @@
                     syncrule rule-interaction)
   (score-ui/reload-score))
 
-(defn- parameter-view [rule-atom]
-  (let [{:keys [v options]} @rule-atom
+(defn- parameter-view [rp rule]
+  (let [{:keys [v options id]} rule
         value-text (ssw/text :text v :columns 5)
         slider (ssw/slider :min (* -5 slider-precision) :max (* 5 slider-precision)
                            :value (* v slider-precision) :snap-to-ticks? false)
         options-text (ssw/text :text options :columns 30)
-        update-value #(swap! rule-atom assoc :v (read-string (.getText value-text)))
-        update-options #(swap! rule-atom assoc :options (.getText options-text))]
+        update-value (fn []
+                       (update-rule!
+                         rp id
+                         #(assoc % :v (read-string (.getText value-text)))))
+        update-options (fn [] (update-rule!
+                                rp id
+                                #(assoc % :options (.getText options-text))))]
     (ssw/listen value-text :action 
                 (fn [_] (update-value)
                   (.setValue slider (* (read-string (.getText value-text)) 
@@ -63,18 +68,28 @@
     [[value-text "gapleft 3"] [slider] [options-text "wrap"]]
     ))
 
-(defn- rule-view [rule-atom]
-  (let [{:keys [name parameterless? enabled? v options]} @rule-atom
+(defn- rule-view [rp rule]
+  (let [{:keys [name parameterless? enabled? v options id]} rule
         enabled? (ssw/checkbox :selected? enabled?)]
     (ssw/listen enabled? :selection
-                (fn [_] (swap! rule-atom assoc
-                               :enabled? (.isSelected enabled?))))
-    ;(add-watch rule-atom nil (fn [_ _ _ v] (println "new value:" (pr-str v))))
+                (fn [_] (update-rule!
+                          rp id #(assoc % :enabled?
+                                   (.isSelected enabled?)))))
     (concat [[enabled?] [name]]
             (if parameterless?
               [["" "wrap"]]
-              (parameter-view rule-atom)
-    ))))
+              (parameter-view rp rule)))))
+
+(defn rules-view [rulepalette]
+  (let [p (ssw-mig/mig-panel :constraints ["gap 0"])
+        update-view (fn []
+                      (ssw/config!
+                        p
+                        :items (reduce concat (map #(rule-view rulepalette %)
+                                                   (get-rules rulepalette)))))
+        ]
+    (update-view)
+    p))
 
 (defn- options-view [rulepalette]
   (let [rule-interact-num (ssw/spinner :model 2)
@@ -114,11 +129,7 @@
   (ssw/scrollable
     (ssw-mig/mig-panel
       :items [[(options-view rulepalette) "dock west"]
-              [(ssw-mig/mig-panel
-                 :items (reduce concat (map rule-view (:rules rulepalette)))
-                 :constraints ["gap 0"]
-                 )
-               "span"]])
+              [(rules-view rulepalette) "span"]])
     :border nil))
 
 ;; =====
