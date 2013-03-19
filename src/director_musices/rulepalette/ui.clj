@@ -134,31 +134,49 @@
        (into {})))
 
 (defn rule-raw->rule [l]
-  (merge {:name (str (first l))
-          :enabled? true}
-         (if (or (= (second l) 'T)
-                 (= (second l) 'F))
-           {:parameterless? true}
-           {:v (second l)
-            :options (apply str (interpose " " (drop 2 l)))}
-           )))
+  (let [rule-name (str (first l))]
+    (merge {:name rule-name
+            :enabled? true
+            :id (gensym rule-name)}
+           (if (or (= (second l) 'T)
+                   (= (second l) 'F))
+             {:parameterless? true}
+             {:v (second l)
+              :options (apply str (interpose " " (drop 2 l)))}
+             ))))
 
-(defn string->rulepalette [string]
+(defn string->rulepalette [string & {:as opts}]
   (let [raw (string->rulepalette-raw string)
-        rules (map rule-raw->rule (:all-rules raw))]
-    {:rules (map atom rules)
-     :path nil
-     :name "Undefined"
-     }
-    ))
+        rules-no-map (->> (:all-rules raw)
+                          (map rule-raw->rule)
+                          (map #(vec [(:id %) (atom %)]))
+                          )
+        order (atom (map first rules-no-map))
+        rules (into {} rules-no-map)]
+    (reify Rulepalette
+      (get-rules [this]
+        (reduce (fn [rule-list id]
+                  (conj rule-list (get-rule this id)))
+                []
+                @order))
+      (update-rule! [this id f]
+        (swap! (get rules id) f))
+      (get-rule [this id] @(get rules id))
+      (on-rule-change [this id f]
+        (add-watch (get rules id) nil
+                   (fn [_ _ _ new-rule] (f new-rule))))
+      (on-order-change [this f])
+      (get-name [this] (str (:name opts)))
+      )))
 
 (defn path->rulepalette [path]
-  (-> (string->rulepalette (slurp path))
-      (assoc :path path :name (.getName (file path)))))
+  (string->rulepalette
+    (slurp path)
+    :path path :name (.getName (file path))))
 
 (defn add-rulepalette [rulepalette]
   (.add (global/get-rulepalette-container)
-        (:name rulepalette)
+        (get-name rulepalette)
         (rulepalette-view rulepalette))
   (global/load-rulepalette-container))
 
