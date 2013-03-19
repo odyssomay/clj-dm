@@ -89,9 +89,9 @@
                       (ssw/config!
                         p
                         :items (reduce concat (map #(rule-view rulepalette %)
-                                                   (get-rules rulepalette)))))
-        ]
+                                                   (get-rules rulepalette)))))]
     (update-view)
+    (on-order-change rulepalette update-view)
     p))
 
 (defn- options-view [rulepalette]
