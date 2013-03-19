@@ -37,7 +37,8 @@
     :property "trackname"
     :type :string}
    {:display-name "Midi channel"
-    :property "midi-channel"}
+    :property "midi-channel"
+    :min 1 :max 16}
    {:display-name "Synth"
     :property "synth"
     :type :synth}
@@ -45,7 +46,8 @@
     :property "midi-initial-program"
     :type :midi-program-list}
    {:display-name "Track delay"
-    :property "track-delay"}
+    :property "track-delay"
+    :min 0 :max 100}
    {:display-name "Pan"
     :property "midi-pan"
     :type :slider :min 0 :max 127
@@ -78,7 +80,9 @@
                         :minor-tick-spacing (:minor-spacing property-map)
                         :snap-to-ticks? (:snap? property-map)
                         :background track-properties-bg)
-            (ssw/spinner :model value))
+            (ssw/spinner :model (ssw/spinner-model value
+                                                   :from (:min property-map)
+                                                   :to (:max property-map))))
         get-value (case type
                     :string ssw/text
                     :bool #(.isSelected %)
