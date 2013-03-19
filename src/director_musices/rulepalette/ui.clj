@@ -13,6 +13,13 @@
               [mig :as ssw-mig]))
   )
 
+(defprotocol Rulepalette
+  (get-rules       [this])
+  (update-rule!    [this id f])
+  (get-rule        [this id])
+  (on-rule-change  [this id f])
+  (on-order-change [this f]))
+
 (def slider-precision 1000)
 
 (defn rules->string [rules]
