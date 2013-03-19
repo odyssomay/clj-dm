@@ -199,8 +199,8 @@
                                  (NORMALIZE-DR T)
                                  (FINAL-RITARD 1.0)
                                  ))
-        (set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")
-      (assoc :name "Default")))
+        (set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))"
+        :name "Default")))
 
 ;; =====
 ;; Menu functions
