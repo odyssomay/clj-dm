@@ -16,6 +16,9 @@
 (defprotocol Rulepalette
   (get-rules       [this])
   (update-rule!    [this id f])
+  (remove-rule!    [this id])
+  (move-rule-up!   [this id])
+  (move-rule-down! [this id])
   (get-rule        [this id])
   (on-rule-change  [this id f])
   (on-order-change [this f])
@@ -172,6 +175,9 @@
                 @order))
       (update-rule! [this id f]
         (swap! (get rules id) f))
+      (remove-rule!    [this id])
+      (move-rule-up!   [this id])
+      (move-rule-down! [this id])
       (get-rule [this id] @(get rules id))
       (on-rule-change [this id f]
         (add-watch (get rules id) nil
