@@ -35,7 +35,7 @@
              ))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction]
-  (glue/apply-rules (rules->string (map deref (:rules rulepalette)))
+  (glue/apply-rules (rules->string (get-rules rulepalette))
                     syncrule rule-interaction)
   (score-ui/reload-score))
 
