@@ -49,12 +49,12 @@
    {:display-name "Pan"
     :property "midi-pan"
     :type :slider :min 0 :max 127
-    :value 64 :spacing 32 :minor-spacing 8
+    :spacing 32 :minor-spacing 8
     :snap? true}
    {:display-name "Volume"
     :property "midi-initial-volume"
     :type :slider :min -39 :max 0
-    :value 0 :spacing 13 :minor-spacing 13
+    :spacing 13 :minor-spacing 13
     :snap? false}
    ])
 
@@ -71,7 +71,7 @@
             (ssw/combobox :id :program-list
                           :model (glue/get-track-synth-program-list id))
             :slider
-            (ssw/slider :value (:value property-map)
+            (ssw/slider :value value
                         :min   (:min property-map)
                         :max   (:max property-map)
                         :major-tick-spacing (:spacing property-map)
