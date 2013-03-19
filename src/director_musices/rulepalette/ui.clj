@@ -182,7 +182,9 @@
       (on-rule-change [this id f]
         (add-watch (get rules id) nil
                    (fn [_ _ _ new-rule] (f new-rule))))
-      (on-order-change [this f])
+      (on-order-change [this f]
+        (add-watch order nil
+                   (fn [& _] (f))))
       (get-name [this] (str (:name opts)))
       )))
 
