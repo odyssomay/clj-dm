@@ -94,13 +94,6 @@
                  :handler
                  (fn [_] (util/open-website
                            "https://github.com/odyssomay/clj-dm#readme")))
-     (ssw/action :name "About"
-                 :handler
-                 (fn [_] (let [d (ssw/custom-dialog :content "Director-musices version 1.0.2")]
-                           (doto d
-                             ssw/pack!
-                             (.setLocationRelativeTo (global/get-frame))
-                             ssw/show!))))
      ]))
 
 (defn menubar []
