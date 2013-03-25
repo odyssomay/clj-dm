@@ -175,15 +175,15 @@
     ))
 
 (defn graph-component [track-component property & {:as graph-opts}]
-  (let [state (atom (merge (->
-                             {:track-component track-component
-                              :graph-data (graph-data track-component property)
-                              :track-view (draw-track/get-view track-component)
-                              :property property
-                              :height 100}
-                             update-state
-                             update-property-values)
-                           graph-opts))
+  (let [state (atom (-> (merge
+                          {:track-component track-component
+                           :graph-data (graph-data track-component property)
+                           :track-view (draw-track/get-view track-component)
+                           :property property
+                           :height 100}
+                          graph-opts)
+                        update-state
+                        update-property-values))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g] (paint g @state))
             (getPreferredSize []
