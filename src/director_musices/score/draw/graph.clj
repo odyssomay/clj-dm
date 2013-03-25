@@ -113,18 +113,19 @@
                        (* scale-y (- next-value))))
         ))))
 
-(defn draw-height-line [state g y sy long? w]
-  (.setColor g java.awt.Color/black)
-  (.drawLine g 0 sy (- w) sy)
-  (when long?
-    (.drawString g (str (float (- y)))
-                 (+ -30 (if (< y 0) 4 0))
-                 (+ (int sy)
-                    4))
-    (.setColor g (java.awt.Color. 200 200 200))
-    (.drawLine g 1 sy
-               (.getWidth (:track-view state))
-               sy)))
+(defn draw-height-line [state g y sy long?]
+  (let [w (if long? 5 2)]
+    (.setColor g java.awt.Color/black)
+    (.drawLine g 0 sy (- w) sy)
+    (when long?
+      (.drawString g (str (float (- y)))
+                   (+ -30 (if (< y 0) 4 0))
+                   (+ (int sy)
+                      4))
+      (.setColor g (java.awt.Color. 200 200 200))
+      (.drawLine g 1 sy
+                 (.getWidth (:track-view state))
+                 sy))))
 
 (defn draw-height-lines [g state]
   (let [{:keys [scale-y height graph-data
@@ -142,10 +143,9 @@
     (doseq [i indices]
       (let [y (* magnitude i)
             sy (* scaled-interval i)
-            long? (zero? (rem i 2))
-            w (if long? 5 2)]
-          (draw-height-line state gc y sy long? w)
-          (draw-height-line state gc (- y) (- sy) long? w)))))
+            long? (zero? (rem i 2))]
+          (draw-height-line state gc y sy long?)
+          (draw-height-line state gc (- y) (- sy) long?)))))
 
 (defn paint [g state]
   (let [{:keys [height track-view track-component]} state
