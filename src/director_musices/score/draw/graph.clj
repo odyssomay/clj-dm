@@ -199,8 +199,9 @@
                 )))
         refresh! (fn [] (swap! state update-state))
         update-property-values! (fn [] (swap! state
-                                              #(-> % update-property-values update-state)))
-        ]
+                                              #(-> %
+                                                   update-property-values
+                                                   update-state)))]
     (draw-track/on-state-change track-component refresh!)
     (draw-track/on-track-change track-component update-property-values!)
     (add-watch state (gensym) (fn [& _] (.revalidate c) (.repaint c)))
