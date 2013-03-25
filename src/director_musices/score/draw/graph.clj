@@ -43,13 +43,10 @@
     (assoc state :graph-data (graph-data track-component property))))
 
 (defn update-scale-y [state]
-  (let [{:keys [graph-data height]} state
-        {:keys [diff furthest]} graph-data]
-    (assoc state :scale-y
-      (if (== diff 0)
-        1
-        (/ (/ height 2)
-           furthest)))))
+  (let [{:keys [line-interval line-height]} state
+        {:keys [magnitude]} line-interval]
+    (assoc state
+      :scale-y (/ line-height magnitude))))
 
 (defn update-height [state]
   (let [{:keys [graph-data scale-y]} state
@@ -77,6 +74,7 @@
   (-> state
       update-graph-data
       update-line-interval
+      update-scale-y
       update-height))
 
 (defn calculate-property-values [state]
@@ -180,7 +178,7 @@
                            :graph-data (graph-data track-component property)
                            :track-view (draw-track/get-view track-component)
                            :property property
-                           :scale-y 1}
+                           :line-height 8}
                           graph-opts)
                         update-state
                         update-property-values))
