@@ -2,8 +2,8 @@
   director-musices "1.0.3"
   :description "FIXME: write description"
   :manifest ["SplashScreen-Image" "splash.gif"]
-  :dependencies [[org.clojure/clojure "1.3.0"]
-                 [seesaw "1.4.2"]
+  :dependencies [[org.clojure/clojure "1.5.0"]
+                 [seesaw "1.4.3"]
                  [com.miglayout/miglayout "3.7.4"]
                  [abcl "1.1.1"]
                  [kitfox/svgsalamander "1.0"]
