@@ -114,7 +114,9 @@
         ))))
 
 (defn draw-height-line [state g y sy long?]
-  (let [w (if long? 5 2)]
+  (let [{:keys [track-component]} state
+        scale (draw-track/get-scale track-component)
+        w (if long? 5 2)]
     (.setColor g java.awt.Color/black)
     (.drawLine g 0 sy (- w) sy)
     (when long?
@@ -150,12 +152,10 @@
 (defn paint [g state]
   (let [{:keys [height track-view track-component]} state
         gc (.create g)
-        width (.getWidth track-view)]
+        width (.getWidth track-view)
+        scale (draw-track/get-scale track-component)]
     (ssw-graphics/anti-alias gc)
-    
-    (let [scale (draw-track/get-scale track-component)]
-      (.scale gc scale scale))
-    
+    (.scale gc 1.0 scale)
     (.translate gc 0 5)
     
     (let [middle (int (/ height 2))]
@@ -164,6 +164,8 @@
     (.setColor gc java.awt.Color/black)
     (.drawLine gc 0 0 width 0)
     (draw-height-lines gc state)
+    
+    (.scale gc scale 1.0)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
     (when (:prev-property-values state)
       (.setColor gc (java.awt.Color. 120 120 120))
