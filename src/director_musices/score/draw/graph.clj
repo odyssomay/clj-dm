@@ -2,6 +2,54 @@
   (:require [director-musices.score.draw.track :as draw-track]
             (seesaw [graphics :as ssw-graphics])))
 
+;; =====
+;; Calculate
+;; =====
+(defn graph-data [track-component property]
+  (let [notes (draw-track/get-notes track-component)
+        property-vals (remove nil? (concat [0] (map #(get % property nil) notes)))
+        property-max (reduce max property-vals)
+        property-min (reduce min property-vals)
+        property-diff (- property-max property-min)]
+    {:max property-max
+     :min property-min
+     :diff property-diff
+     :furthest (max property-max
+                    (- property-min))}))
+
+(defn update-graph-data [state]
+  (let [{:keys [track-component property]} state]
+    (assoc state :graph-data (graph-data track-component property))))
+
+(defn update-scale-y [state]
+  (let [{:keys [graph-data height]} state
+        {:keys [diff furthest]} graph-data]
+    (assoc state :scale-y
+      (if (== diff 0)
+        1
+        (/ (/ height 2)
+           furthest)))))
+
+(defn update-state [state]
+  (-> state
+      update-graph-data
+      update-scale-y))
+
+(defn calculate-property-values [state]
+  (let [{:keys [track-component property]} state
+        notes (draw-track/get-notes track-component)
+        property-vals (map #(get % property 0) notes)]
+    property-vals))
+
+(defn update-property-values [state]
+  (let [{:keys [property-values]} state]
+    (assoc state
+      :prev-property-values property-values
+      :property-values (calculate-property-values state))))
+
+;; =====
+;; Drawing
+;; =====
 (defn draw-note-property-graph [g state property-values]
   (let [gc (.create g)
         {:keys [track-component scale-y]} state
@@ -104,48 +152,6 @@
     (.setColor gc java.awt.Color/red)
     (draw-note-property-graph gc state (:property-values state))
     ))
-
-(defn graph-data [track-component property]
-  (let [notes (draw-track/get-notes track-component)
-        property-vals (remove nil? (concat [0] (map #(get % property nil) notes)))
-        property-max (reduce max property-vals)
-        property-min (reduce min property-vals)
-        property-diff (- property-max property-min)]
-    {:max property-max
-     :min property-min
-     :diff property-diff
-     :furthest (max property-max
-                    (- property-min))}))
-
-(defn update-graph-data [state]
-  (let [{:keys [track-component property]} state]
-    (assoc state :graph-data (graph-data track-component property))))
-
-(defn update-scale-y [state]
-  (let [{:keys [graph-data height]} state
-        {:keys [diff furthest]} graph-data]
-    (assoc state :scale-y
-      (if (== diff 0)
-        1
-        (/ (/ height 2)
-           furthest)))))
-
-(defn update-state [state]
-  (-> state
-      update-graph-data
-      update-scale-y))
-
-(defn calculate-property-values [state]
-  (let [{:keys [track-component property]} state
-        notes (draw-track/get-notes track-component)
-        property-vals (map #(get % property 0) notes)]
-    property-vals))
-
-(defn update-property-values [state]
-  (let [{:keys [property-values]} state]
-    (assoc state
-      :prev-property-values property-values
-      :property-values (calculate-property-values state))))
 
 (defn graph-component [track-component property & {:as graph-opts}]
   (let [state (atom (merge (->
