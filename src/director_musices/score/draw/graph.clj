@@ -56,9 +56,27 @@
         {:keys [furthest]} graph-data]
     (assoc state :height (max (* 2 furthest scale-y) 50))))
 
+(defn guess-interval [furthest expected-lines]
+  (let [magnitudes (map #(Math/pow 10 %) (range -10 10))
+        nr-lines (map #(let [lines (quot furthest %)]
+                         {:magnitude %
+                          :lines lines
+                          :diff (Math/abs (- lines expected-lines))})
+                      magnitudes)
+        interval (first (sort-by :diff nr-lines))]
+    interval))
+
+(defn update-line-interval [state]
+  (let [{:keys [graph-data]} state
+        {:keys [furthest]} graph-data]
+    (assoc state
+      :line-interval
+      (guess-interval furthest 10))))
+
 (defn update-state [state]
   (-> state
       update-graph-data
+      update-line-interval
       update-height))
 
 (defn calculate-property-values [state]
@@ -108,49 +126,28 @@
     (.setColor g (java.awt.Color. 200 200 200))
     (.drawLine g 1 sy
                (.getWidth (:track-view state))
-               sy)
-    )
-  )
-
-(defn guess-interval [furthest expected-lines]
-  (let [magnitudes (map #(Math/pow 10 %) (range -10 10))
-        nr-lines (map #(let [lines (quot furthest %)]
-                         {:magnitude %
-                          :lines lines
-                          :diff (Math/abs (- lines expected-lines))})
-                      magnitudes)
-        interval (first (sort-by :diff nr-lines))
-        ]
-    (assoc interval :interval (:magnitude interval))
-    ))
+               sy)))
 
 (defn draw-height-lines [g state]
-  (let [{:keys [scale-y height graph-data]} state
+  (let [{:keys [scale-y height graph-data
+                line-interval]} state
         {:keys [diff furthest]} graph-data
-        expected-lines 10
-        {:keys [interval lines]}
-        (guess-interval furthest expected-lines)
-        ;interval (/ furthest expected-lines)
-        scaled-interval (* scale-y interval)
+        {:keys [magnitude lines]} line-interval
+        scaled-interval (* scale-y magnitude)
         indices (range 1 (inc lines))
         gc (.create g)]
-    ;(guess-interval furthest expected-lines)
     (.translate gc 40 0)
     (.setColor gc java.awt.Color/black)
-    (let [h (/ height 2)];(* scale-y interval lines)]
+    (let [h (/ height 2)]
       (.drawLine gc 0 0 0 h)
       (.drawLine gc 0 0 0 (- h)))
     (doseq [i indices]
-      (let [y (* interval i)
+      (let [y (* magnitude i)
             sy (* scaled-interval i)
             long? (zero? (rem i 2))
             w (if long? 5 2)]
-        ;(when (<= sy (/ height 2))
           (draw-height-line state gc y sy long? w)
-          (draw-height-line state gc (- y) (- sy) long? w)
-         ; )
-        ))
-    ))
+          (draw-height-line state gc (- y) (- sy) long? w)))))
 
 (defn paint [g state]
   (.setColor g java.awt.Color/red)
