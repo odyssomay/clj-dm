@@ -5,9 +5,26 @@
 ;; =====
 ;; Calculate
 ;; =====
+(def ^{:private true} properties
+  {:dr {:display "Duration"
+        :fn :dr}
+   :sl {:display "Soundlevel"
+        :fn :sl}
+   :dr-div-ndr {:display "Duration difference"
+                :fn #(/ (:dr %) (:ndr %))}
+   })
+
+(defn get-available-properties [] (keys properties))
+(defn calculate-property [note property]
+  (let [f (get-in properties [property :fn])
+        v (f note)]
+    (or v 0)))
+
 (defn graph-data [track-component property]
   (let [notes (draw-track/get-notes track-component)
-        property-vals (remove nil? (concat [0] (map #(get % property nil) notes)))
+        property-vals (remove nil? (concat [0] (map #(calculate-property
+                                                       % property)
+                                                    notes)))
         property-max (reduce max property-vals)
         property-min (reduce min property-vals)
         property-diff (- property-max property-min)]
@@ -38,7 +55,7 @@
 (defn calculate-property-values [state]
   (let [{:keys [track-component property]} state
         notes (draw-track/get-notes track-component)
-        property-vals (map #(get % property 0) notes)]
+        property-vals (map #(calculate-property % property) notes)]
     property-vals))
 
 (defn update-property-values [state]
