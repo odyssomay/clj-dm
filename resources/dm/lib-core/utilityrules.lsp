@@ -98,6 +98,7 @@
 ;; ---------------------
 ;;
 
+#|
 (defun mark-beat ()
   (let ((beat-value 4)
         ack-value)
@@ -111,7 +112,73 @@
         ;(print-ll *i* "  " (this 'n))
         )
       (incf ack-value (get-note-value-fraction *i*))
-      )))
+     )))
+|#
+
+;new version with meter templates
+;130108/af
+(defun mark-beat ()
+  (let ((beat-value 4)
+        ack-value)
+    (each-note             ;mark beat
+      (when (this 'meter) 
+         (setq beat-value (beat-fraction-from-meter (this 'meter))))
+      (when (this 'bar) 
+         (setq ack-value 0))
+      (when (zerop (mod ack-value beat-value))
+        (set-this :beat t)
+        ;(print-ll *i* "  " (this 'n))
+        )
+      (incf ack-value (get-note-value-fraction *i*))
+     )))
+
+(defun beat-fraction-from-meter (meter)
+  (cond
+    ((equal meter '(4 4)) 1/4)
+    ((equal meter '(2 2)) 1/2)
+    ((equal meter '(4 2)) 1/2)
+    ((equal meter '(2 4)) 1/4)
+    ((equal meter '(3 4)) 1/4)
+    ((equal meter '(6 8)) 3/8)
+    ((equal meter '(9 8)) 3/8)
+    ((equal meter '(12 8)) 3/8)
+   ))
+
+;mark the middle of bar in the cases 4/4, 4/2 and 12/8
+;otherwise nothing
+(defun mark-half-bar ()
+  (let (ack-value 
+        beat-value
+        (mark-half-bar-p nil) )
+    (each-note             ;mark beat
+     ;get new meter and check if half-beat
+     (when (and (this 'meter) (half-bar-fraction-from-meter (this 'meter)))
+       (setq mark-half-bar-p t)
+       (setq beat-value (half-bar-fraction-from-meter (this 'meter))))
+     (when (and (this 'meter) (not (half-bar-fraction-from-meter (this 'meter))))
+       (setq mark-half-bar-p nil) )
+     ;reset counter at bar
+     (when (this 'bar) 
+       (setq ack-value 0))
+     ;check if half-bar
+     (when (and mark-half-bar-p (zerop (mod ack-value beat-value)))
+       (set-this :half-bar t)
+       ;(print-ll *i* "  " (this 'n))
+       )
+     (incf ack-value (get-note-value-fraction *i*))
+     )))
+
+(defun half-bar-fraction-from-meter (meter)
+  (cond
+    ((equal meter '(4 4)) 2/4)
+    ((equal meter '(2 2)) nil)
+    ((equal meter '(4 2)) 2/2)
+    ((equal meter '(2 4)) nil)
+    ((equal meter '(3 4)) nil)
+    ((equal meter '(6 8)) nil)
+    ((equal meter '(9 8)) nil)
+    ((equal meter '(12 8)) 6/8)
+   ))
 
 (defun mark-beat-number-in-measure ()
   (let ((beat-value 4)
@@ -979,14 +1046,18 @@
      (print-ll "nofnotes " nofnotes " drtot " drtot " nps " (* (/ nofnotes drtot) 1000.0))
      )))
 
+
 ;compute for all tracks including sync track
 ;works only for ndr
+;probably used for cortex 2011 paper (?)
 (defun print-nps-all-tracks-sync-ndr ()
   (add-one-track *active-score* (sync-make-mel))
   (print-nps-all-tracks-ndr)
   (remove-one-track *active-score* (1- (length (track-list *active-score*))))
   )
-   
+
+
+
 ;---------------------------
 
 ;mark duration deviation for each bar

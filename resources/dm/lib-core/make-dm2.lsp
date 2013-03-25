@@ -118,6 +118,7 @@
         "dm:rules;articulation"
         "dm:rules;violinvibrato"
         "dm:rules;accent-rule-ebrp"
+        "dm:rules;accent-analysis"
         ;"piano"
         ;"accents" 
         

@@ -200,7 +200,7 @@
     (excl:run-shell-command 
      ;(concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\af\\simip-4-standalone.jar 2 " file)
      ;;second argument gives midi device number (from zero)
-     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre7\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 3 " file)
      :wait nil)
     ))
 
@@ -219,7 +219,7 @@
     ;(excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
     (excl:run-shell-command 
      ;;second argument gives midi device number (from zero)
-     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre7\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 3 " file)
      :wait nil)
     ))
 
@@ -239,7 +239,7 @@
     ;(excl:run-shell-command (concatenate 'string "C:\\Program Files\\Windows Media Player\\wmplayer " file) :wait nil)
     (excl:run-shell-command 
      ;;second argument gives midi device number (from zero)
-     (concatenate 'string "\"C:\\Program Files\\Java\\jre6\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 2 " file)
+     (concatenate 'string "\"C:\\Program Files\\Java\\jre7\\bin\\java\" -jar C:\\Nobackup\\afriberg\\simip-4-standalone.jar 3 " file)
      :wait nil)
     )))
 
@@ -404,82 +404,7 @@
 ;;   playlist-gen-list, internal
 ;; ======================
 ;;
-(defun playlist-gen-list ()
-   (if (not (get-dm-var 'to-midi-file?))
-      (if (get-dm-var 'verbose)
-         (format t "generate list")))
-   (let ((startt)(endt)(l ())(chan 1)(tempo 1)
-         (default-synt (make-synth (get-dm-var 'play-synth-name-default)))
-          synt
-         (active-p nil))
-      (declare (special l startt tempo chan synt))
-      (each-track
-        (if (not (get-dm-var 'to-midi-file?))
-           (setq startt 300 endt 300)
-          (setq startt 0 endt 0))
-        (incf startt (get-track-var 'track-delay))
-        (incf endt (get-track-var 'track-delay))
-        (if (get-track-var 'synth)
-           (setq synt (get-track-var 'synth))
-           (setq synt default-synt) )
-        (if (get-track-var 'midi-channel)
-           (setq chan (get-track-var 'midi-channel)))
-        (send-track-var-before-play)
-        (setq active-p t) ;(setq active-p nil) ;;deactivated the start-bar option
-        (if (get-track-var 'active-p)
-           (each-segment
-;;;              (if (not active-p)
-;;;                 (if (and (this 'bar) (>= (this 'bar) (get-dm-var 'start-bar)))
-;;;                    (setq active-p t) ))
-             (when active-p
-                (setq startt endt)
-                (setq endt (+ endt (this 'dr)))
-                ;OTHER PARAMETERS
-                (send-before-noton)
-                (send-voice-par-before-noton)
-                ;if REST
-                (if (this 'rest)
-                   (send-after-noton)   ;if chord on a rest
-                   ;else if NOTEGROUP
-                   (if (notegroupobj? (this 'n)) 
-                      (send-notegroupobj)
-                      ;else NOTE ON
-                      (progn
-                        (if (or (first?) (not (prev 'tie)))
-                           (if (not (listp (this 'f0)))
-                              (newr l (list (+ (round (/ startt tempo)) 0.1)  ;fix for sort routine
-                                        synt chan 'note-on-sl (this-f0) (this 'sl)))  
-                              (dolist (f0 (this 'f0))
-                                 (newr l (list (+ (round (/ startt tempo)) 0.1)  ;fix for sort routine
-                                           synt chan 'note-on-sl f0 (this 'sl))) )))
-                        (send-after-noton)
-                        ;and  NOTE OFF
-                        (if (or (last?)
-                                (and (get-dm-var 'send-note-off?) 
-                                     (not (this 'tie))
-                                     (not (this 'rest)) ))
-                           (if (this 'dro)
-                              (if (not (listp (this 'f0)))
-                                 (newr l (list (round (/ (- endt (this 'dro)) tempo))
-                                           synt chan 'note-on (this 'f0) 0) )
-                                 (dolist (f0 (this 'f0))
-                                    (newr l (list (round (/ (- endt (this 'dro)) tempo))
-                                              synt chan 'note-on f0 0) )) )
-                              (if (not (listp (this 'f0)))
-                                 (newr l (list (round (/ endt tempo))
-                                           synt chan 'note-on (this 'f0) 0) )
-                                 (dolist (f0 (this 'f0))
-                                    (newr l (list (round (/ endt tempo))
-                                              synt chan 'note-on f0 0) )))
-                              )))
-                      ))))))
-      (if (not (get-dm-var 'to-midi-file?))
-         (if (get-dm-var 'verbose)
-            (format t "~%  sort")))
-      l
-      ))
-
-;;change order of track-delay and send-track-var-before-play
+;;changed order of track-delay and send-track-var-before-play
 (defun playlist-gen-list ()
    (if (not (get-dm-var 'to-midi-file?))
       (if (get-dm-var 'verbose)
@@ -505,8 +430,8 @@
        ;(incf startt (get-track-var 'track-delay))
        ;(incf endt (get-track-var 'track-delay))
        ;;sätt till 1000 (500) - superfix for att fördröja första tonen när man spelar med roland jv1001 som tar minst 300ms! för att ställa om program change!
-       (incf startt 1000)
-       (incf endt 1000)
+       ;(incf startt 1000)
+       ;(incf endt 1000)
 
         (setq active-p t) ;(setq active-p nil) ;;deactivated the start-bar option
         (if (get-track-var 'active-p)

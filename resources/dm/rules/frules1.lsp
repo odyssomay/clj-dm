@@ -65,7 +65,7 @@
      )))
 |#        
 ;smears out the peaks
-;ej symmetrisk ej ok pÂŒ hkyrie takt 7     
+;ej symmetrisk ej ok pŒ hkyrie takt 7     
 (defun melodic-charge-smear ()
  (each-note-if
    (not (first?))
@@ -218,7 +218,7 @@
   (harmonic-charge-amp3 ampscale)
   )
 
-;*****fixa om ej ett ackord stÂŒr sist!!!!!*********
+;*****fixa om ej ett ackord stŒr sist!!!!!*********
 ;set the target-values on the notes with q-value
 ;chdl is the value to be added to l0
 ;chdl = 1.5*sqrt(CH)*quant (dB)
@@ -624,7 +624,7 @@
   )
 
 ;set the performance parameters
-;Ã†L = 1.35 * cchrom-mean * quant (dB)
+;ÆL = 1.35 * cchrom-mean * quant (dB)
 ;DR = DR*(1 + 0.009*cchrom-mean*quant)
 (defun chrom-charge-set-values (quant)
   (each-note-if

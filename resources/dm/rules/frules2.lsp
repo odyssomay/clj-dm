@@ -553,7 +553,7 @@
         (- (next-f0) (this-f0)) )
          )))
 
-;*fixa f\9Ar mycket just nu kolla billy test
+;*fixa för mycket just nu kolla billy test
 ;target note: dr = dr + 4.2*quant*(sqrt leap) 
 ;start  note: dr = dr - 4.2*quant*(sqrt leap) 
 (defun leap-tone-duration-rise (quant)
@@ -732,7 +732,7 @@
 
 ;-------  
 
-;endast vid flerst\8Ammighet
+;endast vid flerstämmighet
 ;used for low organ voices
 ;dro = k*quant*log(dr)/f0
 (defun low-short (quant)

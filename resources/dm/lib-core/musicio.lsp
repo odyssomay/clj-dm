@@ -42,7 +42,7 @@
 ;;;  :synth "PINNACLE"
 ;;; (ph "E:" bar 1 n ("G3" . 4) dot 1 meter (4 4) mm 187 q
 ;;;  ("G" "B" "D") modus "maj" key "G" phrase t phrase-start (4 5 6))
-;;; (ph "Ã…" n ("A3" . 8))
+;;; (ph "Å" n ("A3" . 8))
 ;;; (ph "A:" n ("B3" . 4))
 
 
@@ -130,7 +130,6 @@
                   (redraw-music-windows) ;def in drawPolyNotes
                   ))
       ))
-
 
 (defun read-active-score-from-file (fpath)
    (let ((inlist)
@@ -250,7 +249,6 @@
         (exit-track)
           )))
 
-
 ;;create time-shape objects with breakpoints as specified in lists: (<time> <value> ....)
 (defun RECREATE-TIME-SHAPES ()
   (each-segment
@@ -263,115 +261,6 @@
     (if (and (this 'dc) (listp (this 'dc)))
           (set-this 'dc (THIS-NOTE-MAKE-TIME-SHAPE :interpolation :linear :break-point-list (this 'dc))) )
           ))
-
-  
-#|   old definitions for loading
-(defun load-score-fpath (fpath)
-   (let ((inlist)
-         (score (make-instance 'score (score-filename fpath))
-         (track))
-      (with-open-file (ifile fpath :direction :input )
-        ;(setq *vlist* nil)
-        (setq track (make-instance 'mono-track))
-        (setf (trackname track)(string (read ifile)))       ;read the first voice-name
-        (loop
-          (setq inlist (read ifile nil))
-          (cond ((not inlist)       ;end of file
-                 (add-one-track score track)
-                 ;(print "case NIL")
-                 (return) )
-                ((atom inlist)      ;new voice
-                 (add-one-track score track)
-                 (setq track (make-instance 'mono-track :trackname (string inlist)))
-                 ;(print "case ATOM")
-                 )
-                (t                  ;else new tone
-                  (add-one-segment 
-                    track 
-                    (make-instance 'segment :var-list (list-to-alist inlist)))
-                  ;(print "case T")                    
-                  )))
-        )
-      (setq *active-score* score)
-      (init-music)
-      (get-track-par)
-      (if (get-dm-var 'verbose-i/o) (print-ll  "Active score loaded from " fpath))
-      score))
-
-(defun load-performance ()
-   (let ((fpath (show-dialog-for-opening-files-PD "Load score"
-                 :directory (get-dm-var 'music-directory)
-                 :extensions '(("Performance files" . "*.per")("All files" . "*.*")) )))
-      (if fpath (progn (setq *active-score* (load-performance-fpath fpath))
-                  (set-dm-var 'music-directory (directory-namestring fpath))
-                  #+:mswindows
-                  (setf (nickname *active-score*)(file-namestring fpath))
-;;;                   (setf (nickname *active-score*)
-;;;                         (pop-up-string-dialog *dm-main-window* 
-;;;                           "Nickname" "I read the object, please provide a convenient nickname for it"
-;;;                           question-icon (file-namestring fpath) 'ok 'cancel))
-                  #+:mcl
-                  (setf (nickname *active-score*) (file-namestring fpath))
-
-                  (make-or-update-edit-music-window) ;def in musicdialog
-                  (redraw-display-windows) ;def in drawProp
-                  (redraw-music-windows) ;def in drawPolyNotes
-                  ))))
-
-(defun load-performance-fpath (fpath)
-   (let ((inlist)
-         (score (make-instance 'score :score-filename fpath))
-         (track))
-      (with-open-file (ifile fpath :direction :input )
-        ;(setq *vlist* nil)
-        (setq track (make-instance 'mono-track))
-        (setf (trackname track)(string (read ifile)))       ;read the first voice-name
-        (loop
-          (setq inlist (read ifile nil))
-          (cond ((not inlist)       ;end of file
-                 (add-one-track score track)
-                 ;(print "case NIL")
-                 (return) )
-                ((atom inlist)      ;new voice
-                 (add-one-track score track)
-                 (setq track (make-instance 'mono-track :trackname (string inlist)))
-                 ;(print "case ATOM")
-                 )
-                (t                  ;else new tone
-                  (add-one-segment 
-                    track 
-                    (make-instance 'segment :var-list (list-to-alist inlist)))
-                  ;(print "case T")                    
-                  )))
-        )
-      (setq *active-score* score)
-      (get-track-par)
-      (if (get-dm-var 'verbose-i/o) (print-ll  "Active score loaded from " fpath))
-      score))
-
-(defun load-performance-object ()
-   (let ((fpath (show-dialog-for-opening-files-PD "Load score"
-                 :directory (get-dm-var 'music-directory)
-                 :extensions '(("MUS score files" . "*.obj")("All files" . "*.*")) )))
-      (if fpath (progn (setq *active-score* (load-performance-object-fpath fpath))
-                  (set-dm-var 'music-directory (directory-namestring fpath))
-                  #+:mswindows
-                  (setf (nickname *active-score*)
-                        (pop-up-string-dialog *dm-main-window* "Nickname" "I read the object, please provide a convenient nickname for it"
-                          question-icon (file-namestring fpath) 'ok 'cancel))
-                  
-                  )
-         (print "I could not open the file") ))
-   )
-
-(defun load-performance-object-fpath (fpath)
-   (let ((score nil))
-      (with-open-file (ifile fpath :direction :input )
-        (setq score (eval (read ifile)))
-        )
-      (if (get-dm-var 'verbose-i/o) (print-ll  "Active score loaded from " fpath))
-      score ))
-|#
 
 
 ;; ---------------------------------------------------------
@@ -435,22 +324,6 @@
        (print "I could not save the file") )))
 
 
-
-;; UNIFY !!!
-;; ******* a part from init-music, the debug message and the remove of properties
-;; ******* this is the same as save-score-fpath -nej
-
-#|
-(defun save-performance-fpath (fpath)
-  (with-open-file (ofile fpath :direction :output
-                         :if-does-not-exist :create
-                         :if-exists :supersede)
-    (let ((print-right-margin 80))
-      (print-music ofile) ))
-  (if (get-dm-var 'verbose-i/o)
-     (print-ll "Active score saved as performance in " fpath))
-  )
-|#
 (defun save-performance-fpath (fpath)
   (with-open-file (ofile fpath :direction :output
                          :if-does-not-exist :create
@@ -534,23 +407,12 @@
 ;; (var-list --> the segment, a list of sub lists)
 ;; then alist-to-list remove the extra parenthesys
 
-
 ;; ---------------------
 ;;   PRINT-MUSIC-ROUND
 ;; ---------------------
 ;;
 ;; print all properties with float's rounded
 ;;
-;;; (defun print-music-round (&optional ofile)
-;;;    (each-track
-;;;      (print (trackname (nth *i* *v*)) ofile)
-;;;      (each-segment
-;;;        (let ((pl (alist-to-list (var-list (nth *i* *v*))))
-;;;              (plr))
-;;;           (dolist (a pl)
-;;;              (setq plr (append plr (list (if (floatp a) (round a) a)))) )
-;;;           (print plr ofile)
-;;;           ))))
 
 (defun print-music-round (&optional ofile)
    (each-track

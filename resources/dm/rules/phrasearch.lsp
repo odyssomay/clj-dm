@@ -338,8 +338,7 @@
 
 #| testing
 (defun foo ()
-  (each-note-if (first?) (iset-ramp-x2-decimal-last 0 0 50 0 'da0 :power 2.5))
-  ;(each-note-if (first?) (iset-ramp-x2-decimal-last 7 10 0 50 'da0 :power 2.5))
+  (each-note-if (first?) (iset-ramp-x2-decimal-last 0 10 0.0 0.0 50.0 0.0 'da0 2.5 'power-fn-acc 'power-fn-dec))
   )
 |#
 

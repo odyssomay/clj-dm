@@ -42,7 +42,7 @@
    (y-min :reader xget-y-min :initarg :y-min :initform 0)
    (y-max :reader xget-y-max :initarg :y-max :initform 1)) )
 
-;;fixa get-x-min med indirekt anrop alltsÃ¥ objekt mÃ¶jligt som vÃ¤rde
+;;fixa get-x-min med indirekt anrop alltså objekt möjligt som värde
 
 ;internal utility for setting the whole list
 (defmethod set-break-points ((self bp-shape) value)

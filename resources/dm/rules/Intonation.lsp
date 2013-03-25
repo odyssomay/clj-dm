@@ -166,10 +166,10 @@
         ))))))
 
 ;Lasse:
-;liten sekund, liten ters, liten sext skall hÂšjas nÂŠr den gÂŒr kromatiskt upp
-;ett steg. Alla andra fall ska de vara lÂŒga.
+;liten sekund, liten ters, liten sext skall hšjas nŠr den gŒr kromatiskt upp
+;ett steg. Alla andra fall ska de vara lŒga.
 ;tonerna runt polerna grundton och kvint sugs upp av dessa.
-;fÂšr inledningston och tritonus exiterar bara alternativet att gÂŒ upp.
+;fšr inledningston och tritonus exiterar bara alternativet att gŒ upp.
 ;tersen har en viss dragningskraft men mycket mindre. "kvarten sugs upp av tersen"
 
 (defun melodic-intonation2 (quant)
@@ -209,7 +209,7 @@
         ))))))
 |#
 
-;ny intonering gruppera halvtoner tvÂŒ och tvÂŒ
+;ny intonering gruppera halvtoner tvŒ och tvŒ
 (defun melodic-intonation2 (quant)
  (let ((one)(case)(dc))
   (each-note
@@ -367,7 +367,7 @@
              (t (let ((new-dc  (pure-intervals
                          (mod (- (tone-to-tonnr (note-to-tone (this 'n))) qnr) 12) ))
                       (old-dc (this 'dc)) )
-                     (incf new-dc (round (* (/ 4 12.) (- (this-f0) 48)))) ;strÂŠckning
+                     (incf new-dc (round (* (/ 4 12.) (- (this-f0) 48)))) ;strŠckning
                      (set-this 'dc (append (list 0 old-dc)
                              (gen-env-list 20 490 old-dc new-dc 20) ))))
               ))
@@ -407,7 +407,7 @@
                          (mod (- (tone-to-tonnr (note-to-tone (this 'n))) qnr) 12) ))
                        (old-dc (this 'dc))
                        (h (round (* (this 'dr) vel))) )
-                   ;(incf new-dc (round (* (/ 4 12.) (- (this-f0) 48)))) ;strÂŠckning
+                   ;(incf new-dc (round (* (/ 4 12.) (- (this-f0) 48)))) ;strŠckning
                    (if (and (not (first?))                ;continue for bind
                             (prev 'tie)
                             (listp (prev 'dc)) )
@@ -420,7 +420,7 @@
                        (set-this 'dc (append (list 0 old-dc)
                                  (gen-env-list
                                      20 (round (/ (abs ddc) vel)) old-dc new-dc 20) ))
-                       ;(print "gÂŒ till slutet")
+                       ;(print "gŒ till slutet")
                        (set-this 'dc (append (list 0 old-dc)
                                  (gen-env-list
                                      20 (round (- (this 'dr) 20))
@@ -442,7 +442,7 @@
     ((and (not (first?))                    ;prev bind or repetition
           (not (this 'rest))
           (repetition?) 
-          (> (this-dr-bind) 400) )    ;****behÂšvs ej hÂŠr egentligen
+          (> (this-dr-bind) 400) )    ;****behšvs ej hŠr egentligen
      (let ((start-dc  (this 'dc))
            (target-dc (this-pure-interval qnr)) )
           (set-this 'dc (gen-env-list-vel start-dc target-dc vel)) ))
@@ -466,17 +466,17 @@
     ((and (not (first?))                    ;prev bind or repetition
           (not (this 'rest))
           (repetition?) 
-          (> (this-dr-bind) 400) )    ;****behÂšvs ej hÂŠr egentligen
+          (> (this-dr-bind) 400) )    ;****behšvs ej hŠr egentligen
      (let ((start-dc  (prev-last-dc))
            (target-dc (this-pure-interval qnr)) )
           (set-this 'dc (gen-env-list-vel start-dc target-dc vel)) ))
            ))))
 |#
 
-;kunde ha tvÂŒ olika hastigheter: nÂŠr alla stÂŠmmor ÂŠr tillsammans
-;en kortare hastiget ÂŠn vid polyfoni
-;alla bunda noter bÂšrjar om
-;tonhÂšjdsenveloppen bÂšrjar vid stime
+;kunde ha tvŒ olika hastigheter: nŠr alla stŠmmor Šr tillsammans
+;en kortare hastiget Šn vid polyfoni
+;alla bunda noter bšrjar om
+;tonhšjdsenveloppen bšrjar vid stime
 (defun harmonic-intonation-env ()
  (let ((qnr)
        (vel 0.0047)   ;vel = change velocity in cent/ms(5,5;4,7 cent/s)
@@ -511,7 +511,7 @@
       (p-each-note
         ;(print (v-this-all curv 'rest))
         (if (and (assq curv *cur-notes*) (v-this curv 'q))
-            (setq qnr (tone-to-tonnr (car (v-this curv 'q)))) ) ;update chordnr *FIXA FÃ–R NYA ACCORD BETECKNING***
+            (setq qnr (tone-to-tonnr (car (v-this curv 'q)))) ) ;update chordnr *FIXA FÖR NYA ACCORD BETECKNING***
         (when (not (v-this-all curv 'rest))                     ; not if rest in curv
           ;(print *cur-notes*)
           (cond ((assq curv *cur-notes*)                  ;new note ?
@@ -551,7 +551,7 @@
           (p-each-note
            ;(print (v-this-all curv 'rest))
            (if (and (assoc curv *cur-notes*) (v-this curv 'q))
-               (setq qnr (tone-to-tonnr (car (v-this curv 'q)))) ) ;update chordnr *FIXA FÃ–R NYA ACCORD BETECKNING***
+               (setq qnr (tone-to-tonnr (car (v-this curv 'q)))) ) ;update chordnr *FIXA FÖR NYA ACCORD BETECKNING***
            (when (not (v-this-all curv 'rest))                     ; not if rest in curv
              ;(print *cur-notes*)
              (cond ((assoc curv *cur-notes*)                  ;new note ?

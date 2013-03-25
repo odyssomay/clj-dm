@@ -56,6 +56,7 @@
       ))))
 
 (defun melodic-contour-accent (quant &key (curve :linear) (amp 1) (dur 1) (width 1))
+  (print "lksdölfkösldkfö")
   (each-note-if
    (this 'accent-c)
    (then
@@ -93,11 +94,12 @@
       (accent-apply-dr *i* w1 w2 quant-dr curve curve)
       ))))
 
-(defun metrical-accent (quant &key (curve :linear) (amp 1) (dur 1) (width 1))
+(defun metrical-accent (quant &key (curve :linear) (amp 1) (dur 1) (width 1) (marker 'accent-m))
   (each-note-if
-   (this 'accent-m)
+   (this marker)
    (then
-    (let* ((sal (this 'accent-m))
+      ;(print-ll "i = " *i*)
+    (let* ((sal (this marker))
            (sal2 (+ (* 0.625 sal) 1.875))
            (w1 (* width 250.0 sal2))
            (w2 (* width 250.0 sal2))
@@ -111,7 +113,7 @@
       (accent-apply-sl *i* w1 w2 quant-sl curve curve)
       (accent-apply-dr *i* w1 w2 quant-dr curve curve)
       ))))
-
+#|
 ;; Applied the sound level variations on the notes
 ;; first make 'dsl and then add that to 'sl
 ;; with added floats marking time in ms
@@ -134,11 +136,12 @@
           (if (iget i 'sl) (iadd i  'sl (iget i 'dsl)))
           (rem-var (nth i *v*) 'dsl)
           )))
-
+|#
 ;; with max instead of add so that envelopes don't add up
 ;; not really compatible with the traditional rule application but works well with the new rule interaction stuff
 ;; will probably not work with negative values as well
 ;; 120327/af
+;; 130114/af included dsl (new score dynamics)
 (defun accent-apply-sl (inote ext-left ext-right peak curve-left curve-right)
   (let ((istart (if (float ext-left)
                    (i?ndr-before-index inote ext-left)
@@ -148,6 +151,7 @@
                 (min (+ note-number ext-left) (i?last)) ))
         fun-left fun-right power-left power-right )
     ;translate from keywords to function names and power
+    ;(print-ll "istart " istart " inote " inote " iend " iend)
     (multiple-value-setq (fun-left power-left) (accents-translate-curv-name-left curve-left))
     (multiple-value-setq  (fun-right power-right) (accents-translate-curv-name-right curve-right))
     (iset-ramp-x2-decimal-last istart inote 0.0 0.0 0.0 peak 'dsl power-left fun-left fun-left)
@@ -155,10 +159,11 @@
     ;transfer dsl to sl
     (loop for i from istart to iend do
           (if (iget i 'sl) 
-              (iset i  'sl (max (iget i 'sl) (iget i 'dsl))) )
+              (iset i  'sl (max (iget i 'sl) (+ (iget i 'nsl)(iget i 'dsl)))) )
           (rem-var (nth i *v*) 'dsl)
           )))
 
+#|
 ;; same for dr
 (defun accent-apply-dr (inote ext-left ext-right peak curve-left curve-right)
   (let ((istart (if (float ext-left)
@@ -176,7 +181,8 @@
     (loop for i from istart to iend do
         (iset i  'dr (* (iget i 'dr) (1+ (iget i 'ddr))))
         (rem-var (nth i *v*) 'ddr)
-        )))
+          )))
+|#
 
 ;; with max instead of add so that envelopes don't add up
 ;; not really compatible with the traditional rule application but works well with the new rule interaction stuff
@@ -192,6 +198,7 @@
     ;translate from keywords to function names and power
     (multiple-value-setq (fun-left power-left) (accents-translate-curv-name-left curve-left))
     (multiple-value-setq  (fun-right power-right) (accents-translate-curv-name-right curve-right))
+    ;(print-ll " istart " istart " inote " inote)
     (iset-ramp-x2-decimal-last istart inote 0.0 0.0 0.0 peak 'ddr power-left fun-left fun-left)
     (iset-ramp-x2-decimal-last inote iend 0.0 0.0 peak 0.0 'ddr power-right fun-right fun-right)
     (loop for i from istart to iend do
@@ -255,7 +262,6 @@
    
 ;; Applied the sound level variations on the notes
 ;; first make 'dsl and then add that to 'sl
-#|
 (defun apply-accent-sl (note-number ext-left ext-right peak fun-left fun-right power-left power-right)
   (iset-ramp-x2-decimal-last (- note-number ext-left) note-number 0.0 0.0 0.0 peak 'dsl power-left fun-left fun-left)
   (iset-ramp-x2-decimal-last note-number (+ note-number ext-right) 0.0 0.0 peak 0.0 'dsl power-right fun-right fun-right)
@@ -263,7 +269,6 @@
         (if (iget i 'sl) (iadd i  'sl (iget i 'dsl)))
         (rem-var (nth i *v*) 'dsl)
         ))
-|#
 
 ;; with added floats marking time in ms
 ;; fractional time not yet implemented

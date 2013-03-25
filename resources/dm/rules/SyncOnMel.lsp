@@ -256,6 +256,45 @@
     *sync-track*
     ))
 
+;;120914/af added stuff for statistical-analysis
+(defun simple-sync-make-mel ()
+  (let ((ton)
+        (last-from-voice)
+        (*sync-track* (make-instance 'mono-track :trackname "sync-track")) )
+    (p-each-note
+     (let ((minl (p-min-all (p-this 'ndr)))
+           (l))
+       
+       ;a new master note from top f0
+       (let* ((from-voice (or (car (p-max (p-this-f0)))
+                              (caar *cur-notes*) ))) ;if all rests?
+         (setq ton (make-instance 'segment))
+         (if (not from-voice) (print-ll "*ndr-to-next* " *ndr-to-next* " *all-notes* " *all-notes* " *cur-notes* " *cur-notes*))
+         (simple-sync-copy-prop ton from-voice) )
+       
+       ;copy phrasing from any of the current notes
+       (if (p-this 'phrase-start)
+           (set-var ton 'phrase-start (cdar (p-this 'phrase-start))))
+       (if (p-this 'phrase-end)
+           (set-var ton 'phrase-end (cdar (p-this 'phrase-end))))
+       (if (p-this 'accent-dr)
+           (set-var ton 'accent-dr (cdar (p-this 'accent-dr))))
+       (if (p-this 'accent-h)
+           (set-var ton 'accent-h (cdar (p-this 'accent-h))))
+       (if (p-this 'accent-m)
+           (set-var ton 'accent-m (cdar (p-this 'accent-m))))
+       (if (p-this 'accent-c)
+           (set-var ton 'accent-c (cdar (p-this 'accent-c))))
+       (if (p-this :real-sl-norm)  ; use max real-sl-norm
+           (set-var ton :real-sl-norm (cdr (p-max (p-this :real-sl-norm)))))
+       (if (p-this :new-tone)  ; transfer :new-tone from any note
+           (set-var ton :new-tone t))
+       
+       (add-one-segment *sync-track* ton) ))
+    (set-var (car (segment-list *sync-track*)) :mr t)
+    *sync-track*
+    ))
+
 ;------------------radio baton sync track ---------------------------------
 
 ;; add a sync track for the radio baton

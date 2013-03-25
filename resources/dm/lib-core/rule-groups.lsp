@@ -69,7 +69,6 @@
     (dolist (rule rule-list)
       (apply (car rule) (cdr rule)) )))
 
-;#+(or :mcl :lispworks)
 (defun rule-apply-list (rule-list)
   (dolist (rule rule-list)
     (if (get-dm-var 'verbose-i/o) (print rule))
@@ -190,6 +189,7 @@
 
 ;main function using file path input
 ;handles mono/poly automatic
+;c interaction parameter, c=1 no interaction, c=2 quadratic, etc
 (defun rule-interaction-apply-rules-sync (rulelist c)
   (let ((polyp (if (> (length (track-list *active-score*)) 1) t nil))) ;true if polyphonic
     (if polyp (make-simple-syncmel))
@@ -412,7 +412,7 @@
       "MozEssdur"
       "Ichtraumte"
       "Brahms"
-      "H\8Andel"
+      "H�ndel"
       "Mazurka" 
       "Mozdmkvart"
       "Ofullborda"

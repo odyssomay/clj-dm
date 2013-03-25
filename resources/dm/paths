@@ -16,6 +16,7 @@ dm:lib-core
  midifileoutput
  midifileinput
  playlist
+ utilityrules
  midibasic-lw
 dm
  init
@@ -24,7 +25,8 @@ dm:rules
  frules2
  Intonation
  FinalRitard
- utilityrules
  Punctuation
  phrasearch
  SyncOnMel
+ accent-analysis
+ accent-rule-ebrp

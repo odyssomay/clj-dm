@@ -6,56 +6,11 @@
 
 (in-package :dm)
 
-(export '(
-          for 
-          while
-          until
-          untilexit
-          ; ifn  has been replaced
-          newr
-          append1
-          print-ll
-          prin1-ll))
-
-;------lelisp style macros---------------------------
-#|
-(defmacro for ((var n p q) &rest body)
-  (let ((test (if (plusp p) '>= '<=))
-        (addsym (if (plusp p) '1+ '1-)))
-    `(do ((,var ,n (+ ,var ,p)))
-         ((,test ,var (,addsym ,q)))
-       ,@body )))
-
-(defmacro for+ ((var n p q) &rest body)
-  `(do ((,var ,n (+ ,var ,p)))
-       ((>= ,var (1+ ,q)))
-     ,@body ))
-
-|#
-
-;;#+:mcl    ;already defined in ACL?
-#|
-#+(or :mcl :lispworks)
-(defmacro while (test &rest body)
- `(do ()()
-    (if (not ,test) (return))
-    ,@body ))
-|#
-
-;#+(or :mcl :lispworks)
+#-:allegro
 (defmacro while (test &rest body)
  `(loop while ,test do ,@body) )
 
-#|
-#+(or :mcl :lispworks)
-(defmacro until (test &rest body)
- `(do ()()
-    (if ,test (return))
-    ,@body ))
-|#
-
-
-;#+(or :mcl :lispworks)
+#-:allegro
 (defmacro until (test &rest body)
  `(loop until ,test do ,@body) )
 
@@ -69,12 +24,10 @@
     (loop
     ,@body )))
 
-
 ;;; -------
 ;;;   IFN
 ;;; -------
 ;;;
-
      ;already defined in ACL? --no
  (defmacro ifn (test then &optional else)
  `(if (not ,test) ,then ,else) )
