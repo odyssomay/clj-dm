@@ -167,6 +167,13 @@
     
     (.scale gc scale 1.0)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
+    
+    ;; IMPORTANT
+    ;; quickfix to make graph dots appear 
+    ;; in the middle of notes
+    (.translate gc 4 0)
+    ;; end quickfix
+    
     (when (:prev-property-values state)
       (.setColor gc (java.awt.Color. 120 120 120))
       (draw-note-property-graph gc state (:prev-property-values state)))
