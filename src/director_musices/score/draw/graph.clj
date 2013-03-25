@@ -10,9 +10,10 @@
         :fn :dr}
    :sl {:display "Soundlevel"
         :fn :sl}
-   :dr-div-ndr {:display "Duration difference"
-                :fn #(/ (:dr %) (:ndr %))}
-   })
+   :dr-div-ndr {:display "Duration difference (in %)"
+                :fn #(* 100
+                        (- (/ (:dr %) (:ndr %))
+                           1))}})
 
 (defn get-available-properties [] (keys properties))
 (defn get-property-display-name [property]
