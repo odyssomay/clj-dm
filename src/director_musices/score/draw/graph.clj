@@ -15,6 +15,9 @@
    })
 
 (defn get-available-properties [] (keys properties))
+(defn get-property-display-name [property]
+  (get-in properties [property :display]))
+
 (defn calculate-property [note property]
   (let [f (get-in properties [property :fn])
         v (f note)]
