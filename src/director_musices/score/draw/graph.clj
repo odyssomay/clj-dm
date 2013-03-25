@@ -150,8 +150,6 @@
           (draw-height-line state gc (- y) (- sy) long? w)))))
 
 (defn paint [g state]
-  (.setColor g java.awt.Color/red)
-  ;(.fillRect g 0 0 100 100)
   (let [{:keys [height track-view track-component]} state
         gc (.create g)
         width (.getWidth track-view)]
