@@ -80,9 +80,10 @@
                         :minor-tick-spacing (:minor-spacing property-map)
                         :snap-to-ticks? (:snap? property-map)
                         :background track-properties-bg)
-            (ssw/spinner :model (ssw/spinner-model value
-                                                   :from (:min property-map)
-                                                   :to (:max property-map))))
+            (ssw/spinner :model (ssw/spinner-model (long value)
+                                                   :from (long (:min property-map))
+                                                   :to (long (:max property-map))
+                                                   )))
         get-value (case type
                     :string ssw/text
                     :bool #(.isSelected %)
