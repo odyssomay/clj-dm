@@ -167,10 +167,14 @@
     (draw-height-lines gc state)
     
     (.scale gc scale 1.0)
-    (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
+    (.translate gc
+                (+ (if (:clef (draw-track/get-track track-component))
+                     35 0)
+                   10)
+                0)
     
-    (.drawString gc
-                 (get-property-display-name property)
+    (.drawString gc (get-property-display-name
+                      property)
                  0 -2)
     
     ;; IMPORTANT
