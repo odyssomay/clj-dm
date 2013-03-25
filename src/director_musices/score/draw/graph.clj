@@ -150,7 +150,8 @@
           (draw-height-line state gc (- y) (- sy) long?)))))
 
 (defn paint [g state]
-  (let [{:keys [height track-view track-component]} state
+  (let [{:keys [height track-view
+                track-component property]} state
         gc (.create g)
         width (.getWidth track-view)
         scale (draw-track/get-scale track-component)]
@@ -167,6 +168,10 @@
     
     (.scale gc scale 1.0)
     (.translate gc (+ (if (:clef (draw-track/get-track track-component)) 35 0) 10) 0)
+    
+    (.drawString gc
+                 (get-property-display-name property)
+                 0 -2)
     
     ;; IMPORTANT
     ;; quickfix to make graph dots appear 
