@@ -160,8 +160,11 @@
     ))
 
 (defn ask-and-show-graph [view tc]
-  (if-let [choice (ssw/input "what type?" :choices [:sl :dr] 
-                             :to-string #(subs (str %) 1))]
+  (if-let [choice (ssw/input "what type?" :choices
+                             (draw-graph/get-available-properties)
+                             :to-string draw-graph/get-property-display-name
+                             :title "Select graph type")
+           ]
     (show-graph view tc choice)))
 
 (defn score-view [id]
