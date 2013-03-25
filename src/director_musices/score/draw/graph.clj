@@ -197,10 +197,11 @@
                 (* (draw-track/get-scale track-component)
                    (+ (:height @state) 10))
                 )))
-        refresh (fn [] (swap! state update-state))
-        update-property-values! (fn [] (swap! state update-property-values))
+        refresh! (fn [] (swap! state update-state))
+        update-property-values! (fn [] (swap! state
+                                              #(-> % update-property-values update-state)))
         ]
-    (draw-track/on-state-change track-component refresh)
+    (draw-track/on-state-change track-component refresh!)
     (draw-track/on-track-change track-component update-property-values!)
     (add-watch state (gensym) (fn [& _] (.revalidate c) (.repaint c)))
     {:view c}))
