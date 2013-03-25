@@ -51,10 +51,15 @@
         (/ (/ height 2)
            furthest)))))
 
+(defn update-height [state]
+  (let [{:keys [graph-data scale-y]} state
+        {:keys [furthest]} graph-data]
+    (assoc state :height (max (* 2 furthest scale-y) 50))))
+
 (defn update-state [state]
   (-> state
       update-graph-data
-      update-scale-y))
+      update-height))
 
 (defn calculate-property-values [state]
   (let [{:keys [track-component property]} state
@@ -180,7 +185,7 @@
                            :graph-data (graph-data track-component property)
                            :track-view (draw-track/get-view track-component)
                            :property property
-                           :height 100}
+                           :scale-y 1}
                           graph-opts)
                         update-state
                         update-property-values))
