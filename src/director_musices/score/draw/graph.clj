@@ -9,11 +9,17 @@
   {:dr {:display "Duration"
         :fn :dr}
    :sl {:display "Soundlevel"
-        :fn :sl}
+        :fn :sl
+        :range 11}
    :dr-div-ndr {:display "Duration difference (in %)"
                 :fn #(* 100
                         (- (/ (:dr %) (:ndr %))
-                           1))}})
+                           1))
+                :range 31
+                :interval {:magnitude 3
+                           :lines 10
+                           }
+                }})
 
 (defn get-available-properties [] (keys properties))
 (defn get-property-display-name [property]
@@ -35,8 +41,10 @@
     {:max property-max
      :min property-min
      :diff property-diff
-     :furthest (max property-max
-                    (- property-min))}))
+     :furthest (or (get-in properties [property :range])
+                   (max property-max
+                        (- property-min)))
+     }))
 
 (defn update-graph-data [state]
   (let [{:keys [track-component property]} state]
@@ -64,11 +72,13 @@
     interval))
 
 (defn update-line-interval [state]
-  (let [{:keys [graph-data]} state
+  (let [{:keys [graph-data property]} state
         {:keys [furthest]} graph-data]
     (assoc state
       :line-interval
-      (guess-interval furthest 10))))
+      (or (get-in properties [property :interval])
+          (guess-interval furthest 10))
+      )))
 
 (defn update-state [state]
   (-> state
@@ -196,7 +206,8 @@
                            :graph-data (graph-data track-component property)
                            :track-view (draw-track/get-view track-component)
                            :property property
-                           :line-height 8}
+                           :line-height 8
+                           :automatic-scaling false}
                           graph-opts)
                         update-state
                         update-property-values))
