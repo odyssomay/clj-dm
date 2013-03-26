@@ -233,10 +233,14 @@
     (draw-track/on-state-change track-component refresh!)
     (draw-track/on-track-change track-component update-property-values!)
     (add-watch state (gensym) (fn [& _] (.revalidate c) (.repaint c)))
-    {:view c}))
+    {:view c
+     :state state}))
 
 ;; =====
 ;; API
 ;; =====
 
 (defn get-view [tgc] (:view tgc))
+(defn set-automatic-scaling [tgc automatic-scaling]
+  (swap! (:state tgc) assoc
+         :automatic-scaling automatic-scaling))
