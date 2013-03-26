@@ -212,8 +212,8 @@
                            :line-height 8
                            :automatic-scaling false}
                           graph-opts)
-                        update-state
-                        update-property-values))
+                        update-property-values
+                        update-state))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g] (paint g @state))
             (getPreferredSize []
