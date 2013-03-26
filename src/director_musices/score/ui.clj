@@ -171,21 +171,21 @@
   (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
-                                        [(draw-track/get-view tc) "span"]
-                                        ]
+                                        [(draw-track/get-view tc) "span"]]
                                 :constraints ["insets 0, gap 0" "" ""]
-                                :background "white")
-        ]
-    (ssw/listen (draw-track/get-view tc)
-                :mouse-clicked
-                (fn [evt]
-                  (let [popup (ssw/popup :items [(ssw/action :name "Edit note..."
-                                                             :handler (fn [_] (edit-note tc id evt)))
-                                                 (ssw/action :name "Show Graph..."
-                                                             :handler (fn [_] (ask-and-show-graph view tc)))])]
-                    (cond
-                      (SwingUtilities/isRightMouseButton evt)
-                      (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
+                                :background "white")]
+    (ssw/listen
+      (draw-track/get-view tc)
+      :mouse-clicked
+      (fn [evt]
+        (cond
+          (SwingUtilities/isRightMouseButton evt)
+          (let [popup (ssw/popup :items
+                                 [(ssw/action :name "Edit note..."
+                                              :handler (fn [_] (edit-note tc id evt)))
+                                  (ssw/action :name "Show Graph..."
+                                              :handler (fn [_] (ask-and-show-graph view tc)))])]
+            (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
