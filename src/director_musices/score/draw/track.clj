@@ -276,7 +276,7 @@
         {:keys [absolute-x-offset y-offset]} note]
     [(* scale (+ first-note-offset
                  (* scale-x absolute-x-offset)))
-     (* scale y-offset)]))
+     (* scale (- y-offset (calc/get-lowest (get-track tc))))]))
 
 (defn get-note-for-x [component-m x]
   (let [{:keys [track scale scale-x]} @(:state component-m)
