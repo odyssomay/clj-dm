@@ -36,7 +36,7 @@
    {:display-name "Track"
     :property "trackname"
     :type :string}
-   {:display-name "Midi channel"
+   {:display-name "Midi ch"
     :property "midi-channel"
     :min 1 :max 16}
    {:display-name "Synth"
@@ -45,7 +45,7 @@
    {:display-name "Program"
     :property "midi-initial-program"
     :type :midi-program-list}
-   {:display-name "Track delay"
+   {:display-name "Delay"
     :property "track-delay"
     :min 0 :max 100}
    {:display-name "Pan"
@@ -116,8 +116,8 @@
         (for [property-map track-properties]
           (let [{:keys [display-name]} property-map
                 c (track-property-editor id property-map)]
-            [[(ssw/label :text display-name) "gapright 20"]
-             [c "w 125!, wrap"]
+            [[(ssw/label :text display-name) "gapright 5"]
+             [c "w 100!, wrap"]
              ]))
         view (ssw-mig/mig-panel :items (reduce concat property-display)
                                 :background track-properties-bg
