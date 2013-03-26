@@ -30,25 +30,28 @@
         v (f note)]
     (or v 0)))
 
-(defn graph-data [track-component property]
-  (let [notes (draw-track/get-notes track-component)
-        property-vals (remove nil? (concat [0] (map #(calculate-property
-                                                       % property)
-                                                    notes)))
+(defn graph-data [state property]
+  (let [{:keys [property-values
+                automatic-scaling]} state
+        property-vals (remove nil? (conj property-values 0))
         property-max (reduce max property-vals)
         property-min (reduce min property-vals)
         property-diff (- property-max property-min)]
     {:max property-max
      :min property-min
      :diff property-diff
-     :furthest (or (get-in properties [property :range])
-                   (max property-max
-                        (- property-min)))
+     :furthest
+     (let [prange (get-in properties [property :range])]
+       (if (and (not automatic-scaling)
+                prange)
+         prange
+         (max property-max
+              (- property-min))))
      }))
 
 (defn update-graph-data [state]
   (let [{:keys [track-component property]} state]
-    (assoc state :graph-data (graph-data track-component property))))
+    (assoc state :graph-data (graph-data state property))))
 
 (defn update-scale-y [state]
   (let [{:keys [line-interval line-height]} state
