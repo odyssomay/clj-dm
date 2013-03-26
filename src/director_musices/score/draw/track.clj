@@ -263,11 +263,14 @@
 
 (defn abs [x] (if (< x 0) (- x ) x))
 
+(defn get-first-note-offset [tc] 45)
+
 (defn get-note-component-position [tc note]
   (let [scale (get-scale tc)
         scale-x (get-scale-x tc)
         {:keys [absolute-x-offset y-offset]} note]
-    [(* scale (+ 45 (* scale-x absolute-x-offset)))
+    [(* scale (+ (get-first-note-offset tc)
+                 (* scale-x absolute-x-offset)))
      (* scale y-offset)]))
 
 (defn get-note-for-x [component-m x]
