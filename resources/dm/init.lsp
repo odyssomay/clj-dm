@@ -47,9 +47,7 @@
 				 (t t))) segment))
 
 (defun get-filtered-track (index)
-  (map 'list 
-	   (lambda (segment) (filter-segment (var-list segment))) 
-	   (segment-list (nth index (track-list *active-score*)))))
+  (map 'list #'var-list (segment-list (nth index (track-list *active-score*)))))
 
 (defun read-score-from-string (string)
    (let ((inlist)
