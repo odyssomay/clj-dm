@@ -98,7 +98,7 @@
 
 (defn menubar []
   (ssw/menubar :items 
-               [score-menu/file-menu
+               [(score-menu/file-menu)
                 edit-menu
                 help-menu
                 ]))

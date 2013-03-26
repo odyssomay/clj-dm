@@ -15,7 +15,7 @@
     (update (global/get-score-loaded?))
     a))
 
-(def file-menu
+(defn file-menu []
   (ssw/menu
     :text "File"
     :items 
