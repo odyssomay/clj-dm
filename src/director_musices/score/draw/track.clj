@@ -263,6 +263,13 @@
 
 (defn abs [x] (if (< x 0) (- x ) x))
 
+(defn get-note-component-position [tc note]
+  (let [scale (get-scale tc)
+        scale-x (get-scale-x tc)
+        {:keys [absolute-x-offset y-offset]} note]
+    [(* scale (+ 45 (* scale-x absolute-x-offset)))
+     (* scale y-offset)]))
+
 (defn get-note-for-x [component-m x]
   (let [{:keys [track scale scale-x]} @(:state component-m)
         notes (:notes track)
@@ -281,12 +288,3 @@
 
 (defn stop-note-highlight! [component-m]
   (swap! (:state component-m) dissoc :highlighted-note))
-
-(defn get-note-component-position [tc note]
-  (let [scale (get-scale tc)
-        scale-x (get-scale-x tc)
-        {:keys [absolute-x-offset y-offset]} note
-        total-x-offset (+ absolute-x-offset 45)]
-    [(* scale scale-x total-x-offset)
-     (* scale y-offset)]
-    ))
