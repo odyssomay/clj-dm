@@ -259,6 +259,12 @@
 
 (defn get-view [component-m] (:view component-m))
 
+(defn get-track [component-m] (:track @(:state component-m)))
+(defn set-track [component-m track]
+  (swap! (:state component-m) assoc :track (calc/calculate-track track)))
+
+(defn get-notes [component-m] (:notes (get-track component-m)))
+
 (defn set-position-indicator [component-m position]
   (swap! (:state component-m) assoc :position-indicator position))
 
@@ -278,12 +284,6 @@
                    (map #(assoc % :cpos (get-note-component-position
                                           component-m %))))]
     (first (sort-by #(abs (- x (first (:cpos %)))) notes))))
-
-(defn get-track [component-m] (:track @(:state component-m)))
-(defn set-track [component-m track]
-  (swap! (:state component-m) assoc :track (calc/calculate-track track)))
-
-(defn get-notes [component-m] (:notes (get-track component-m)))
 
 (defn highlight-note! [component-m note]
   (swap! (:state component-m) assoc :highlighted-note note))
