@@ -184,22 +184,28 @@
       add-label
       :mouse-clicked
       (fn [_]
-        (let [new-name (ssw/text)]
+        (let [new-name (ssw/text)
+              add-new-view
+              (fn [items k]
+                (concat
+                  items
+                  (note-value-view view-items segment-atom
+                                   k "" border-color)))
+              remove-new-name
+              (fn [items]
+                (remove #(= (first %) new-name) items))]
           (swap! view-items concat [[new-name "growx, wrap"]])
           (ssw/listen
             new-name
-            :focus-lost
+            :action
             (fn [_]
               (let [k (keyword (ssw/text new-name))]
                 (swap! view-items
                        (fn [items]
-                         (remove #(= (first %) new-name)
-                                 items)))
-                (when-not (= k "")
-                  (swap! view-items concat
-                         (note-value-view view-items segment-atom
-                                          k "" border-color))
-                  ))))
+                         (remove-new-name
+                           (if (= k "")
+                             items
+                             (add-new-view items k))))))))
           (ssw/request-focus! new-name))))
     [add-label
      "dock south, growx, gapbottom 7"]))
