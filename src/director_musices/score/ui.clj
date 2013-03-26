@@ -10,7 +10,9 @@
               [player :as player]
               [util :as util])
             (seesaw
+              [border :as ssw-border]
               [chooser :as ssw-chooser]
+              [color :as ssw-color]
               [core :as ssw]
               [mig :as ssw-mig])
             [clojure.java.io :as jio])
@@ -124,22 +126,73 @@
                                 :constraints ["gap 1"])]
     view))
 
+(defn- set-edit-note-location [dialog tc evt note]
+  (let [[nx ny] (draw-track/get-note-component-position tc note)
+        scale (draw-track/get-scale tc)
+        x-diff (- nx (.getX evt))
+        y-diff (- ny (.getY evt))
+        x (+ (.getXOnScreen evt)
+             x-diff
+             (* scale 5))
+        y (+ (.getYOnScreen evt)
+             y-diff
+             (* scale 5))]
+    (.setLocation dialog x y)))
+
 (defn edit-note [tc id mouse-evt]
   (let [note (draw-track/get-note-for-x tc (.getX mouse-evt))
         note-id (:index note)
-        ta (ssw/text :text (-> (clojure.string/replace (str (glue/get-segment id note-id))
-                                                       ", " "\n")
-                               (clojure.string/replace #"\{|\}" ""))
-                     :multi-line? true)
-        dialog (ssw/dialog :content (ssw/scrollable ta) :option-type :ok-cancel :size [300 :by 300]
-                           :parent (dm-global/get-frame)
-                           :success-fn
-                           (fn [& _]
-                             (glue/set-segment id note-id
-                                               (read-string (str "{" (.getText ta) "}")))))]
-    (ssw/listen dialog :window-closed (fn [& _] (draw-track/stop-note-highlight! tc)))
-    (draw-track/highlight-note! tc note)
-    (ssw/show! dialog)))
+        segment (glue/get-segment id note-id)
+        segment-atom (atom segment)
+        sorted (sort-by (comp name first) segment)
+        border-color (ssw-color/to-color "#FF5050")
+        arrow (proxy [javax.swing.JComponent] []
+                (paint [g]
+                  (let [g (.create g)]
+                    (.setColor g border-color)
+                    (.fillPolygon g
+                      (int-array [0 25 0])
+                      (int-array [0 25 25])
+                      3)
+                    ))
+                (getPreferredSize []
+                  (java.awt.Dimension. 25 25)))
+        view (ssw-mig/mig-panel
+               :constraints ["gap 1"]
+               :items (reduce
+                        concat
+                        (for [[k value] sorted]
+                          (let [t (ssw/text :text (print-str value)
+                                                 :columns 15)]
+                            (ssw/listen t :document
+                                        (fn [& _]
+                                          (try
+                                            (swap! segment-atom assoc k
+                                                   (read-string (ssw/text t)))
+                                            (ssw/config! t :background :white)
+                                            (catch Exception e
+                                              (ssw/config! t :background :red)))))
+                            [[(name k)] [t "gapleft 5, wrap"]])))
+               :border (ssw-border/line-border
+                         :color border-color
+                         :thickness 1))
+        dialog (ssw/frame :content (ssw-mig/mig-panel
+                                     :items [[arrow "span"]
+                                             [view]]
+                                     :constraints ["insets 0, gap 0"])
+                          :on-close :dispose
+                          :resizable? false
+                          :undecorated? true)]
+    (ssw/listen dialog
+                :window-deactivated
+                (fn [& _] (.dispose dialog)
+                  (glue/set-segment id note-id @segment-atom)))
+    (doto dialog
+      (set-edit-note-location tc mouse-evt note)
+      (.setBackground (java.awt.Color. 0 0 0 0))
+      ssw/pack!
+      ssw/show!)
+    ))
 
 (defn show-graph [view tc type]
   (let [gc (draw-graph/graph-component tc type)
