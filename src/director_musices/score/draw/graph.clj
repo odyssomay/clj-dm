@@ -72,7 +72,7 @@
                           :diff (Math/abs (- lines expected-lines))})
                       magnitudes)
         interval (first (sort-by :diff nr-lines))]
-    interval))
+    (:magnitude interval)))
 
 (defn update-line-interval [state]
   (let [{:keys [graph-data property
@@ -149,18 +149,17 @@
   (let [{:keys [scale-y height graph-data
                 line-interval]} state
         {:keys [diff furthest]} graph-data
-        {:keys [magnitude lines]} line-interval
-        scaled-interval (* scale-y magnitude)
-        indices (range 1 (inc lines))
+        scaled-interval (* scale-y line-interval)
         gc (.create g)]
     (.translate gc 40 0)
     (.setColor gc java.awt.Color/black)
     (let [h (/ height 2)]
       (.drawLine gc 0 0 0 h)
       (.drawLine gc 0 0 0 (- h)))
-    (doseq [i indices]
-      (let [y (* magnitude i)
-            sy (* scaled-interval i)
+    (doseq [i (rest (range))
+            :let [y (* line-interval i)]
+            :while (<= y furthest)]
+      (let [sy (* scaled-interval i)
             long? (zero? (rem i 2))]
           (draw-height-line state gc y sy long?)
           (draw-height-line state gc (- y) (- sy) long?)))))
