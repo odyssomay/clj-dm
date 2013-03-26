@@ -205,7 +205,7 @@
     (paint g state)
     img))
 
-(defn track-component [track & {:keys [default-distance] :or {default-distance 1/8} :as opts}] 
+(defn track-component [track & {:as opts}] 
   (let [state (atom (merge {:scale 1 :scale-x 1
                             :position-indicator nil
                             :track (calc/calculate-track track)}
