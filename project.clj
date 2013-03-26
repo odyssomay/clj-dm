@@ -1,5 +1,5 @@
 (defproject 
-  director-musices "1.0.3"
+  director-musices "1.0.4"
   :description "FIXME: write description"
   :manifest ["SplashScreen-Image" "splash.gif"]
   :dependencies [[org.clojure/clojure "1.5.0"]
