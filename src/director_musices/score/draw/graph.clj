@@ -16,9 +16,7 @@
                         (- (/ (:dr %) (:ndr %))
                            1))
                 :range 31
-                :interval {:magnitude 3
-                           :lines 10
-                           }
+                :interval 3
                 }})
 
 (defn get-available-properties [] (keys properties))
