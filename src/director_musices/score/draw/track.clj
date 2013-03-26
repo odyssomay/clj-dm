@@ -272,10 +272,10 @@
 
 (defn get-note-for-x [component-m x]
   (let [{:keys [track scale scale-x]} @(:state component-m)
-        notes (:notes track)
-        x (* (/ 1 (* scale scale-x))
-             (- x (+ (if (:clef track) 35 0) 10)))]
-    (first (sort-by #(abs (- x (:absolute-x-offset %))) notes))))
+        notes (->> (:notes track)
+                   (map #(assoc % :cpos (get-note-component-position
+                                          component-m %))))]
+    (first (sort-by #(abs (- x (first (:cpos %)))) notes))))
 
 (defn get-track [component-m] (:track @(:state component-m)))
 (defn set-track [component-m track]
