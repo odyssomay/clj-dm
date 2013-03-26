@@ -281,3 +281,12 @@
 
 (defn stop-note-highlight! [component-m]
   (swap! (:state component-m) dissoc :highlighted-note))
+
+(defn get-note-component-position [tc note]
+  (let [scale (get-scale tc)
+        scale-x (get-scale-x tc)
+        {:keys [absolute-x-offset y-offset]} note
+        total-x-offset (+ absolute-x-offset 45)]
+    [(* scale scale-x total-x-offset)
+     (* scale y-offset)]
+    ))
