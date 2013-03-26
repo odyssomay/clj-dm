@@ -246,7 +246,11 @@
                                               :handler (fn [_] (edit-note tc id evt)))
                                   (ssw/action :name "Show Graph..."
                                               :handler (fn [_] (ask-and-show-graph view tc)))])]
-            (.show popup (.getSource evt) (.getX evt) (.getY evt))))))
+            (.show popup (.getSource evt) (.getX evt) (.getY evt)))
+          (and (SwingUtilities/isLeftMouseButton evt)
+               (== (.getClickCount evt) 2))
+          (edit-note tc id evt)
+          )))
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
