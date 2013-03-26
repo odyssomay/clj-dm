@@ -147,14 +147,22 @@
         remove-graph #(do
                         (.remove view c)
                         (.revalidate view)
-                        (.repaint view))]
+                        (.repaint view))
+        custom-scale? (draw-graph/has-custom-scaling? type)
+        autoscale? (ssw/checkbox-menu-item
+                     :text "Automatic scaling"
+                     :selected? (not custom-scale?)
+                     :enabled? custom-scale?)
+        popup (ssw/popup :items [autoscale?
+                                 (ssw/action :name "Remove graph"
+                                             :handler (fn [_] (remove-graph)))])]
+    (ssw/listen autoscale? :selection
+                (fn [_] (draw-graph/set-automatic-scaling
+                          gc (ssw/selection autoscale?))))
     (ssw/listen c :mouse-clicked
                 (fn [evt]
                   (when (SwingUtilities/isRightMouseButton evt)
-                    (let [popup (ssw/popup :items [(ssw/action :name "Remove graph"
-                                                               :handler (fn [_] (remove-graph)))])]
-                      (.show popup (.getSource evt) (.getX evt) (.getY evt))
-                      ))))
+                    (.show popup (.getSource evt) (.getX evt) (.getY evt)))))
     (.add view c "span")
     (.revalidate view)
     ))
