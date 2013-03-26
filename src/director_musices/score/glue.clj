@@ -51,14 +51,11 @@
          (into {}))))
 
 (defn map->segment [m]
-  (let [raw (with-open [s (java.io.StringWriter.)]
-              (binding [*out* s]
-                (prn (map (fn [[k v]]
+  (let [raw (prn-str (map (fn [[k v]]
                             (concat (list (symbol (.toUpperCase (name k))))
-                              (if (coll? v)
-                                (map clj->value v)
-                                (list (clj->value v))))) m))
-                (str s)))]
+                                    (if (coll? v)
+                                      (map clj->value v)
+                                      (list (clj->value v))))) m))]
     (.replaceAll raw "," "")))
 
 (defn get-track [track-index]
