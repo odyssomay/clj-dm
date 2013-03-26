@@ -72,7 +72,8 @@
     interval))
 
 (defn update-line-interval [state]
-  (let [{:keys [graph-data property]} state
+  (let [{:keys [graph-data property
+                automatic-scaling]} state
         {:keys [furthest]} graph-data
         custom-interval (get-in properties [property :interval])]
     (assoc state
