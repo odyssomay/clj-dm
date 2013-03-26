@@ -73,12 +73,14 @@
 
 (defn update-line-interval [state]
   (let [{:keys [graph-data property]} state
-        {:keys [furthest]} graph-data]
+        {:keys [furthest]} graph-data
+        custom-interval (get-in properties [property :interval])]
     (assoc state
       :line-interval
-      (or (get-in properties [property :interval])
-          (guess-interval furthest 10))
-      )))
+      (if (and (not automatic-scaling)
+               custom-interval)
+        custom-interval
+        (guess-interval furthest 10)))))
 
 (defn update-state [state]
   (-> state
