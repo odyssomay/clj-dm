@@ -182,10 +182,7 @@
     
     (.scale gc scale 1.0)
     
-    (.translate gc
-                (draw-track/get-first-note-offset
-                  track-component)
-                0)
+    (.translate gc draw-track/first-note-offset 0)
     
     (.drawString gc (get-property-display-name
                       property)
