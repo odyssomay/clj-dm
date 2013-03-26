@@ -1,5 +1,4 @@
 (ns director-musices.score.ui
-  (:use [clojure.java.io :only [file resource]])
   (:require (director-musices.score
               [global :as global]
               [glue :as glue])
@@ -13,7 +12,8 @@
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw]
-              [mig :as ssw-mig]))
+              [mig :as ssw-mig])
+            [clojure.java.io :as jio])
   (:import javax.swing.SwingUtilities))
 
 (def score-panel-reloader (atom nil))
@@ -269,7 +269,7 @@
   (load-score-from-file-with
     file glue/load-active-score-from-file))
 
-(defn load-score-from-midi-file [f]
+(defn load-score-from-midi-file [file]
   (load-score-from-file-with
     file glue/load-active-score-from-midi-file))
 
@@ -301,8 +301,8 @@
     (glue/save-midi-to-path (.getCanonicalPath f))))
 
 (defn open-test-score [& _]
-  (let [f (file (util/tmp-dir) "Mozart-Amaj-newformat.mus")]
-    (spit f (slurp (resource "Mozart-Amaj-newformat.mus")))
+  (let [f (jio/file (util/tmp-dir) "Mozart-Amaj-newformat.mus")]
+    (spit f (slurp (jio/resource "Mozart-Amaj-newformat.mus")))
     (load-score-from-file f)))
 
 ;; =====
