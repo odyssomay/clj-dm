@@ -52,10 +52,9 @@
     (assoc state :graph-data (graph-data state property))))
 
 (defn update-scale-y [state]
-  (let [{:keys [line-interval line-height]} state
-        {:keys [magnitude]} line-interval]
+  (let [{:keys [line-interval line-height]} state]
     (assoc state
-      :scale-y (/ line-height magnitude))))
+      :scale-y (/ line-height line-interval))))
 
 (defn update-height [state]
   (let [{:keys [graph-data scale-y]} state
