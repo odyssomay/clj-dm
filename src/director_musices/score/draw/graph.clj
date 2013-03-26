@@ -22,6 +22,8 @@
 (defn get-available-properties [] (keys properties))
 (defn get-property-display-name [property]
   (get-in properties [property :display]))
+(defn has-custom-scaling? [property]
+  (get-in properties [property :range]))
 
 (defn calculate-property [note property]
   (let [f (get-in properties [property :fn])
