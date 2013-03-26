@@ -335,7 +335,7 @@
    (midi-initial-program :accessor midi-initial-program :initarg :midi-initial-program :initform 1)
    (midi-bank-msb :accessor midi-bank-msb :initarg :midi-bank-msb :initform nil)
    (midi-bank-lsb :accessor midi-bank-lsb :initarg :midi-bank-lsb :initform nil)
-   (midi-pan :accessor midi-pan :initarg :midi-pan :initform nil)
+   (midi-pan :accessor midi-pan :initarg :midi-pan :initform 64)
    (midi-reverb :accessor midi-reverb :initarg :midi-reverb :initform nil)
    (synth :accessor synth :initarg :synth :initform (make-synth (get-dm-var 'play-synth-name-default)))
    (instrument-type :accessor instrument-type :initarg :instrument-type :initform "String")
