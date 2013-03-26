@@ -144,8 +144,7 @@
 (defn show-graph [view tc type]
   (let [gc (draw-graph/graph-component tc type)
         c (draw-graph/get-view gc)
-        remove-graph #(do
-                        (.remove view c)
+        remove-graph #(do (.remove view c)
                         (.revalidate view)
                         (.repaint view))
         custom-scale? (draw-graph/has-custom-scaling? type)
@@ -158,7 +157,8 @@
                                              :handler (fn [_] (remove-graph)))])]
     (ssw/listen autoscale? :selection
                 (fn [_] (draw-graph/set-automatic-scaling
-                          gc (ssw/selection autoscale?))))
+                          gc (ssw/selection autoscale?))
+                  (draw-graph/refresh! gc)))
     (ssw/listen c :mouse-clicked
                 (fn [evt]
                   (when (SwingUtilities/isRightMouseButton evt)
