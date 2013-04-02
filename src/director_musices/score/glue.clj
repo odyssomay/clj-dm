@@ -65,34 +65,30 @@
                    (map segment->map))]
     {:clef \G :notes notes}))
 
-;(defn get-segment-parameter [track-index segment-index k]
-;  (get (get-segment track-index segment-index) (keyword (name k))))
+(defn track-list [] "(track-list *active-score*)")
 
-; (defn set-segment-parameter [track-index segment-index k v]
-;   (set-segment track-index segment-index
-;     (map->segment (assoc (get-segment track-index segment-index) 
-;                          (keyword (.toUpperCase (name k)))
-;                          v))))
+(defn segment-list [track-id]
+  (str "(segment-list (nth " track-id " " (track-list) "))"))
+
+(defn segment [track-id id]
+  (str "(nth " id " " (segment-list track-id) ")"))
 
 (defn set-segment-parameter [track-index segment-index k v]
   (glue/eval-dm
-    (str "(set-var (var-list (nth " segment-index
-         " (segment-list (nth " track-index
-         " (track-list *active-score*))))) '"
-         (name k) " "
-         v ")")))
+    (str "(set-var " (segment track-index segment-index)
+         " '" (name k) " '" (pr-str v) ")")))
+
+(defn remove-segment-parameter [track-index segment-index k]
+  (glue/eval-dm
+    (str "(rem-var " (segment track-index segment-index)
+         " '" (name k) ")")))
 
 (defn get-segment [track-index segment-index]
   (nth (:notes (get-track track-index)) segment-index nil))
 
 (defn set-segment [track-index segment-index segment]
   (doseq [[k v] segment]
-      (set-segment-parameter track-index segment-index k v))
-    ; (glue/eval-dm (str "(setf (var-list (nth " segment-index 
-    ;                                  " (segment-list (nth " track-index 
-    ;                                                  " (track-list *active-score*))))) '"
-    ;                    segment ")"))
-    )
+      (set-segment-parameter track-index segment-index k v)))
 
 (defn get-track-count []
   (.javaInstance (glue/eval-dm "(length (track-list *active-score*))")))
