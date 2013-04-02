@@ -1,3 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-* -crlf
+* eol=lf
+*.vbs eol=crlf
+
+*.xcf -text
+*.jpeg -text
+*.jpg -text
+*.gif -text
+*.png -text
