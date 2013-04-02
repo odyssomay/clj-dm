@@ -65,26 +65,34 @@
                    (map segment->map))]
     {:clef \G :notes notes}))
 
+;(defn get-segment-parameter [track-index segment-index k]
+;  (get (get-segment track-index segment-index) (keyword (name k))))
+
+; (defn set-segment-parameter [track-index segment-index k v]
+;   (set-segment track-index segment-index
+;     (map->segment (assoc (get-segment track-index segment-index) 
+;                          (keyword (.toUpperCase (name k)))
+;                          v))))
+
+(defn set-segment-parameter [track-index segment-index k v]
+  (glue/eval-dm
+    (str "(set-var (var-list (nth " segment-index
+         " (segment-list (nth " track-index
+         " (track-list *active-score*))))) '"
+         (name k) " "
+         v ")")))
+
 (defn get-segment [track-index segment-index]
   (nth (:notes (get-track track-index)) segment-index nil))
 
 (defn set-segment [track-index segment-index segment]
-  (let [segment (if (map? segment)
-                    (map->segment segment)
-                    segment)]
-    (glue/eval-dm (str "(setf (var-list (nth " segment-index 
-                                     " (segment-list (nth " track-index 
-                                                     " (track-list *active-score*))))) '"
-                       segment ")"))))
-
-(defn get-segment-parameter [track-index segment-index k]
-  (get (get-segment track-index segment-index) (keyword (name k))))
-
-(defn set-segment-parameter [track-index segment-index k v]
-  (set-segment track-index segment-index
-    (map->segment (assoc (get-segment track-index segment-index) 
-                         (keyword (.toUpperCase (name k)))
-                         v))))
+  (doseq [[k v] segment]
+      (set-segment-parameter track-index segment-index k v))
+    ; (glue/eval-dm (str "(setf (var-list (nth " segment-index 
+    ;                                  " (segment-list (nth " track-index 
+    ;                                                  " (track-list *active-score*))))) '"
+    ;                    segment ")"))
+    )
 
 (defn get-track-count []
   (.javaInstance (glue/eval-dm "(length (track-list *active-score*))")))
