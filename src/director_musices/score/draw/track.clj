@@ -162,8 +162,8 @@
     (.drawRect gc -1 -1 11 10)
     ))
 
-(defn draw-line-indicator [g state]
-  (if-let [position (:position-indicator state)]
+(defn draw-line-indicator [g state position]
+  (if position
     (let [gc (.create g)]
       (.translate gc 45.0 0.0)
       (.setColor gc java.awt.Color/red)
@@ -207,7 +207,8 @@
     img))
 
 (defn track-component [track & {:as opts}] 
-  (let [state (atom (merge {:scale 1 :scale-x 1
+  (let [position-indicator (atom nil)
+        state (atom (merge {:scale 1 :scale-x 1
                             :position-indicator nil
                             :track (calc/calculate-track track)}
                            opts))
@@ -217,22 +218,23 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
-              (draw-line-indicator g @state)
+              (draw-line-indicator g @state @position-indicator)
               (when-let [hnote (:highlighted-note @state)]
                 (highlight-note g hnote @state)))
             (getPreferredSize []
               (let [t (get-track)]
                 (java.awt.Dimension.
                   (get-track-component-width @state)
-                  (* (:scale @state) (calc/get-height t))))))]
+                  (* (:scale @state) (calc/get-height t))))))
+        repaint! (fn [] (ssw/invoke-later (.revalidate c) (.repaint c)))]
     (add-watch state (gensym)
                (fn [_ _ _ state]
-                 (ssw/invoke-later
-                   (update-image)
-                   (.revalidate c)
-                   (.repaint c))))
+                 (update-image)
+                 (repaint!)))
+    (add-watch position-indicator nil (fn [& _] (repaint!)))
     {:view c
-     :state state}))
+     :state state
+     :position-indicator position-indicator}))
 
 ;; =====
 ;; API
@@ -268,7 +270,7 @@
 (defn get-notes [component-m] (:notes (get-track component-m)))
 
 (defn set-position-indicator [component-m position]
-  (swap! (:state component-m) assoc :position-indicator position))
+  (reset! (:position-indicator component-m) position))
 
 (defn abs [x] (if (< x 0) (- x ) x))
 
