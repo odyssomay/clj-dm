@@ -230,19 +230,18 @@
         score-views (for [i (range (glue/get-track-count))]
                       (let [sv (score-view i)
                             sc (:score-component sv)
-                            ]
+                            offs draw-track/first-note-offset]
                         (ssw/listen (draw-track/get-view sc) 
                                     :mouse-pressed (fn [e] 
                                                      (reset! mouse-position-x-start (.getX e))
                                                      (reset! initial-scale-x (draw-track/get-scale-x sc)))
                                     :mouse-dragged (fn [e] 
-                                                     (reset! new-scale-x (* @initial-scale-x
-                                                                            (/ (.getX e)
-                                                                               @mouse-position-x-start)))))
-                        (add-watch new-scale-x i (fn [_ _ _ scale-x] (draw-track/set-scale-x sc scale-x)))
-                        [(:view sv) "span"]
-                        ;(:view sv)
-                        ))]
+                                                     (draw-track/set-scale-x
+                                                       sc (* @initial-scale-x
+                                                             (/ (- (.getX e) offs)
+                                                                (- @mouse-position-x-start offs)
+                                                                )))))
+                        [(:view sv) "span"]))]
     (ssw/config! p
                  :items
                  (interleave score-views
