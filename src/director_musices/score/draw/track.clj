@@ -217,6 +217,7 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
+              (draw-line-indicator g @state)
               (when-let [hnote (:highlighted-note @state)]
                 (highlight-note g hnote @state)))
             (getPreferredSize []
@@ -226,9 +227,10 @@
                   (* (:scale @state) (calc/get-height t))))))]
     (add-watch state (gensym)
                (fn [_ _ _ state]
-                 (update-image)
-                 (.revalidate c)
-                 (.repaint c)))
+                 (ssw/invoke-later
+                   (update-image)
+                   (.revalidate c)
+                   (.repaint c))))
     {:view c
      :state state}))
 
