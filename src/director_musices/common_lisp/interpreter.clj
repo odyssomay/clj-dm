@@ -8,6 +8,7 @@
             [seesaw.core :as ssw]))
 
 (defn abcl-error [e]
+  (.printStackTrace e)
   (global/show-error
     :text "The back end crashed."
     :buttons [(ssw/action :name "Restart")]))
@@ -66,7 +67,8 @@
           )
         (log/error path "does not exist!")))
     (catch Exception e
-      (log/error "failed loading" path ", error:" e))))
+      (log/error "failed loading" path ", error:" e)
+      (.printStackTrace e))))
 
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
