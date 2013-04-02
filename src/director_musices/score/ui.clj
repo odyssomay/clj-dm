@@ -18,6 +18,8 @@
             [clojure.java.io :as jio])
   (:import javax.swing.SwingUtilities))
 
+(declare reload-score)
+
 (def score-panel-reloader (atom nil))
 
 ; All properties:
@@ -153,7 +155,7 @@
 
 (defn- note-value-view [view-items segment-atom k value border-color]
   (let [k-label (ssw/label :text (name k))
-        t (ssw/text :text (print-str value)
+        t (ssw/text :text (pr-str value)
                     :columns 10)
         delete (ssw/label :icon "icons/delete.png")]
     (ssw/listen t :document
@@ -249,7 +251,8 @@
     (ssw/listen dialog
                 :window-deactivated
                 (fn [& _] (.dispose dialog)
-                  (glue/set-segment id note-id @segment-atom)))
+                  (glue/set-segment id note-id @segment-atom)
+                  (reload-score)))
     (doto dialog
       (set-edit-note-location tc mouse-evt note)
       (.setBackground (java.awt.Color. 0 0 0 0))
@@ -290,6 +293,15 @@
            ]
     (show-graph view tc choice)))
 
+(defn phrase-action [type l]
+  (ssw/action :name (str "Set phrase-" (name type) " " l)))
+
+(defn remove-phrase-marks [tc id evt]
+  (let [note-id (:index (draw-track/get-note-for-x
+                          tc (.getX evt)))]
+    (glue/remove-segment-parameter id note-id "phrase-start")
+    (glue/remove-segment-parameter id note-id "phrase-end")))
+
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
@@ -303,11 +315,24 @@
       (fn [evt]
         (cond
           (SwingUtilities/isRightMouseButton evt)
-          (let [popup (ssw/popup :items
-                                 [(ssw/action :name "Edit note..."
-                                              :handler (fn [_] (edit-note tc id evt)))
-                                  (ssw/action :name "Show Graph..."
-                                              :handler (fn [_] (ask-and-show-graph view tc)))])]
+          (let [popup (ssw/popup
+                        :items
+                        [(phrase-action :start '(4 5 6))
+                         (phrase-action :start '(5 6))
+                         (phrase-action :start '(6))
+                         :separator
+                         (phrase-action :end '(4 5 6))
+                         (phrase-action :end '(5 6))
+                         (phrase-action :end '(6))
+                         :separator
+                         (ssw/action :name "Remove all phrase marks"
+                                     :handler (fn [_] (remove-phrase-marks
+                                                        tc id evt)))
+                         :separator
+                         (ssw/action :name "Edit note..."
+                                     :handler (fn [_] (edit-note tc id evt)))
+                         (ssw/action :name "Show Graph..."
+                                     :handler (fn [_] (ask-and-show-graph view tc)))])]
             (.show popup (.getSource evt) (.getX evt) (.getY evt)))
           (and (SwingUtilities/isLeftMouseButton evt)
                (== (.getClickCount evt) 2))
