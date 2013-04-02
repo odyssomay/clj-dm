@@ -217,6 +217,7 @@
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
+    (player/listen-to-position #(draw-track/set-position-indicator tc %))
     {:score-component tc
      :view view
      }))
