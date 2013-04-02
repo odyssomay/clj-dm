@@ -48,71 +48,6 @@
     (.stop @sequencer)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Position Control
-
-(def position-is-updating? (atom false))
-(def position-indicator (ssw/slider :min 0 :max 0))
-(def position-indicator-label (ssw/label :text "00:00/00:00" :border 5))
-(def indicator-panel (ssw/card-panel :items [[(ssw/border-panel :west position-indicator-label
-                                                                :center position-indicator)
-                                              "position"]
-                                             [(ssw/progress-bar :indeterminate? true :border 10) "progress"]]))
-
-(defn update-position-indicator-range []
-  (when (sequencer-ready?)
-    (reset! position-is-updating? true)
-    (.setMaximum position-indicator (int (.getMicrosecondLength @sequencer)))
-    (reset! position-is-updating? false)))
-
-(def init-position-indicator
-  (memoize 
-    (fn []
-      (.start
-        (Thread. (fn [] 
-                   (when (sequencer-ready?)
-                     (reset! position-is-updating? true)
-                     (.setValue position-indicator (int (.getMicrosecondPosition @sequencer)))
-                     (reset! position-is-updating? false))
-                   (Thread/sleep 100)
-                   (recur))))
-      (.addChangeListener position-indicator
-        (reify javax.swing.event.ChangeListener
-          (stateChanged [_ _]
-            (when (and (not @position-is-updating?)
-                     (sequencer-ready?))
-              (.setMicrosecondPosition @sequencer (.getValue position-indicator))))))
-      (.addChangeListener position-indicator
-        (reify javax.swing.event.ChangeListener
-          (stateChanged [_ e]
-            (ssw/config! position-indicator-label :text
-              (let [pos-in-seconds (/ (.getValue (.getSource e)) 1000000)
-                    length-in-seconds (/ (.getMicrosecondLength @sequencer) 1000000)]
-                (format "%02d:%02d/%02d:%02d"
-                        (int (quot pos-in-seconds 60))
-                        (int (mod pos-in-seconds 60))
-                        (int (quot length-in-seconds 60))
-                        (int (mod length-in-seconds 60))
-                        )
-                ; (str (quot pos-in-seconds 60) 
-                ;      ":" 
-                ;      (int (mod pos-in-seconds 60))
-                ;      "/"
-                ;      (quot length-in-seconds 60)
-                ;      ":"
-                ;      (int (mod length-in-seconds 60))
-                ;      )
-                )))))
-      )))
-
-(defn show-position-indicator []
-  (init-position-indicator)
-  (update-position-indicator-range)
-  (ssw/show-card! indicator-panel "position"))
-
-(defn show-progress-indicator []
-  (ssw/show-card! indicator-panel "progress"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; File handling
 
 (let [midi-file (atom nil)]
@@ -124,8 +59,7 @@
 
   (defn open-midi-file [f]
     (reset! midi-file f)
-    (reload-midi-file)
-    (show-position-indicator))
+    (reload-midi-file))
 
   (defn choose-midi-file []
     (when-let [f (ssw-chooser/choose-file :filters [["Midi Files" ["midi" "mid" "smf"]]])]
@@ -200,9 +134,7 @@
                              :modal? true
                              :success-fn (fn [& _] 
                                            (set-midi-device (.getSelectedIndex cb))))]
-      (show-progress-indicator)
-      (-> dialog ssw/pack! ssw/show!)
-      (show-position-indicator))))
+      (-> dialog ssw/pack! ssw/show!))))
 
 ;; =====
 ;; Init
@@ -227,12 +159,12 @@
       (update-player))))
 
 (defn listen-to-position [f]
-  (.addChangeListener position-indicator
-    (reify javax.swing.event.ChangeListener
-      (stateChanged [_ e]
-        (f (/ (.getValue position-indicator)
-              (.getMaximum position-indicator)))))))
-        ; (let [s (.getSource e)
-        ;       m (.getMaximum s)
-        ;       v (.getValue s)]
-        ;   (f (/ v m)))))))
+  (util/thread
+    (loop []
+      (Thread/sleep 50)
+      (when-let [s @sequencer]
+        (when (.isRunning s)
+          (let [position (/ (.getTickPosition s)
+                            (.getTickLength s))]
+            (f position))))
+      (recur))))

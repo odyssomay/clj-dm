@@ -136,6 +136,4 @@
                                     )])
      ]))
 
-(defn toolbar-panel []
-  (ssw/border-panel :center (toolbar)
-                    :south player/indicator-panel))
+(defn toolbar-panel [] (toolbar))
