@@ -293,9 +293,6 @@
            ]
     (show-graph view tc choice)))
 
-(defn phrase-action [type l]
-  (ssw/action :name (str "Set phrase-" (name type) " " l)))
-
 (defn remove-phrase-marks [tc id evt]
   (let [note-id (:index (draw-track/get-note-for-x
                           tc (.getX evt)))]
@@ -308,14 +305,25 @@
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
                                         [(draw-track/get-view tc) "span"]]
                                 :constraints ["insets 0, gap 0" "" ""]
-                                :background "white")]
+                                :background "white")
+        get-note-id #(:index (draw-track/get-note-for-x
+                               tc (.getX %)))]
     (ssw/listen
       (draw-track/get-view tc)
       :mouse-clicked
       (fn [evt]
         (cond
           (SwingUtilities/isRightMouseButton evt)
-          (let [popup (ssw/popup
+          (let [phrase-action 
+                (fn [type l]
+                  (ssw/action :name (str "Set phrase-" (name type) " " l)
+                              :handler (fn [_]
+                                         (let [note-id (get-note-id evt)]
+                                           (glue/set-segment-parameter
+                                             id note-id
+                                             (str "phrase-" (name type))
+                                             l)))))
+                popup (ssw/popup
                         :items
                         [(phrase-action :start '(4 5 6))
                          (phrase-action :start '(5 6))
