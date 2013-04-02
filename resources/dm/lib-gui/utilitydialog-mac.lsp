@@ -145,7 +145,7 @@
                                     (item)
                                     item
                                     (setq all-tracks? t))
-                                :radio-button-pushed-p all-tracks?                                 :dialog-item-enabled-p nil)
+                                :radio-button-pushed-p all-tracks?                                 :dialog-item-enabled-p nil)
               (make-dialog-item 'radio-button-dialog-item
                                 #@(2 45)
                                 #@(110 16)
@@ -154,7 +154,7 @@
                                     (item)
                                     item
                                     (setq all-tracks? nil))
-                                :radio-button-pushed-p (not all-tracks?)                                 :dialog-item-enabled-p nil)
+                                :radio-button-pushed-p (not all-tracks?)                                 :dialog-item-enabled-p nil)
                (make-dialog-item 'button-dialog-item
                                 #@(10 75)
                                 #@(60 18)

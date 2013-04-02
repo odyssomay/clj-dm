@@ -997,4 +997,3 @@
 (defun is-keyend-p (e) (or (eq (type e) typekeyoff) 
                            (and (eq (type e) typekeyon) (= (vel e) 0))))
 
-
