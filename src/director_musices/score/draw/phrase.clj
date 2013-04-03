@@ -12,16 +12,23 @@
         minlevel (reduce min levels)
         maxlevel (reduce max levels)]
     (.translate g draw-track/first-note-offset 3)
-    (.setColor g java.awt.Color/black)
     (doseq [level levels]
       (doseq [[start end] (get level-map level)]
-        (let [start-offset (* (:absolute-x-offset start) scale-x)
-              end-offset (* (:absolute-x-offset end) scale-x)]
-          ; (let [v (int (* (- level minlevel) 60))]
-          ;   (.setColor g (java.awt.Color. v v v)))
-          (.drawLine g start-offset phrase-height (+ start-offset phrase-height) 0)
-          (.drawLine g end-offset 0 (+ end-offset phrase-height) phrase-height)
-          (.drawLine g (+ phrase-height start-offset) 0 end-offset 0)))
+        (let [start-offset (* (or (:absolute-x-offset start) 0) scale-x)
+              end-offset (* (or (:absolute-x-offset end) 0) scale-x)]
+          (.setColor g java.awt.Color/black)
+          (if (and start end)
+            (.drawLine g (+ phrase-height start-offset) 0 end-offset 0)
+            (.setColor g java.awt.Color/red))
+          (if start
+            (.drawLine g
+                       start-offset phrase-height
+                       (+ start-offset phrase-height) 0))
+          (if end
+            (.drawLine g
+                       end-offset 0
+                       (+ end-offset phrase-height) phrase-height))
+          ))
       (.translate g 0 phrase-height))))
 
 (defn paint [c g state]
@@ -37,10 +44,19 @@
                            levels
                            (list levels))
                   m (into {} (map #(vector % [(assoc note
-                                                :phrase-mark [k %])])
+                                                :phrase-mark k)])
                                   levels))]
               (merge-with concat level-map m)))
           {}
+          notes))
+
+(defn partition-notes [notes]
+  (reduce (fn [notes note]
+            (if (= (:phrase-mark note) :phrase-start)
+              (conj notes [note])
+              (conj (pop notes)
+                    (conj (peek notes) note))))
+          []
           notes))
 
 (defn sort-phrases [notes]
@@ -53,7 +69,7 @@
                               (create-level-map :phrase-end end-notes))
         sorted-level-map
         (reduce (fn [level-map [k v]]
-                  (assoc level-map k (partition 2 (sort-by :absolute-x-offset v))))
+                  (assoc level-map k (partition-notes (sort-by :absolute-x-offset v))))
                 {}
                 level-map)]
     {:level-map sorted-level-map
