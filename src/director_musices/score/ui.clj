@@ -5,6 +5,7 @@
               [glue :as glue])
             (director-musices.score.draw
               [graph :as draw-graph]
+              [parameter :as draw-parameter]
               [track :as draw-track])
             (director-musices
               [global :as dm-global]
@@ -127,6 +128,21 @@
                                 :constraints ["gap 1"])]
     view))
 
+(defn ask-and-show-property [view tc]
+  (when-let [choice (ssw/input "What parameter?")]
+    (let [parameter (keyword choice)
+          pc (draw-parameter/parameter-component tc parameter)
+          c (draw-parameter/get-view pc)
+          remove-parameter #(do (.remove view c)
+                              (.revalidate view)
+                              (.repaint view))
+          popup (ssw/popup
+                  :items
+                  [(ssw/action :name "Remove parameter"
+                               :handler (fn [_] (remove-parameter)))])]
+      (.add view c "span")
+      (.revalidate view))))
+
 (defn show-graph [view tc type]
   (let [gc (draw-graph/graph-component tc type)
         c (draw-graph/get-view gc)
@@ -170,8 +186,10 @@
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
+        parameter-view (ssw-mig/mig-panel)
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
-                                        [(draw-track/get-view tc) "span"]]
+                                        [(draw-track/get-view tc) "span"]
+                                        [parameter-view "span"]]
                                 :constraints ["insets 0, gap 0" "" ""]
                                 :background "white")
         get-note-id #(:index (draw-track/get-note-for-x
@@ -207,6 +225,10 @@
                          :separator
                          (ssw/action :name "Edit note..."
                                      :handler (fn [_] (edit-note/edit-note tc id evt reload-score)))
+                         :separator
+                         (ssw/action :name "Show Property..."
+                                     :handler (fn [_] (ask-and-show-property
+                                                        parameter-view tc)))
                          (ssw/action :name "Show Graph..."
                                      :handler (fn [_] (ask-and-show-graph view tc)))])]
             (.show popup (.getSource evt) (.getX evt) (.getY evt)))
