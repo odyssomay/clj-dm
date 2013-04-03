@@ -6,6 +6,7 @@
             (director-musices.score.draw
               [graph :as draw-graph]
               [parameter :as draw-parameter]
+              [phrase :as draw-phrase]
               [track :as draw-track])
             (director-musices
               [global :as dm-global]
@@ -186,8 +187,10 @@
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
+        pc (draw-phrase/phrase-component tc)
         parameter-view (ssw-mig/mig-panel)
         view (ssw-mig/mig-panel :items [[opts-view "dock west"]
+                                        [(draw-phrase/get-view pc) "span"]
                                         [(draw-track/get-view tc) "span"]
                                         [parameter-view "span"]]
                                 :constraints ["insets 0, gap 0" "" ""]
