@@ -99,12 +99,13 @@
                           :bool :selection
                           :midi-program-list :selection
                           :change)
-        update-property (fn [value]
-                          (glue/set-track-property id property value)
-                          (case type
-                            :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
-                                                :model (glue/get-track-synth-program-list id))
-                            nil))]
+        update-property
+        (fn [value]
+          (glue/set-track-property id property value)
+          (case type
+            :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
+                                :model (glue/get-track-synth-program-list id))
+            nil))]
     (when (= type :slider)
       (let [update-c (fn [show?] (ssw/config! c :paint-labels? show? :paint-ticks? show?))]
         (update-c false)
@@ -227,7 +228,8 @@
                                                         tc id evt)))
                          :separator
                          (ssw/action :name "Edit note..."
-                                     :handler (fn [_] (edit-note/edit-note tc id evt reload-score)))
+                                     :handler (fn [_] (edit-note/edit-note
+                                                        tc id evt reload-score)))
                          :separator
                          (ssw/action :name "Show Property..."
                                      :handler (fn [_] (ask-and-show-property
@@ -253,27 +255,34 @@
         new-scale-x (atom 1)
         p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
         s-p (ssw/scrollable p :border nil)
-        score-views (for [i (range (glue/get-track-count))]
-                      (let [sv (score-view i)
-                            sc (:score-component sv)
-                            offs draw-track/first-note-offset]
-                        (ssw/listen (draw-track/get-view sc) 
-                                    :mouse-pressed (fn [e] 
-                                                     (reset! mouse-position-x-start (.getX e))
-                                                     (reset! initial-scale-x (draw-track/get-scale-x sc)))
-                                    :mouse-dragged (fn [e] 
-                                                     (draw-track/set-scale-x
-                                                       sc (* @initial-scale-x
-                                                             (/ (- (.getX e) offs)
-                                                                (- @mouse-position-x-start offs)
-                                                                )))))
-                        [(:view sv) "span"]))]
-    (ssw/config! p
-                 :items
-                 (interleave score-views
-                             (take (count score-views)
-                                   (repeatedly #(vec [(ssw/separator :orientation :horizontal) "growx, span"]))))
-                 )
+        score-views
+        (for [i (range (glue/get-track-count))]
+          (let [sv (score-view i)
+                sc (:score-component sv)
+                offs draw-track/first-note-offset]
+            (ssw/listen (draw-track/get-view sc) 
+                        :mouse-pressed
+                        (fn [e] 
+                          (reset! mouse-position-x-start (.getX e))
+                          (reset! initial-scale-x (draw-track/get-scale-x sc)))
+                        :mouse-dragged
+                        (fn [e] 
+                          (reset! new-scale-x
+                                  (* @initial-scale-x
+                                     (/ (- (.getX e) offs)
+                                        (- @mouse-position-x-start offs)
+                                        )))))
+            (add-watch new-scale-x
+                       (gensym) (fn [_ _ _ scale-x]
+                                  (draw-track/set-scale-x sc scale-x)))
+            [(:view sv) "span"]))]
+    (ssw/config!
+      p :items
+      (interleave score-views
+                  (take (count score-views)
+                        (repeatedly #(vec [(ssw/separator
+                                             :orientation :horizontal)
+                                           "growx, span"])))))
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])
