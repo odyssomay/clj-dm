@@ -13,7 +13,7 @@
         maxlevel (reduce max levels)]
     (.translate g draw-track/first-note-offset 3)
     (doseq [level levels]
-      (doseq [[start end] (get level-map level)]
+      (doseq [{:keys [start end]} (get level-map level)]
         (let [start-offset (* (or (:absolute-x-offset start) 0) scale-x)
               end-offset (* (or (:absolute-x-offset end) 0) scale-x)]
           (.setColor g java.awt.Color/black)
@@ -53,9 +53,14 @@
 (defn partition-notes [notes]
   (reduce (fn [notes note]
             (if (= (:phrase-mark note) :phrase-start)
-              (conj notes [note])
-              (conj (pop notes)
-                    (conj (peek notes) note))))
+              (conj notes {:start note})
+              (if (and (:start (peek notes))
+                       (not (:end (peek notes))))
+                (conj (pop notes)
+                      (assoc (peek notes)
+                        :end note))
+                (conj notes
+                      {:end note}))))
           []
           notes))
 
