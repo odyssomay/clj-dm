@@ -87,7 +87,9 @@
                          (remove-new-name
                            (if (= k "")
                              items
-                             (add-new-view items k))))))))
+                             (add-new-view items k)))))
+                ;; HACK
+                (ssw/request-focus! (first (last (butlast @view-items)))))))
           (ssw/request-focus! new-name))))
     [add-label
      "dock south, growx, gapbottom 7"]))
