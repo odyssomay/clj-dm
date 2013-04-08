@@ -91,10 +91,8 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (let [g (.create g)
-                    s (.getSize this)]
-                ;(ssw-graphics/anti-alias g)
-                ; (.setColor g java.awt.Color/red)
-                ; (.fillRect g 0 0 (.width s) (.height s))
+                    scale (draw-track/get-scale track-component)]
+                (.scale g scale scale)
                 (paint this g @state)))
             (getPreferredSize []
               (java.awt.Dimension.
