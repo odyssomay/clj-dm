@@ -53,18 +53,18 @@
             (paintComponent [g]
               (let [{:keys [x width]} (x-info this)
                     h (.getHeight this)]
-                (.setColor g java.awt.Color/red)
-                (.fillRect g x 0 width h)))
+                (.setColor g (java.awt.Color. 200 200 200))
+                (.fillRect g 0 0 width h)))
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize score-view))
                 15)))
         set-position-from-x
         (fn [in-x]
-          (let [{:keys [x width]} (x-info c)]
-            (set-position
-              (float (/ (- in-x x)
-                        width)))))]
+          (let [{:keys [x width]} (x-info c)
+                position (float (max 0 (min 1 (/ (- in-x x)
+                                                 width))))]
+            (set-position position)))]
     (ssw/listen c :mouse-clicked
                 (fn [e] (set-position-from-x (.getX e))))
     c))
