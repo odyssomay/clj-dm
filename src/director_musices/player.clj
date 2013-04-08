@@ -23,6 +23,29 @@
 (defn sequencer-ready? []
   (and @sequencer (.isOpen @sequencer) (.getSequence @sequencer)))
 
+;; =====
+;; Position listener
+;; =====
+(def position-listener (atom nil))
+
+(defn fire-position-listener! [s]
+  (when-let [f @position-listener]
+    (let [position (/ (.getTickPosition s)
+                      (.getTickLength s))]
+      (f position))))
+
+(util/thread
+  (loop []
+    (Thread/sleep 50)
+    (when (sequencer-ready?)
+      (let [s @sequencer]
+        (when (.isRunning s)
+          (fire-position-listener! s))))
+    (recur)))
+
+(defn listen-to-position [f]
+  (reset! position-listener f))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Controls
 
@@ -35,12 +58,16 @@
 
 (defn stop! []
   (when (sequencer-ready?)
-    (.stop @sequencer) 
-    (.setTickPosition @sequencer 0)))
+    (let [s @sequencer]
+      (.stop s)
+      (.setTickPosition s 0)
+      (fire-position-listener! s))))
 
 (defn pause! []
   (when (sequencer-ready?)
-    (.stop @sequencer)))
+    (let [s @sequencer]
+      (.stop s)
+      (fire-position-listener! s))))
 
 (defn toggle-pause! []
   (when (sequencer-ready?)
@@ -144,20 +171,10 @@
 (open-output-device (first (get-output-devices)))
 
 ;; =====
-;; Update
+;; Set position
 ;; =====
-(def position-listener (atom nil))
-
-(util/thread
-  (loop []
-    (Thread/sleep 50)
-    (when-let [s @sequencer]
-      (when-let [f @position-listener]
-        (when (.isRunning s)
-          (let [position (/ (.getTickPosition s)
-                            (.getTickLength s))]
-            (f position)))))
-    (recur)))
-
-(defn listen-to-position [f]
-  (reset! position-listener f))
+(defn position! [x]
+  (when (sequencer-ready?)
+    (let [s @sequencer]
+      (.setTickPosition s (long (* x (.getTickLength s))))
+      (fire-position-listener! s))))
