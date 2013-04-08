@@ -34,7 +34,8 @@
 
 (defn- note-value-view [view-items segment-atom k value border-color]
   (let [k-label (ssw/label :text (name k))
-        t (ssw/text :text (pr-str value)
+        t (ssw/text :text (if (= value ::empty)
+                            "" (pr-str value))
                     :columns 10)
         delete (ssw/label :icon "icons/delete.png")]
     (ssw/listen t :document
@@ -71,7 +72,7 @@
                 (concat
                   items
                   (note-value-view view-items segment-atom
-                                   k "" border-color)))
+                                   k ::empty border-color)))
               remove-new-name
               (fn [items]
                 (remove #(= (first %) new-name) items))]
