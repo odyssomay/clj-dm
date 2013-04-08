@@ -175,6 +175,7 @@
 ;; =====
 (defn position! [x]
   (when (sequencer-ready?)
-    (let [s @sequencer]
+    (let [s @sequencer
+          x (max 0 (min 1 x))]
       (.setTickPosition s (long (* x (.getTickLength s))))
       (fire-position-listener! s))))

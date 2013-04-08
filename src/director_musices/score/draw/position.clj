@@ -61,10 +61,9 @@
                 15)))
         set-position-from-x
         (fn [in-x]
-          (let [{:keys [x width]} (x-info c)
-                position (float (max 0 (min 1 (/ (- in-x x)
-                                                 width))))]
-            (set-position position)))]
+          (let [{:keys [x width]} (x-info c)]
+            (set-position (/ (- in-x x)
+                             width))))]
     (ssw/listen c :mouse-clicked
                 (fn [e] (set-position-from-x (.getX e))))
     c))
