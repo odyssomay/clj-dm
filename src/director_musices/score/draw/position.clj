@@ -1,5 +1,6 @@
 (ns director-musices.score.draw.position
-  (:require (director-musices.score.draw [track :as draw-track])
+  (:require (director-musices [player :as player])
+            (director-musices.score.draw [track :as draw-track])
             [seesaw.core :as ssw]))
 
 ;; =====
@@ -39,6 +40,24 @@
 ;; =====
 ;; Set position
 ;; =====
+(defn draw-position-ticks [g x-info track-component]
+  (when-let [s (player/get-sequencer)]
+    (let [g (.create g)
+          {:keys [x width]} x-info
+          seconds (/ (.getMicrosecondLength s)
+                     1e6)]
+      (.setColor g java.awt.Color/black)
+      (.translate g x 0)
+      (doseq [second-pos (range (inc seconds))]
+        (let [pos (* (/ second-pos seconds)
+                     width)]
+          (.drawLine g pos 0 pos 15)
+          ; (cond
+          ;   (zero? (rem pos 5))
+          ;    (.drawLine g pos 0 pos 15)
+          ;   )
+          )))))
+
 (defn position-setter-component [track-component score-view set-position]
   (let [x-info (fn [c]
                  (let [w (.getWidth c)
@@ -54,7 +73,9 @@
               (let [{:keys [x width]} (x-info this)
                     h (.getHeight this)]
                 (.setColor g (java.awt.Color. 200 200 200))
-                (.fillRect g 0 0 width h)))
+                (.fillRect g 0 0 width h)
+                ;(draw-position-ticks g (x-info this) track-component)
+                ))
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize score-view))
