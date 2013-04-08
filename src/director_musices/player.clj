@@ -23,6 +23,10 @@
 (defn sequencer-ready? []
   (and @sequencer (.isOpen @sequencer) (.getSequence @sequencer)))
 
+(defn get-sequencer []
+  (if (sequencer-ready?)
+    @sequencer))
+
 ;; =====
 ;; Position listener
 ;; =====
