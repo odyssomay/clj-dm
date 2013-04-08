@@ -210,13 +210,15 @@
           (SwingUtilities/isRightMouseButton evt)
           (let [phrase-action 
                 (fn [type l]
-                  (ssw/action :name (str "Set phrase-" (name type) " " l)
-                              :handler (fn [_]
-                                         (let [note-id (get-note-id evt)]
-                                           (glue/set-segment-parameter
-                                             id note-id
-                                             (str "phrase-" (name type))
-                                             l)))))
+                  (ssw/action
+                    :name (str "Set phrase-" (name type) " " l)
+                    :handler (fn [_]
+                               (let [note-id (get-note-id evt)]
+                                 (glue/set-segment-parameter
+                                   id note-id
+                                   (str "phrase-" (name type))
+                                   l)
+                                 (reload-score)))))
                 popup (ssw/popup
                         :items
                         [(phrase-action :start '(4 5 6))
