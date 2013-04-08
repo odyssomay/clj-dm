@@ -36,7 +36,10 @@
   (let [k-label (ssw/label :text (name k))
         t (ssw/text :text (if (= value ::empty)
                             "" (pr-str value))
-                    :columns 10)
+                    :columns 10
+                    :background (if (= value ::empty)
+                                  :red
+                                  :white))
         delete (ssw/label :icon "icons/delete.png")]
     (ssw/listen t :document
                 (fn [& _]
@@ -89,7 +92,8 @@
                              items
                              (add-new-view items k)))))
                 ;; HACK
-                (ssw/request-focus! (first (last (butlast @view-items)))))))
+                (let [t (first (last (butlast @view-items)))]
+                  (ssw/request-focus! t)))))
           (ssw/request-focus! new-name))))
     [add-label
      "dock south, growx, gapbottom 7"]))
