@@ -7,6 +7,16 @@
               [core :as ssw]
               [mig :as ssw-mig])))
 
+(defn update-segment! [old-segment new-segment]
+  (doseq [k (keys new-segment)]
+    (let [old-value (get old-segment k nil)
+          new-value (get new-segment k)]
+      ))
+  (doseq [k (keys old-segment)]
+    (when-not (contains? new-segment k)
+      
+      )))
+
 (defn- set-edit-note-location [dialog tc evt note]
   (let [[nx ny] (draw-track/get-note-component-position tc note)
         scale (draw-track/get-scale tc)
