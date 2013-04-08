@@ -20,9 +20,28 @@
             [clojure.java.io :as jio])
   (:import javax.swing.SwingUtilities))
 
-(declare reload-score)
-
+;; =====
+;; Updating
+;; =====
 (def score-panel-reloader (atom nil))
+
+(defn- reload-score-panel_hidden []
+  (swap! score-panel-reloader not))
+
+(defn update-player []
+  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
+    (glue/save-midi-to-path (.getCanonicalPath f))
+    (player/open-midi-file f)))
+
+(defn reload-score []
+  (reload-score-panel_hidden)
+  (update-player))
+
+(defn reload-later! [])
+
+;; =====
+;; Track property editor
+;; ====
 
 ; All properties:
 ; "trackname" "midi-channel"
@@ -115,7 +134,7 @@
                     :mouse-exited (fn [e] (update-c false)))))
     (ssw/listen c listen-property
                 (fn [& _] (update-property (get-value c))
-                  (player/update-later!)))
+                  (reload-later!)))
     c))
 
 (defn track-properties-view [id]
@@ -302,13 +321,6 @@
     (ssw/config! (global/get-score-panel) :items [s-p])
     p))
 
-(defn- reload-score-panel_hidden []
-  (swap! score-panel-reloader not))
-
-(defn reload-score []
-  (reload-score-panel_hidden)
-  (player/update-player))
-
 ;; =====
 ;; Loading
 ;; =====
@@ -324,7 +336,7 @@
     (f)
     (ssw/invoke-now
       (update-score-panel)
-      (player/update-player)
+      (update-player)
       (dm-global/hide-progress-bar))))
 
 (defn- load-score-from-file-with [file f]

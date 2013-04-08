@@ -6,16 +6,12 @@
   (:require (director-musices
               [global :as global]
               [util :as util])
-            (director-musices.score
-              [glue :as score-glue])
             [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]])
   (:import javax.sound.midi.MidiSystem))
 
 (global/native!)
-
-(declare update-if-update?)
 
 (def sequencer (atom nil))
 (def transmitter (atom nil))
@@ -31,7 +27,6 @@
 ;; Controls
 
 (defn start! []
-  (update-if-update?)
   (when (sequencer-ready?)
     (if (< (- (.getTickLength @sequencer) (.getTickPosition @sequencer)) 10)
       (.setTickPosition @sequencer 0))
@@ -46,6 +41,12 @@
 (defn pause! []
   (when (sequencer-ready?)
     (.stop @sequencer)))
+
+(defn toggle-pause! []
+  (when (sequencer-ready?)
+    (if (.isRunning @sequencer)
+      (pause!)
+      (start!))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; File handling
@@ -145,26 +146,18 @@
 ;; =====
 ;; Update
 ;; =====
-(defn update-player []
-  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
-    (score-glue/save-midi-to-path (.getCanonicalPath f))
-    (open-midi-file f)))
+(def position-listener (atom nil))
 
-(let [update? (atom false)]
-  (defn update-later! []
-    (reset! update? true))
-  
-  (defn update-if-update? []
-    (when @update?
-      (update-player))))
-
-(defn listen-to-position [f]
-  (util/thread
-    (loop []
-      (Thread/sleep 50)
-      (when-let [s @sequencer]
+(util/thread
+  (loop []
+    (Thread/sleep 50)
+    (when-let [s @sequencer]
+      (when-let [f @position-listener]
         (when (.isRunning s)
           (let [position (/ (.getTickPosition s)
                             (.getTickLength s))]
-            (f position))))
-      (recur))))
+            (f position)))))
+    (recur)))
+
+(defn listen-to-position [f]
+  (reset! position-listener f))
