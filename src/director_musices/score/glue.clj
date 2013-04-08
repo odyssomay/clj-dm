@@ -8,6 +8,7 @@
 ;     (str "(read-active-score-from-string \"" string "\")
 ;           (init-music-score)")))
 
+
 (defn load-active-score-from-file [path]
   (glue/eval-dm
     (str "(read-active-score-from-file \"" (inr/abcl-path path) "\")"
@@ -26,6 +27,19 @@
 (defn get-active-score []
   (glue/eval-dm "(get-active-score)"))
 
+
+;; =====
+;; Easy access
+;; =====
+(defn track-list [] "(track-list *active-score*)")
+
+(defn segment-list [track-id]
+  (str "(segment-list (nth " track-id " " (track-list) "))"))
+
+(defn segment [track-id id]
+  (str "(nth " id " " (segment-list track-id) ")"))
+
+
 (defn value->clj [v]
   (condp = v 
     'T true
@@ -33,21 +47,21 @@
     v))
 
 (defn clj->value [v]
-  (condp = v
-    true 'T
-    false 'NIL
-    nil 'NIL
-    v))
+  (if (sequential? v)
+    (map clj->value v)
+    (condp = v
+      true 'T
+      false 'NIL
+      nil 'NIL
+      v)))
 
 (defn segment->map [segment]
   (let [raw (.printObject segment)]
-    (->> (.replaceAll raw " \\. " " ")
+    (->> raw
          read-string
-         (map (fn [[k & vs]]
+         (map (fn [[k vs]]
                 [(keyword (.toLowerCase (str k)))
-                 (if (== (count vs) 1)
-                   (value->clj (first vs))
-                   (map value->clj vs))]))
+                 (value->clj vs)]))
          (into {}))))
 
 (defn map->segment [m]
@@ -59,19 +73,19 @@
     (.replaceAll raw "," "")))
 
 (defn get-track [track-index]
-  (let [raw (glue/eval-dm (str "(get-filtered-track " track-index ")"))
+  (let [raw (glue/eval-dm
+              (str "(map 'list (lambda (segment)
+                                 (map 'list
+                                      (lambda (x)
+                                        (list (car x)
+                                              (cdr x)))
+                                      (var-list segment)))"
+                   (segment-list track-index)
+                   ")"))
         notes (->> raw
                    .copyToArray
                    (map segment->map))]
     {:clef \G :notes notes}))
-
-(defn track-list [] "(track-list *active-score*)")
-
-(defn segment-list [track-id]
-  (str "(segment-list (nth " track-id " " (track-list) "))"))
-
-(defn segment [track-id id]
-  (str "(nth " id " " (segment-list track-id) ")"))
 
 (defn set-segment-parameter [track-index segment-index k v]
   (glue/eval-dm
