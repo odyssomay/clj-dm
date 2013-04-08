@@ -19,6 +19,19 @@
             [taoensso.timbre :as log]
             ))
 
+(defn bind-space [c]
+  (println "binding space")
+  (.put (.getInputMap
+          c javax.swing.JComponent/WHEN_IN_FOCUSED_WINDOW)
+        (javax.swing.KeyStroke/getKeyStroke
+          "UP")
+        (str ::space-pressed))
+  (.put (.getActionMap c)
+        (str ::space-pressed)
+        (ssw/action
+          :handler (fn [& _]
+                     (println "space pressed!")))))
+
 (defn director-musices [& args]
   (global/native!)
   (logging/init)
@@ -42,6 +55,7 @@
                            :divider-location 0.5
                            :resize-weight 0.5
                            :one-touch-expandable? true))
+    (bind-space (global/get-main-panel))
     (when (global/get-arg :cl-repl) (inr/repl))
     (log/info "Using tmp directory" (util/tmp-dir))
     (.setLocationRelativeTo fr nil)
