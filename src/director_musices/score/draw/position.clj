@@ -11,12 +11,13 @@
         s (.getSize this)
         w (.width s)
         h (.height s)
-        scale-x (draw-track/get-scale-x track-component)]
-    (.translate g draw-track/first-note-offset 0)
+        scale (draw-track/get-scale track-component)
+        scale-x (draw-track/get-scale-x track-component)
+        first-note-offset (* scale draw-track/first-note-offset)]
+    (.translate g (double first-note-offset) 0.0)
     (.setColor g java.awt.Color/red)
     (.translate
-      g (double (* position
-                   (- w draw-track/first-note-offset)))
+      g (double (* position (- w first-note-offset)))
       (double 0))
     (.drawLine g 0 0 0 (.height s))))
 
