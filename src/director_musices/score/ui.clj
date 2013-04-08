@@ -248,9 +248,8 @@
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
-    (player/listen-to-position #(draw-position/set-position-indicator
-                                  position-component %))
     {:score-component tc
+     :position-component position-component
      :view view
      }))
 
@@ -258,6 +257,7 @@
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
+        position-components (atom [])
         p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
         s-p (ssw/scrollable p :border nil)
         score-views
@@ -280,6 +280,8 @@
             (add-watch new-scale-x
                        (gensym) (fn [_ _ _ scale-x]
                                   (draw-track/set-scale-x sc scale-x)))
+            (swap! position-components conj
+                   (:position-component sv))
             [(:view sv) "span"]))]
     (ssw/config!
       p :items
@@ -288,6 +290,11 @@
                         (repeatedly #(vec [(ssw/separator
                                              :orientation :horizontal)
                                            "growx, span"])))))
+    (player/listen-to-position
+      (fn [position]
+        (doseq [pc @position-components]
+          (draw-position/set-position-indicator
+            pc position))))
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])
