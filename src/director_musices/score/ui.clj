@@ -269,7 +269,8 @@
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
-    {:score-component tc
+    {:track-component tc
+     :score-component tc
      :position-component position-component
      :view view
      }))
@@ -303,14 +304,20 @@
                                   (draw-track/set-scale-x sc scale-x)))
             (swap! position-components conj
                    (:position-component sv))
-            [(:view sv) "span"]))]
+            sv))
+        position-setter-component
+        (draw-position/position-setter-component
+          (:track-component (first score-views))
+          (:view (first score-views))
+          player/position!)]
     (ssw/config!
       p :items
-      (interleave score-views
-                  (take (count score-views)
-                        (repeatedly #(vec [(ssw/separator
-                                             :orientation :horizontal)
-                                           "growx, span"])))))
+      (cons [position-setter-component "span"]
+        (interleave (map #(vector (:view %) "span") score-views)
+                    (take (count score-views)
+                          (repeatedly #(vec [(ssw/separator
+                                               :orientation :horizontal)
+                                             "growx, span"]))))))
     (player/listen-to-position
       (fn [position]
         (doseq [pc @position-components]
