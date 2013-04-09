@@ -198,6 +198,7 @@
   (let [state (atom (merge {:scale 1 :scale-x 1
                             :track (calc/calculate-track track)}
                            opts))
+        state-listeners (atom [])
         image-atom (atom (create-image @state))
         update-image (fn [] (reset! image-atom (create-image @state)))
         get-track #(:track @state)
@@ -211,13 +212,16 @@
                 (java.awt.Dimension.
                   (get-track-component-width @state)
                   (* (:scale @state) (calc/get-height t))))))
-        repaint! (fn [] (ssw/invoke-later (.revalidate c) (.repaint c)))]
+        repaint! (fn [] (ssw/invoke-now (.revalidate c) (.repaint c)))]
     (add-watch state (gensym)
                (fn [_ _ _ state]
                  (update-image)
-                 (repaint!)))
+                 (repaint!)
+                 (doseq [f @state-listeners]
+                   (f))))
     {:view c
-     :state state}))
+     :state state
+     :state-listeners state-listeners}))
 
 ;; =====
 ;; API
@@ -226,8 +230,7 @@
 (defn get-state-atom [component-m] (:state component-m))
 
 (defn on-state-change [component-m f]
-  (add-watch (:state component-m) (gensym :state-change-listener)
-             (fn [& _] (f))))
+  (swap! (:state-listeners component-m) conj f))
 
 (defn on-track-change [component-m f]
   (add-watch (:state component-m) (gensym :track-change-listener)
