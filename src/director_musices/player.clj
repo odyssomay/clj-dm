@@ -40,7 +40,7 @@
 
 (util/thread
   (loop []
-    (Thread/sleep 50)
+    (Thread/sleep 25)
     (when (sequencer-ready?)
       (let [s @sequencer]
         (when (.isRunning s)
