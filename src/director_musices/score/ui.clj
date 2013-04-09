@@ -210,10 +210,7 @@
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         pc (draw-phrase/phrase-component tc)
         parameter-view (ssw-mig/mig-panel :background "white")
-        position-component (draw-position/position-component tc)
-        view (ssw-mig/mig-panel :items [[(draw-position/get-view position-component)
-                                         "pos track.x 0 track.x2 100%"]
-                                        [opts-view "dock west"]
+        view (ssw-mig/mig-panel :items [[opts-view "dock west"]
                                         [(draw-phrase/get-view pc) "span"]
                                         [(draw-track/get-view tc) "span, id track"]
                                         [parameter-view "span"]]
@@ -271,9 +268,7 @@
     (global/on-scale-change #(draw-track/set-scale tc %))
     {:track-component tc
      :score-component tc
-     :position-component position-component
-     :view view
-     }))
+     :view view}))
 
 (defn update-score-panel []
   (let [mouse-position-x-start (atom 0)
@@ -302,9 +297,9 @@
             (add-watch new-scale-x
                        (gensym) (fn [_ _ _ scale-x]
                                   (draw-track/set-scale-x sc scale-x)))
-            (swap! position-components conj
-                   (:position-component sv))
             sv))
+        position-component (draw-position/position-component
+                             (:track-component (first score-views)))
         position-setter-component
         (draw-position/position-setter-component
           (:track-component (first score-views))
@@ -312,7 +307,9 @@
           player/position!)]
     (ssw/config!
       p :items
-      (cons [position-setter-component "span"]
+      (concat [[(draw-position/get-view position-component)
+                "pos 0 0 100% 100%"]
+               [position-setter-component "span"]]
         (interleave (map #(vector (:view %) "span") score-views)
                     (take (count score-views)
                           (repeatedly #(vec [(ssw/separator
@@ -320,9 +317,8 @@
                                              "growx, span"]))))))
     (player/listen-to-position
       (fn [position]
-        (doseq [pc @position-components]
-          (draw-position/set-position-indicator
-            pc position))))
+        (draw-position/set-position-indicator
+          position-component position)))
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])

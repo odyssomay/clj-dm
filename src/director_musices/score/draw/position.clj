@@ -9,11 +9,13 @@
 (defn paint [this position track-component g]
   (let [g (.create g)
         s (.getSize this)
-        w (.width s)
-        h (.height s)
+        track-view (draw-track/get-view track-component)
+        w (.getWidth track-view)
+        h (.getHeight this)
         scale (draw-track/get-scale track-component)
         scale-x (draw-track/get-scale-x track-component)
         first-note-offset (* scale draw-track/first-note-offset)]
+    (.translate g (.getX track-view) 0)
     (.translate g (double first-note-offset) 0.0)
     (.setColor g java.awt.Color/red)
     (.translate
@@ -71,12 +73,12 @@
                     :x x}))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
-              (let [{:keys [x width]} (x-info this)
-                    h (.getHeight this)]
-                (.setColor g (java.awt.Color. 200 200 200))
-                (.fillRect g 0 0 width h)
-                ;(draw-position-ticks g (x-info this) track-component)
-                ))
+              (.setColor g (java.awt.Color. 200 200 200))
+              (.fillRect g 0 0
+                         (.getWidth this)
+                         (.getHeight this))
+              ;(draw-position-ticks g (x-info this) track-component)
+              )
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize score-view))
