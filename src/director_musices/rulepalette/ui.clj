@@ -12,7 +12,8 @@
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw]
-              [mig :as ssw-mig])))
+              [mig :as ssw-mig])
+            [taoensso.timbre :as log]))
 
 (defprotocol Rulepalette
   (get-rules       [this])
@@ -45,6 +46,7 @@
 
 (defn- parameter-view [rp rule]
   (let [{:keys [v options id]} rule
+        updating-value? (atom false)
         value-text (ssw/text :text v :columns 5)
         slider (ssw/slider :min (* -5 slider-precision) :max (* 5 slider-precision)
                            :value (* v slider-precision) :snap-to-ticks? false)
@@ -56,21 +58,32 @@
         update-options (fn [] (update-rule!
                                 rp id
                                 #(assoc % :options (.getText options-text))))]
-    (ssw/listen value-text :action 
-                (fn [_] (update-value)
-                  (.setValue slider (* (read-string (.getText value-text)) 
-                                       slider-precision))))
-    (ssw/listen slider :change 
-                (fn [_] (update-value)
-                  (.setText value-text (str (double (/ (.getValue slider) 
-                                                       slider-precision))))))
+    (ssw/listen value-text :document
+                (fn [_]
+                  (when-not
+                    (try (let [new-v (read-string (.getText value-text))]
+                           (when (number? new-v)
+                             (reset! updating-value? true)
+                             (update-value)
+                             (ssw/invoke-now
+                               (.setValue slider (* new-v slider-precision)))
+                             (reset! updating-value? false)
+                             (ssw/config! value-text :background
+                                          (util/default-background))))
+                      (catch Exception e nil))
+                    (ssw/config! value-text :background :red))))
+    (ssw/listen slider :change
+                (fn [_]
+                  (when-not @updating-value?
+                    (.setText value-text (str (double (/ (.getValue slider)
+                                                         slider-precision))))
+                    (update-value))))
     (.addDocumentListener (.getDocument options-text)
       (reify javax.swing.event.DocumentListener
         (changedUpdate [_ _])
         (insertUpdate [_ _] (update-options))
         (removeUpdate [_ _] (update-options))))
-    [[value-text "gapleft 3"] [slider] [options-text]]
-    ))
+    [[value-text "gapleft 3"] [slider] [options-text]]))
 
 (defn configure-label [l on-click]
   (ssw/config! l :border 3)
@@ -217,7 +230,7 @@
                 []
                 @order))
       (update-rule! [this id f]
-        (swap! (get rules id) f))
+        (swap! (get @rules id) f))
       (remove-rule! [this id] (remove-rule id))
       (move-rule-up! [this id]
         (move-rule id :up))
