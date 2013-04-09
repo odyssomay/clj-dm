@@ -69,7 +69,7 @@
         (changedUpdate [_ _])
         (insertUpdate [_ _] (update-options))
         (removeUpdate [_ _] (update-options))))
-    [[value-text "gapleft 3"] [slider] [options-text "wrap"]]
+    [[value-text "gapleft 3"] [slider] [options-text]]
     ))
 
 (defn- rule-view [rp rule]
@@ -79,10 +79,20 @@
                 (fn [_] (update-rule!
                           rp id #(assoc % :enabled?
                                    (.isSelected enabled?)))))
-    (concat [[enabled?] [name]]
+    (concat [[(ssw/action :name "up"
+                          :handler (fn [_]
+                                     (move-rule-up! rp id)))]
+             [(ssw/action :name "down"
+                          :handler (fn [_]
+                                     (move-rule-down! rp id)))]
+             [enabled?] [name]]
             (if parameterless?
-              [["" "wrap"]]
-              (parameter-view rp rule)))))
+              [[""] [""] [""]]
+              (parameter-view rp rule))
+            [[(ssw/action :name "remove"
+                          :handler (fn [_]
+                                     (remove-rule! rp id)))
+              "wrap"]])))
 
 (defn rules-view [rulepalette]
   (let [p (ssw-mig/mig-panel :constraints ["gap 0"])
@@ -166,10 +176,32 @@
   (let [raw (string->rulepalette-raw string)
         rules-no-map (->> (:all-rules raw)
                           (map rule-raw->rule)
-                          (map #(vec [(:id %) (atom %)]))
-                          )
+                          (map #(vec [(:id %) (atom %)])))
         order (atom (map first rules-no-map))
-        rules (into {} rules-no-map)]
+        rules (atom (into {} rules-no-map))
+        remove-rule
+        (fn [id]
+          (swap! rules dissoc id)
+          (swap! order
+                 (fn [order]
+                   (remove #(= id %) order))))
+        move-rule
+        (fn [id direction]
+          (swap! order
+                 (fn [order]
+                   (->> order
+                        (reduce (fn [order i]
+                                  (or (if (> (count order) 0)
+                                        (case direction
+                                          :up (if (= i id)
+                                                (conj (pop order)
+                                                      i (peek order)))
+                                          :down (if (= (peek order) id)
+                                                  (conj (pop order)
+                                                        i id ::remove))))
+                                      (conj order i)))
+                                [])
+                        (remove (partial = ::remove))))))]
     (reify Rulepalette
       (get-rules [this]
         (reduce (fn [rule-list id]
@@ -178,18 +210,18 @@
                 @order))
       (update-rule! [this id f]
         (swap! (get rules id) f))
-      (remove-rule!    [this id])
-      (move-rule-up!   [this id])
-      (move-rule-down! [this id])
-      (get-rule [this id] @(get rules id))
+      (remove-rule! [this id] (remove-rule id))
+      (move-rule-up! [this id]
+        (move-rule id :up))
+      (move-rule-down! [this id]
+        (move-rule id :down))
+      (get-rule [this id] @(get @rules id))
       (on-rule-change [this id f]
-        (add-watch (get rules id) nil
+        (add-watch (get @rules id) nil
                    (fn [_ _ _ new-rule] (f new-rule))))
       (on-order-change [this f]
-        (add-watch order nil
-                   (fn [& _] (f))))
-      (get-name [this] (str (:name opts)))
-      )))
+        (add-watch order nil (fn [& _] (f))))
+      (get-name [this] (str (:name opts))))))
 
 (defn path->rulepalette [path]
   (string->rulepalette
