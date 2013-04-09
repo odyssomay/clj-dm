@@ -84,7 +84,18 @@
                    (map-indexed (fn [index note] (assoc note :index index))))]
     (assoc track :notes notes)))
 
-(defn calculate-clef [track] \G)
+(defn calculate-clef [track]
+  (let [octaves (remove nil? (map #(if-let [n (:n %)]
+                                     (if-let [pitch (first n)]
+                                       (let [pitch (if (list? pitch)
+                                                     (first pitch)
+                                                     pitch)]
+                                         (read-string (str (last pitch))))))
+                                  (:notes track)))
+        average (/ (reduce + octaves) (count octaves))]
+    (if (< average 4)
+      \F
+      \G)))
 
 (defn add-clef [track]
   (assoc track :clef
