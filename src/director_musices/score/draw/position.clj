@@ -11,7 +11,6 @@
         s (.getSize this)
         track-view (draw-track/get-view track-component)
         w (.getWidth track-view)
-        h (.getHeight this)
         scale (draw-track/get-scale track-component)
         scale-x (draw-track/get-scale-x track-component)
         first-note-offset (* scale draw-track/first-note-offset)]
@@ -21,7 +20,7 @@
     (.translate
       g (double (* position (- w first-note-offset)))
       (double 0))
-    (.drawLine g 0 0 0 (.height s))))
+    (.drawLine g 0 0 0 (.getHeight this))))
 
 (defn position-component [track-component]
   (let [position (atom 0)
