@@ -85,7 +85,7 @@
         notes (->> raw
                    .copyToArray
                    (map segment->map))]
-    {:clef \G :notes notes}))
+    {:notes notes}))
 
 (defn set-segment-parameter [track-index segment-index k v]
   (glue/eval-dm
