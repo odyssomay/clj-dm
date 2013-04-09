@@ -85,3 +85,6 @@
 (defn open-website [url]
   (.browse (java.awt.Desktop/getDesktop)
            (java.net.URI. url)))
+
+(defn default-background []
+  (javax.swing.UIManager/getColor "Panel.background"))
