@@ -175,7 +175,7 @@
                 (double 0.0) 
                 (double (- (calc/get-lowest track))))
     (draw-lines (:track state) gc)
-    (when-let [clef (:clef state)]
+    (when-let [clef (:clef track)]
       (.translate gc 5 0)
       (draw-clef gc clef)
       (.translate gc 30 0)
