@@ -7,15 +7,16 @@
               [core :as ssw]
               [mig :as ssw-mig])))
 
-(defn update-segment! [old-segment new-segment]
+(defn update-segment! [track-index segment-index old-segment new-segment]
   (doseq [k (keys new-segment)]
     (let [old-value (get old-segment k nil)
           new-value (get new-segment k)]
-      ))
+      (when (not= old-value new-value)
+        (glue/set-segment-parameter
+          track-index segment-index k new-value))))
   (doseq [k (keys old-segment)]
     (when-not (contains? new-segment k)
-      
-      )))
+      (glue/remove-segment-parameter track-index segment-index k))))
 
 (defn- set-edit-note-location [dialog tc evt note]
   (let [[nx ny] (draw-track/get-note-component-position tc note)
@@ -147,7 +148,7 @@
     (ssw/listen dialog
                 :window-deactivated
                 (fn [& _] (.dispose dialog)
-                  (glue/set-segment id note-id @segment-atom)
+                  (update-segment! id note-id segment @segment-atom)
                   (reload-score)))
     (doto dialog
       (set-edit-note-location tc mouse-evt note)
