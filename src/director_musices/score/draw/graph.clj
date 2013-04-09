@@ -125,8 +125,7 @@
             (.drawLine gc
                        0 y
                        (* (:x-offset next-note) scale-x)
-                       (* scale-y (- next-value))))
-        ))))
+                       (* scale-y (- next-value))))))))
 
 (defn draw-height-line [state g y sy long?]
   (let [{:keys [track-component]} state
@@ -178,9 +177,9 @@
     
     (.setColor gc java.awt.Color/black)
     (.drawLine gc 0 0 width 0)
-    (draw-height-lines gc state)
     
     (.scale gc scale 1.0)
+    (draw-height-lines gc state)
     
     (.translate gc draw-track/first-note-offset 0)
     
@@ -198,8 +197,7 @@
       (.setColor gc (java.awt.Color. 120 120 120))
       (draw-note-property-graph gc state (:prev-property-values state)))
     (.setColor gc java.awt.Color/red)
-    (draw-note-property-graph gc state (:property-values state))
-    ))
+    (draw-note-property-graph gc state (:property-values state))))
 
 (defn graph-component [track-component property & {:as graph-opts}]
   (let [state (atom (-> (merge
@@ -218,8 +216,7 @@
               (java.awt.Dimension.
                 (.width (.getPreferredSize (draw-track/get-view track-component)))
                 (* (draw-track/get-scale track-component)
-                   (+ (:height @state) 10))
-                )))
+                   (+ (:height @state) 10)))))
         refresh! (fn [] (swap! state update-state))
         update-property-values! (fn [] (swap! state
                                               #(-> %
