@@ -2,27 +2,31 @@
 
 (def line-separation 7)
 
-(defn note-height [note]
+(defn note-height [track note]
   (let [p (:pitch note)
-        p (if (list? p) (first p) p)] ; chord drawing quickfix
-    (- 9
-       (case (first p)
-         \C 0, \D 1, \E 2, \F 3
-         \G 4, \A 5, \B 6)
-       (* 7 (- (read-string (str (last p))) 4)))))
+        ;; HACK - fix for chords
+        p (if (list? p) (first p) p)
+        h (- 9
+             (case (first p)
+               \C 0, \D 1, \E 2, \F 3
+               \G 4, \A 5, \B 6)
+             (* 7 (- (read-string (str (last p))) 4)))]
+    (case (:clef track)
+      \G h
+      \F (- h 12))))
 
 (defn note-y-offset [note]
-  (* (note-height note) (/ line-separation 2)))
+  (* (:height note) (/ line-separation 2)))
 
 (defn note-hollow? [note]
   (not (contains? #{1 1/2 1/4 1/8 1/16 1/32}
                   (:nlength note))))
 
-(defn note-data [note]
-  (assoc note
-    :height (note-height note)
-    :y-offset (note-y-offset note)
-    :hollow? (note-hollow? note)))
+(defn note-data [track note]
+  (let [note (assoc note :height (note-height track note))]
+    (assoc note
+      :y-offset (note-y-offset note)
+      :hollow? (note-hollow? note))))
 
 (defn add-absolute-lengths [notes]
   (:new-notes
@@ -40,16 +44,16 @@
              :total-length 0}
             notes)))
 
-(defn calculate-notes [notes]
-  (-> (for [{:keys [dr ndr n] :as note} notes]
-        (-> (merge note
-                   (when n
-                     {:pitch (first n)
-                      :length dr
-                      :nlength (second n)}))
-            note-data
-            ))
-      add-absolute-lengths))
+(defn calculate-notes [track]
+  (assoc track :notes
+    (-> (for [{:keys [dr ndr n] :as note} (:notes track)]
+          (->> (merge note
+                      (when n
+                        {:pitch (first n)
+                         :length dr
+                         :nlength (second n)}))
+               (note-data track)))
+        add-absolute-lengths)))
 
 (defn add-track-heights [track]
   (let [{:keys [notes]} track
@@ -80,9 +84,16 @@
                    (map-indexed (fn [index note] (assoc note :index index))))]
     (assoc track :notes notes)))
 
+(defn calculate-clef [track] \G)
+
+(defn add-clef [track]
+  (assoc track :clef
+    (or (:clef track) (calculate-clef track))))
+
 (defn calculate-track [track]
   (-> track
-      (update-in [:notes] calculate-notes)
+      add-clef
+      calculate-notes
       add-track-width
       add-track-heights
       add-note-indices))
