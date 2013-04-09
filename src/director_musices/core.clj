@@ -16,8 +16,7 @@
               [global :as rule-global]
               [ui :as rule-ui])
             [seesaw.core :as ssw]
-            [taoensso.timbre :as log]
-            ))
+            [taoensso.timbre :as log]))
 
 (defn bind-space [c]
   (println "binding space")
