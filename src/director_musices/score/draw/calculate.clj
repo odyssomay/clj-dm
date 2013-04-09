@@ -93,9 +93,7 @@
                                          (read-string (str (last pitch))))))
                                   (:notes track)))
         average (/ (reduce + octaves) (count octaves))]
-    (if (< average 4)
-      \F
-      \G)))
+    (if (< average 4) \F \G)))
 
 (defn add-clef [track]
   (assoc track :clef
