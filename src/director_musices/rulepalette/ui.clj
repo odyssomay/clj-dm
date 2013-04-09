@@ -72,27 +72,35 @@
     [[value-text "gapleft 3"] [slider] [options-text]]
     ))
 
+(defn configure-label [l on-click]
+  (ssw/config! l :border 3)
+  (ssw/listen l :mouse-clicked
+              (fn [_] (on-click)))
+  (ssw/listen l :mouse-entered
+              (fn [_] (ssw/config! l :background "#AAA")))
+  (ssw/listen l :mouse-exited
+              (fn [_] (ssw/config! l :background :white))))
+
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
-        enabled? (ssw/checkbox :selected? enabled?)]
+        enabled? (ssw/checkbox :selected? enabled?)
+        move-up (ssw/label :icon "icons/up_alt.png")
+        move-down (ssw/label :icon "icons/down_alt.png")
+        delete (ssw/label :icon "icons/delete.png")]
+    (configure-label move-up #(move-rule-up! rp id))
+    (configure-label move-down #(move-rule-down! rp id))
+    (configure-label delete #(remove-rule! rp id))
     (ssw/listen enabled? :selection
                 (fn [_] (update-rule!
                           rp id #(assoc % :enabled?
                                    (.isSelected enabled?)))))
-    (concat [[(ssw/action :name "up"
-                          :handler (fn [_]
-                                     (move-rule-up! rp id)))]
-             [(ssw/action :name "down"
-                          :handler (fn [_]
-                                     (move-rule-down! rp id)))]
+    (concat [[move-up "gapleft 10"]
+             [move-down]
              [enabled?] [name]]
             (if parameterless?
               [[""] [""] [""]]
               (parameter-view rp rule))
-            [[(ssw/action :name "remove"
-                          :handler (fn [_]
-                                     (remove-rule! rp id)))
-              "wrap"]])))
+            [[delete "wrap, gapleft 2"]])))
 
 (defn rules-view [rulepalette]
   (let [p (ssw-mig/mig-panel :constraints ["gap 0"])
