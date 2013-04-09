@@ -6,12 +6,13 @@
             (director-musices
               [player :as player]
               [util :as util])
-            [director-musices.score.ui :as score-ui]
+            (director-musices.score
+              [global :as score-global]
+              [ui :as score-ui])
             (seesaw
               [chooser :as ssw-chooser]
               [core :as ssw]
-              [mig :as ssw-mig]))
-  )
+              [mig :as ssw-mig])))
 
 (defprotocol Rulepalette
   (get-rules       [this])
@@ -114,13 +115,15 @@
     (update-rule-interact)
     (ssw-mig/mig-panel
       :constraints ["gap 1"]
-      :items [[(ssw/action :name "Apply"
-                           :handler apply-this)
+      :items [[(score-global/a-if-score
+                 :name "Apply"
+                 :handler apply-this)
                "span, growx"]
-              [(ssw/action :name "Apply & Play"
-                           :handler (fn [_]
-                                      (apply-this)
-                                      (player/start!)))
+              [(score-global/a-if-score
+                 :name "Apply & Play"
+                 :handler (fn [_]
+                            (apply-this)
+                            (player/start!)))
                "span, growx"]
               [rule-interact? "span"]
               [rule-interact-num "w 50!, align right, span"]

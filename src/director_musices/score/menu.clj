@@ -1,19 +1,11 @@
 (ns director-musices.score.menu
   (:require (director-musices.score
-              [global :as global]
+              [global :as g]
               [ui :as ui])
             (director-musices.rulepalette
               [ui :as rule-ui])
             (seesaw
               [core :as ssw])))
-
-(defn a-if-score [& opts]
-  (let [a (apply ssw/action opts)
-        update #(ssw/config! a :enabled? %)]
-    (global/on-score-loaded
-      (fn [loaded?] (update loaded?)))
-    (update (global/get-score-loaded?))
-    a))
 
 (defn file-menu []
   (ssw/menu
@@ -21,15 +13,15 @@
     :items 
     [(ssw/action :name "Open Score..."
                  :handler ui/choose-and-open-score)
-     (a-if-score :name "Save Score As..."
-                 :handler ui/choose-and-save-score)
-     (a-if-score :name "Save Performance As..."
-                 :handler ui/choose-and-save-performance)
+     (g/a-if-score :name "Save Score As..."
+                   :handler ui/choose-and-save-score)
+     (g/a-if-score :name "Save Performance As..."
+                   :handler ui/choose-and-save-performance)
      (ssw/separator)
      (ssw/action :name "Import Score from Midifile..."
                  :handler ui/choose-and-open-midi)
-     (a-if-score :name "Export Performance to Midifile..."
-                 :handler ui/choose-and-save-midi)
+     (g/a-if-score :name "Export Performance to Midifile..."
+                   :handler ui/choose-and-save-midi)
      (ssw/separator)
      (ssw/action :name "Open Rulepalette..."
                  :handler rule-ui/choose-and-open-rulepalette)

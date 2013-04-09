@@ -35,3 +35,15 @@
     (reset! loaded-watchers [])
     (reset! scale-watchers []))
   )
+
+;; =====
+;; Action
+;; -- Enabled when a score has been loaded
+;; =====
+(defn a-if-score [& opts]
+  (let [a (apply ssw/action opts)
+        update #(ssw/config! a :enabled? %)]
+    (on-score-loaded
+      (fn [loaded?] (update loaded?)))
+    (update (get-score-loaded?))
+    a))
