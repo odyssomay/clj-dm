@@ -42,9 +42,6 @@
                 (.width (.getPreferredSize (draw-track/get-view
                                              track-component)))
                 20)))]
-    (draw-track/on-state-change track-component (fn []
-                                                  (.revalidate c)
-                                                  (.repaint c)))
     {:view c
      :state state}))
 

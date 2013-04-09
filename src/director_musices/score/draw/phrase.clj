@@ -103,10 +103,7 @@
                       (count (:levels @state)))
                    6))))]
     (draw-track/on-state-change
-      track-component (fn []
-                        (swap! state calculate-phrases)
-                        (.revalidate c)
-                        (.repaint c)))
+      track-component (fn [] (swap! state calculate-phrases)))
     {:view c
      :state state}))
 

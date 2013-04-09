@@ -29,7 +29,6 @@
               (paint this @position track-component g)
               ))
         repaint #(do (.revalidate c) (.repaint c))]
-    (draw-track/on-state-change track-component repaint)
     (add-watch position nil (fn [& _] (repaint)))
     {:view c
      :position position}))

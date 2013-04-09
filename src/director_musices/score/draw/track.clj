@@ -211,12 +211,10 @@
               (let [t (get-track)]
                 (java.awt.Dimension.
                   (get-track-component-width @state)
-                  (* (:scale @state) (calc/get-height t))))))
-        repaint! (fn [] (ssw/invoke-now (.revalidate c) (.repaint c)))]
+                  (* (:scale @state) (calc/get-height t))))))]
     (add-watch state (gensym)
                (fn [_ _ _ state]
                  (update-image)
-                 (repaint!)
                  (doseq [f @state-listeners]
                    (f))))
     {:view c
