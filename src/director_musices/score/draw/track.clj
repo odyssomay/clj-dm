@@ -162,18 +162,6 @@
     (.drawRect gc -1 -1 11 10)
     ))
 
-(defn draw-line-indicator [g state position]
-  (if position
-    (let [gc (.create g)]
-      (.translate gc 45.0 0.0)
-      (.setColor gc java.awt.Color/red)
-      (.translate gc 
-                  (double (* (- (get-track-component-width state) 45)
-                     position))
-                  (double 0))
-      (.drawLine gc 0 0 0 (get-track-component-height state))
-      )))
-
 (defn paint [g state]
   (let [gc (.create g)
         scale (:scale state)
@@ -207,9 +195,7 @@
     img))
 
 (defn track-component [track & {:as opts}] 
-  (let [position-indicator (atom nil)
-        state (atom (merge {:scale 1 :scale-x 1
-                            :position-indicator nil
+  (let [state (atom (merge {:scale 1 :scale-x 1
                             :track (calc/calculate-track track)}
                            opts))
         image-atom (atom (create-image @state))
@@ -218,7 +204,6 @@
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (.drawImage g @image-atom 0 0 nil)
-              (draw-line-indicator g @state @position-indicator)
               (when-let [hnote (:highlighted-note @state)]
                 (highlight-note g hnote @state)))
             (getPreferredSize []
@@ -231,10 +216,8 @@
                (fn [_ _ _ state]
                  (update-image)
                  (repaint!)))
-    (add-watch position-indicator nil (fn [& _] (repaint!)))
     {:view c
-     :state state
-     :position-indicator position-indicator}))
+     :state state}))
 
 ;; =====
 ;; API
@@ -268,9 +251,6 @@
   (swap! (:state component-m) assoc :track (calc/calculate-track track)))
 
 (defn get-notes [component-m] (:notes (get-track component-m)))
-
-(defn set-position-indicator [component-m position]
-  (reset! (:position-indicator component-m) position))
 
 (defn abs [x] (if (< x 0) (- x ) x))
 
