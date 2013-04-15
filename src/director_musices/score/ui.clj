@@ -199,12 +199,49 @@
            ]
     (show-graph view tc choice)))
 
-(defn remove-phrase-marks [tc id evt]
-  (let [note-id (:index (draw-track/get-note-for-x
-                          tc (.getX evt)))]
-    (glue/remove-segment-parameter id note-id "phrase-start")
-    (glue/remove-segment-parameter id note-id "phrase-end")
-    (reload-score)))
+(defn remove-phrase-marks [tc id note-id]
+  (glue/remove-segment-parameter id note-id "phrase-start")
+  (glue/remove-segment-parameter id note-id "phrase-end")
+  (reload-score))
+
+(defn note-popup-menu [tc id evt view parameter-view]
+  (let [note (draw-track/get-note-for-x
+               tc (.getX evt))
+        note-id (:index note)
+        phrase-action
+        (fn [type l]
+          (ssw/action
+            :name (str "Set phrase-" (name type) " " l)
+            :handler (fn [_]
+                       (glue/set-segment-parameter
+                         id note-id
+                         (str "phrase-" (name type))
+                         l)
+                       (reload-score))))
+        popup (ssw/popup
+                :items
+                [(phrase-action :start '(4 5 6))
+                 (phrase-action :start '(5 6))
+                 (phrase-action :start '(6))
+                 :separator
+                 (phrase-action :end '(4 5 6))
+                 (phrase-action :end '(5 6))
+                 (phrase-action :end '(6))
+                 :separator
+                 (ssw/action :name "Remove all phrase marks"
+                             :handler (fn [_] (remove-phrase-marks
+                                                tc id note-id)))
+                 :separator
+                 (ssw/action :name "Edit note..."
+                             :handler (fn [_] (edit-note/edit-note
+                                                tc id evt reload-score)))
+                 :separator
+                 (ssw/action :name "Show Property..."
+                             :handler (fn [_] (ask-and-show-property
+                                                parameter-view tc)))
+                 (ssw/action :name "Show Graph..."
+                             :handler (fn [_] (ask-and-show-graph view tc)))])]
+    (.show popup (.getSource evt) (.getX evt) (.getY evt))))
 
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
@@ -216,54 +253,17 @@
                                         [(draw-track/get-view tc) "span, id track"]
                                         [parameter-view "span"]]
                                 :constraints ["insets 0, gap 0" "" ""]
-                                :background "white")
-        get-note-id #(:index (draw-track/get-note-for-x
-                               tc (.getX %)))]
+                                :background "white")]
     (ssw/listen
       (draw-track/get-view tc)
       :mouse-clicked
       (fn [evt]
         (cond
           (SwingUtilities/isRightMouseButton evt)
-          (let [phrase-action 
-                (fn [type l]
-                  (ssw/action
-                    :name (str "Set phrase-" (name type) " " l)
-                    :handler (fn [_]
-                               (let [note-id (get-note-id evt)]
-                                 (glue/set-segment-parameter
-                                   id note-id
-                                   (str "phrase-" (name type))
-                                   l)
-                                 (reload-score)))))
-                popup (ssw/popup
-                        :items
-                        [(phrase-action :start '(4 5 6))
-                         (phrase-action :start '(5 6))
-                         (phrase-action :start '(6))
-                         :separator
-                         (phrase-action :end '(4 5 6))
-                         (phrase-action :end '(5 6))
-                         (phrase-action :end '(6))
-                         :separator
-                         (ssw/action :name "Remove all phrase marks"
-                                     :handler (fn [_] (remove-phrase-marks
-                                                        tc id evt)))
-                         :separator
-                         (ssw/action :name "Edit note..."
-                                     :handler (fn [_] (edit-note/edit-note
-                                                        tc id evt reload-score)))
-                         :separator
-                         (ssw/action :name "Show Property..."
-                                     :handler (fn [_] (ask-and-show-property
-                                                        parameter-view tc)))
-                         (ssw/action :name "Show Graph..."
-                                     :handler (fn [_] (ask-and-show-graph view tc)))])]
-            (.show popup (.getSource evt) (.getX evt) (.getY evt)))
+           (note-popup-menu tc id evt view parameter-view)
           (and (SwingUtilities/isLeftMouseButton evt)
                (== (.getClickCount evt) 2))
-          (edit-note/edit-note tc id evt reload-score)
-          )))
+           (edit-note/edit-note tc id evt reload-score))))
     (add-watch score-panel-reloader (gensym)
                (fn [& _] (draw-track/set-track tc (glue/get-track id))))
     (global/on-scale-change #(draw-track/set-scale tc %))
