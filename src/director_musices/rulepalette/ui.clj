@@ -13,7 +13,8 @@
               [chooser :as ssw-chooser]
               [core :as ssw]
               [mig :as ssw-mig])
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [clojure.string :as cstr]))
 
 (defprotocol Rulepalette
   (get-rules       [this])
@@ -102,6 +103,7 @@
 
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
+        name (cstr/capitalize (cstr/replace name "-" " "))
         enabled? (ssw/checkbox :selected? enabled?)
         move-up (ssw/label :icon "icons/up_alt.png")
         move-down (ssw/label :icon "icons/down_alt.png")
