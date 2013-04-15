@@ -1,5 +1,6 @@
 (ns director-musices.score.edit-note
-  (:require (director-musices.score [glue :as glue])
+  (:require [director-musices.util :as util]
+            (director-musices.score [glue :as glue])
             (director-musices.score.draw [track :as draw-track])
             (seesaw
               [border :as ssw-border]
@@ -121,14 +122,16 @@
                :constraints ["gap 1, insets 5"]
                :border (ssw-border/line-border
                          :color border-color
-                         :thickness 1))
+                         :thickness 1)
+               :background (util/default-background))
         dialog (ssw/frame
-                 :content 
+                 :content
                  (ssw-mig/mig-panel
                    :items [[(arrow-component border-color)
                             "span"]
                            [view]]
-                   :constraints ["insets 0, gap 0"])
+                   :constraints ["insets 0, gap 0"]
+                   :background (java.awt.Color. 0 0 0 0))
                  :on-close :dispose
                  :resizable? false
                  :undecorated? true)]
