@@ -267,9 +267,7 @@
 (defun distribute-chord-analysis ()
      (p-each-note
       (when (p-this 'q)
-        (p-set-this 'q (cdr (first (p-this 'q)))))
-      )
-  (redraw-music-windows))
+        (p-set-this 'q (cdr (first (p-this 'q)))))))
 
 ;;0009/af as above for phrases
 (defun distribute-phrase-analysis ()
@@ -277,9 +275,7 @@
       (when (p-this 'phrase-start)
         (p-set-this 'phrase-start (cdr (first (p-this 'phrase-start)))))
       (when (p-this 'phrase-end)
-        (p-set-this 'phrase-end (cdr (first (p-this 'phrase-end)))))
-      )
-  (redraw-music-windows) )
+        (p-set-this 'phrase-end (cdr (first (p-this 'phrase-end)))))))
 
 ;;0911/af
 ;;add a number to all phrase levels
@@ -288,9 +284,7 @@
       (when (this 'phrase-start)
         (set-this 'phrase-start (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-start))) )
       (when (this 'phrase-end)
-        (set-this 'phrase-end (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-end))) )
-      )
-  (redraw-music-windows) )
+        (set-this 'phrase-end (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-end))))))
 
 
 ;set all sl and nsl to zero
