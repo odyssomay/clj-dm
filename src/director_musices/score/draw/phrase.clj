@@ -35,7 +35,8 @@
   (let [{:keys [track-component parameter]} state
         scale (draw-track/get-scale track-component)]
     (.setColor g java.awt.Color/black)
-    (draw-phrases g state)))
+    (when-not (zero? (count (:levels state)))
+      (draw-phrases g state))))
 
 (defn create-level-map [k notes]
   (reduce (fn [level-map note]
