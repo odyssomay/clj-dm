@@ -119,8 +119,7 @@
       (reset! receiver r)
       (.open s)
       (.setReceiver @transmitter r)
-      (.addShutdownHook (Runtime/getRuntime) (Thread. #(.close r)))
-      )
+      (.addShutdownHook (Runtime/getRuntime) (Thread. #(.close r))))
     (catch javax.sound.midi.MidiUnavailableException _
       (ssw/alert "Midi device is unavailable")
       (System/exit 1))))
