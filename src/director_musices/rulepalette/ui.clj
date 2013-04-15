@@ -128,7 +128,7 @@
     (on-order-change rulepalette update-view)
     p))
 
-(defn- options-view [rulepalette]
+(defn options-view [rulepalette]
   (let [rule-interact-num (ssw/spinner :model 2)
         rule-interact? (ssw/checkbox :text "Rule interact:"
                                      :selected? false)
@@ -143,25 +143,33 @@
                                rulepalette
                                (ssw/selection sync-rule)
                                (if (.isSelected rule-interact?)
-                                 (ssw/selection rule-interact-num))))]
+                                 (ssw/selection rule-interact-num))))
+        editable? (ssw/checkbox :text "editable"
+                                :selected? false)
+        add-rule (ssw/button :text "Add rule")]
     (ssw/listen rule-interact? :selection update-rule-interact)
     (update-rule-interact)
     (ssw-mig/mig-panel
       :constraints ["gap 1"]
-      :items [[(score-global/a-if-score
+      :items [["Apply" "span"]
+              [(score-global/a-if-score
                  :name "Apply"
                  :handler apply-this)
-               "span, growx"]
+               "span, growx, gapleft 7"]
               [(score-global/a-if-score
                  :name "Apply & Play"
                  :handler (fn [_]
                             (apply-this)
                             (player/start!)))
-               "span, growx"]
-              [rule-interact? "span"]
+               "span, growx, gapleft 7"]
+              ["Apply options" "gaptop 7, span"]
+              [rule-interact? "span, gapleft 7"]
               [rule-interact-num "w 50!, align right, span"]
-              ["Sync:" "span"]
-              [sync-rule "growx, span"]
+              ["Sync:" "span, gapleft 7"]
+              [sync-rule "growx, span, gapleft 7"]
+              ["Rulepalette" "gaptop 7, span"]
+              [editable? "span, gapleft 7"]
+              [add-rule "growx, span, gapleft 7"]
               ])))
 
 (defn rulepalette-view [rulepalette]
