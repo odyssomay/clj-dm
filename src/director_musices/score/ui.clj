@@ -37,7 +37,13 @@
   (reload-score-panel_hidden)
   (update-player))
 
-(defn reload-later! [])
+(let [score-changed? (atom false)]
+  (defn reload-later! []
+    (reset! score-changed? true))
+  
+  (defn reload-score-if-changed! []
+    (reset! score-changed? false)
+    (reload-score)))
 
 ;; =====
 ;; Track property editor
