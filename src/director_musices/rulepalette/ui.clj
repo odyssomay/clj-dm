@@ -48,6 +48,7 @@
   (let [{:keys [v options id]} rule
         updating-value? (atom false)
         value-text (ssw/text :text v :columns 5)
+        text-background (.getBackground value-text)
         slider (ssw/slider :min (* -5 slider-precision) :max (* 5 slider-precision)
                            :value (* v slider-precision) :snap-to-ticks? false)
         options-text (ssw/text :text options :columns 30)
@@ -69,7 +70,7 @@
                                (.setValue slider (* new-v slider-precision)))
                              (reset! updating-value? false)
                              (ssw/config! value-text :background
-                                          (util/default-background))))
+                                          text-background)))
                       (catch Exception e nil))
                     (ssw/config! value-text :background :red))))
     (ssw/listen slider :change
@@ -92,7 +93,8 @@
   (ssw/listen l :mouse-entered
               (fn [_] (ssw/config! l :background "#AAA")))
   (ssw/listen l :mouse-exited
-              (fn [_] (ssw/config! l :background :white))))
+              (fn [_] (ssw/config! l :background
+                                   (util/default-background)))))
 
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
