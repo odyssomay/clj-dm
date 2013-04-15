@@ -39,8 +39,8 @@
                               (when-let [raw (ssw/input "Set meter" :title "Set meter" 
                                                         :value (str m1 "/" m2))]
                                 (let [[nm1 nm2] (map read-string (.split raw "/"))]
-                                  (glue/eval-dm (str "(set-meter " nm1 " " nm2 ")")))))
-                            (reload-score)))
+                                  (glue/eval-dm (str "(set-meter " nm1 " " nm2 ")"))
+                                  (reload-score))))))
      (ssw/action :name "Key"
                  :handler (fn [& _] 
                             (when-let [k (ssw/input "Set key" :title "Set key"
@@ -48,14 +48,14 @@
                               (when-let [m (ssw/input "Set modus" :title "Set modus"
                                                       :value (.javaInstance (glue/eval-dm "(get-first 'modus)")))]
                                 (glue/eval-dm (str "(set-first 'key \"" k "\")"))
-                                (glue/eval-dm (str "(set-first 'modus \"" m "\")"))))
-                            (reload-score)))
+                                (glue/eval-dm (str "(set-first 'modus \"" m "\")"))
+                                (reload-score)))))
      :separator
      (ssw/action :name "Remove Parameter"
                  :handler (fn [& _] (when-let [raw (ssw/input "Remove parameter" :title "Remove parameter")]
                                       (let [p (read-string raw)]
-                                        (glue/eval-dm (str "(rem-all '" p ")"))))
-                            (reload-score)))
+                                        (glue/eval-dm (str "(rem-all '" p ")"))
+                                        (reload-score)))))
      (ssw/action :name "Reset Soundlevel"
                  :handler (fn [& _] (glue/eval-dm "(reset-sound-level)")
                             (reload-score)))
