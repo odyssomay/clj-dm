@@ -2,6 +2,14 @@
 
 (def line-separation 7)
 
+(defn rest? [note]
+  (boolean (:rest note)))
+
+(defn add-rests [track]
+  (assoc track :notes
+    (map #(assoc % :rest (rest? %))
+         (:notes track))))
+
 (defn note-height [track note]
   (let [p (:pitch note)
         ;; HACK - fix for chords
@@ -23,10 +31,12 @@
                   (:nlength note))))
 
 (defn note-data [track note]
-  (let [note (assoc note :height (note-height track note))]
-    (assoc note
-      :y-offset (note-y-offset note)
-      :hollow? (note-hollow? note))))
+  (if (:rest note)
+    note
+    (let [note (assoc note :height (note-height track note))]
+      (assoc note
+        :y-offset (note-y-offset note)
+        :hollow? (note-hollow? note)))))
 
 (defn add-absolute-lengths [notes]
   (:new-notes
@@ -46,7 +56,7 @@
 
 (defn calculate-notes [track]
   (assoc track :notes
-    (-> (for [{:keys [dr ndr n] :as note} (:notes track)]
+    (-> (for [{:keys [dr ndr n rest] :as note} (:notes track)]
           (->> (merge note
                       (when n
                         {:pitch (first n)
@@ -57,9 +67,7 @@
 
 (defn add-track-heights [track]
   (let [{:keys [notes]} track
-        heights (remove nil? (map #(if (:pitch %)
-                                       (:y-offset %))
-                                  notes))
+        heights (map :y-offset (remove :rest notes))
         lowest (- (reduce min (cons 0 heights))
                   30)
         highest (+ (reduce max (cons (* 5 line-separation) heights))
@@ -85,13 +93,14 @@
     (assoc track :notes notes)))
 
 (defn calculate-clef [track]
-  (let [octaves (remove nil? (map #(if-let [n (:n %)]
+  (let [notes (remove :rest (:notes track))
+        octaves (remove nil? (map #(if-let [n (:n %)]
                                      (if-let [pitch (first n)]
                                        (let [pitch (if (list? pitch)
                                                      (first pitch)
                                                      pitch)]
                                          (read-string (str (last pitch))))))
-                                  (:notes track)))
+                                  notes))
         average (/ (reduce + octaves) (count octaves))]
     (if (< average 4) \F \G)))
 
@@ -101,6 +110,7 @@
 
 (defn calculate-track [track]
   (-> track
+      add-rests
       add-clef
       calculate-notes
       add-track-width
