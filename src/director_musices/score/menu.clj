@@ -17,12 +17,12 @@
                    :handler ui/choose-and-save-score)
      (g/a-if-score :name "Save Performance As..."
                    :handler ui/choose-and-save-performance)
-     (ssw/separator)
+     :separator
      (ssw/action :name "Import Score from Midifile..."
                  :handler ui/choose-and-open-midi)
      (g/a-if-score :name "Export Performance to Midifile..."
                    :handler ui/choose-and-save-midi)
-     (ssw/separator)
+     :separator
      (ssw/action :name "Open Rulepalette..."
                  :handler rule-ui/choose-and-open-rulepalette)
      (ssw/action :name "Open Default Rulepalette"
