@@ -66,8 +66,7 @@
                         (log/error "i/o error when retreiving last modification of file.")
                         (when (> new-last-modified @last-modified)
                           (on-change)
-                          (reset! last-modified new-last-modified))))))
-        ]
+                          (reset! last-modified new-last-modified))))))]
     (.scheduleAtFixedRate 
       (new java.util.Timer)
       task 0 rate)))
