@@ -87,14 +87,14 @@
     [[value-text "gapleft 3"] [slider] [options-text]]))
 
 (defn configure-label [l on-click]
-  (ssw/config! l :border 3)
-  (ssw/listen l :mouse-clicked
-              (fn [_] (on-click)))
-  (ssw/listen l :mouse-entered
-              (fn [_] (ssw/config! l :background "#AAA")))
-  (ssw/listen l :mouse-exited
-              (fn [_] (ssw/config! l :background
-                                   (util/default-background)))))
+  (let [bg (.getBackground l)]
+    (ssw/config! l :border 3)
+    (ssw/listen l :mouse-clicked
+                (fn [_] (on-click)))
+    (ssw/listen l :mouse-entered
+                (fn [_] (ssw/config! l :background "#AAA")))
+    (ssw/listen l :mouse-exited
+                (fn [_] (ssw/config! l :background bg)))))
 
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
