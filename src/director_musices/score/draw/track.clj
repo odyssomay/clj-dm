@@ -39,8 +39,9 @@
       :else (do (.scale g 0.28 0.28) (.translate g 0 -74))
       )))
 
-(defn draw-bar [g]
-  (.drawLine g -5 0 -5 (* 4 line-separation)))
+(defn draw-bar [g {:keys [scale-x]}]
+  (let [x (max -5 (* -20 scale-x))]
+    (.drawLine g x 0 x (* 4 line-separation))))
 
 (defn draw-accidental [g {[_ accidental] :pitch}]
   (if (or (= accidental \#)
@@ -109,7 +110,7 @@
       (let [note (nth notes i)]
         (.translate gc (double (* (:x-offset note) scale-x)) (double 0))
         (if (:bar note)
-          (draw-bar gc))
+          (draw-bar gc options))
         (draw-note gc note options)))))
 
 (defn draw-clef [g clef]
