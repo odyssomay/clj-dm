@@ -410,8 +410,7 @@
 (defn choose-and-save-score [& _]
   (if-let [f (util/new-file-dialog)]
     (let [path (.getCanonicalPath f)]
-      (glue/save-score-to-path path)
-      )))
+      (glue/save-score-to-path path))))
 
 (defn choose-and-open-midi [& _]
   (ssw-chooser/choose-file
