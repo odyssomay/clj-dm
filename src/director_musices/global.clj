@@ -130,7 +130,7 @@
       p (ssw-mig/mig-panel
           :constraints ["filly"]
           :items [[t] [l]]
-          :visible? true)]
+          :visible? false)]
   (defn get-loading-spinner-panel [] p)
   
   (defn show-loading-spinner []
