@@ -143,17 +143,42 @@
                   (reload-later!)))
     c))
 
+(defn property-display [track-properties id width]
+  (for [property-map track-properties]
+    (let [{:keys [display-name]} property-map
+          c (track-property-editor id property-map)]
+      [[(ssw/label :text display-name) "gapright 5"]
+       [c (str "w " width "!, wrap")]])))
+
 (defn track-properties-view [id]
-  (let [property-display
-        (for [property-map track-properties]
-          (let [{:keys [display-name]} property-map
-                c (track-property-editor id property-map)]
-            [[(ssw/label :text display-name) "gapright 5"]
-             [c "w 100!, wrap"]
-             ]))
-        view (ssw-mig/mig-panel :items (reduce concat property-display)
-                                :background track-properties-bg
-                                :constraints ["gap 1"])]
+  (let [top-view (ssw-mig/mig-panel
+                   :items (reduce concat
+                                  (property-display (take 2 track-properties)
+                                                    id
+                                                    50))
+                   :background track-properties-bg
+                   :constraints ["gap 1, insets 0"])
+        extra-view (ssw-mig/mig-panel
+                     :items (reduce concat
+                                    (property-display (drop 2 track-properties)
+                                                      id
+                                                      150))
+                     :background track-properties-bg
+                     :constraints ["gap 1, insets 0"])
+        view (ssw-mig/mig-panel
+               :background track-properties-bg)
+        expand (ssw/action :name "More")
+        retract (ssw/action :name "Less")
+        expand-view (fn [& _]
+                      (ssw/config! view :items [[top-view "span"]
+                                                [extra-view "span"]
+                                                [retract "span, align center"]]))
+        retract-view (fn [& _]
+                       (ssw/config! view :items [[top-view "span"]
+                                                 [expand "span, align center"]]))]
+    (ssw/config! expand :handler expand-view)
+    (ssw/config! retract :handler retract-view)
+    (retract-view)
     view))
 
 (defn ask-and-show-property [view tc]
