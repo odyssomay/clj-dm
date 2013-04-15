@@ -27,6 +27,7 @@
                  :handler rule-ui/choose-and-open-rulepalette)
      (ssw/action :name "Open Default Rulepalette"
                  :handler rule-ui/open-default-rulepalette)
+     :separator
      (ssw/action :name "Quit"
                  :handler (fn [&_ ] (System/exit 0)))
      ]))
