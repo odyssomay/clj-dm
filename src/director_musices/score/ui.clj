@@ -14,6 +14,7 @@
               [player :as player]
               [util :as util])
             (seesaw
+              [border :as ssw-border]
               [chooser :as ssw-chooser]
               [core :as ssw]
               [mig :as ssw-mig])
@@ -96,7 +97,6 @@
         value (glue/get-track-property id property)
         c (case type
             :bool (ssw/checkbox :selected? value
-                                :background track-properties-bg
                                 :halign :right)
             :string (ssw/text :text (str value) :columns 5)
             :synth (ssw/combobox :id :synth :model (glue/get-defined-synths))
@@ -109,8 +109,7 @@
                         :max   (:max property-map)
                         :major-tick-spacing (:spacing property-map)
                         :minor-tick-spacing (:minor-spacing property-map)
-                        :snap-to-ticks? (:snap? property-map)
-                        :background track-properties-bg)
+                        :snap-to-ticks? (:snap? property-map))
             (ssw/spinner :model (ssw/spinner-model (long value)
                                                    :from (long (:min property-map))
                                                    :to (long (:max property-map))
@@ -156,17 +155,17 @@
                                   (property-display (take 2 track-properties)
                                                     id
                                                     50))
-                   :background track-properties-bg
                    :constraints ["gap 1, insets 0"])
         extra-view (ssw-mig/mig-panel
                      :items (reduce concat
                                     (property-display (drop 2 track-properties)
                                                       id
                                                       150))
-                     :background track-properties-bg
                      :constraints ["gap 1, insets 0"])
         view (ssw-mig/mig-panel
-               :background track-properties-bg)
+               :border (ssw-border/line-border
+                         :thickness 0 :right 1
+                         :color (java.awt.Color. 150 150 150)))
         expand (ssw/action :name "More")
         retract (ssw/action :name "Less")
         expand-view (fn [& _]
