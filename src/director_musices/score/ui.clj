@@ -203,7 +203,8 @@
   (let [note-id (:index (draw-track/get-note-for-x
                           tc (.getX evt)))]
     (glue/remove-segment-parameter id note-id "phrase-start")
-    (glue/remove-segment-parameter id note-id "phrase-end")))
+    (glue/remove-segment-parameter id note-id "phrase-end")
+    (reload-score)))
 
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
