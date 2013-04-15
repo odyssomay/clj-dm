@@ -312,7 +312,7 @@
 ;; Default
 ;; =====
 
-(def default-rulepalette
+(defn default-rulepalette []
   (-> (string->rulepalette
         "(in-package \"DM\")
         (set-dm-var 'all-rules '((HIGH-LOUD 1.0)
@@ -335,7 +335,7 @@
 ;; =====
 
 (defn open-default-rulepalette [& _]
-  (add-rulepalette default-rulepalette))
+  (add-rulepalette (default-rulepalette)))
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
