@@ -1019,9 +1019,7 @@
    (this 'q)
    (listp (this 'q))
    (then 
-    (set-this 'q (chord-note-list-to-chordname (this 'q)))
-    ))
-   (redraw-music-windows))
+    (set-this 'q (chord-note-list-to-chordname (this 'q))))))
 
 ;;
 ;; -----------------
