@@ -239,7 +239,7 @@
                  (f)))))
 
 (defn set-scale-x [component-m scale-x]
-  (swap! (:state component-m) assoc :scale-x scale-x))
+  (swap! (:state component-m) assoc :scale-x (max 0.01 scale-x)))
 (defn get-scale-x [component-m] (:scale-x @(:state component-m)))
 
 (defn set-scale [component-m scale]
