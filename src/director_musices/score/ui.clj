@@ -305,8 +305,12 @@
           (:track-component (first score-views))
           (:view (first score-views))
           player/position!)]
-    (draw-track/on-state-change (:track-component (first score-views))
-                                #(doto p .revalidate .repaint))
+    (draw-track/on-state-change
+      (:track-component (first score-views))
+      #(do 
+         (doto p .revalidate .repaint)
+         (doseq [c (.getComponents p)]
+           (doto c .revalidate .repaint))))
     (ssw/config!
       p :items
       (concat [[(draw-position/get-view position-component)
