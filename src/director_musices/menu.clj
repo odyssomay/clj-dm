@@ -11,8 +11,9 @@
               [global :as score-global]
               [menu :as score-menu]
               [ui :as score-ui])
-            [seesaw.core :as ssw]
-            ))
+            (seesaw
+              [core :as ssw]
+              [mig :as ssw-mig])))
 
 (defn reload-score []
   (score-ui/reload-score))
@@ -78,11 +79,10 @@
      :separator
      (ssw/action :name "Transpose from major to minor"
                  :handler (fn [_] (glue/eval-dm "(transpose-from-major-to-minor)")
-                            (reload-score)))
+                              (reload-score)))
      (ssw/action :name "Transpose from minor to major"
                  :handler (fn [_] (glue/eval-dm "(transpose-from-minor-to-major)")
-                            (reload-score)))
-     ]))
+                            (reload-score)))]))
 
 (def help-menu
   (ssw/menu
@@ -93,19 +93,17 @@
      (ssw/action :name "Director-musices website"
                  :handler
                  (fn [_] (util/open-website
-                           "https://github.com/odyssomay/clj-dm#readme")))
-     ]))
+                           "https://github.com/odyssomay/clj-dm#readme")))]))
 
 (defn menubar []
   (ssw/menubar :items 
                [(score-menu/file-menu)
                 edit-menu
-                help-menu
-                ]))
+                help-menu]))
 
-(defn toolbar []
+(defn toolbar* []
   (ssw/toolbar
-    :floatable? true
+    :floatable? false
     :items
     [(ssw/action :icon (resource "icons/play.png") :tip "play"
                  :handler (fn [_]
@@ -134,8 +132,13 @@
                  :listen [:change (fn [e]
                                     (score-global/scale!
                                       (double (/ (.getValue (.getSource e))
-                                                 100)))
-                                    )])
-     ]))
+                                                 100))))])]))
+
+(defn toolbar []
+  (ssw-mig/mig-panel
+    :constraints ["insets 0, fill"]
+    :items
+    [[(toolbar*)]
+     [(global/get-loading-spinner-panel) "dock east"]]))
 
 (defn toolbar-panel [] (toolbar))

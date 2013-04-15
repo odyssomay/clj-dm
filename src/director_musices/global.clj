@@ -29,8 +29,7 @@
     (if percent-done   (ssw/config! progress-bar :value (* max-value percent-done)))
     (if indeterminate? (ssw/config! progress-bar :indeterminate? indeterminate?))
     (if large-text     (ssw/config! large-label :text large-text))
-    (if small-text     (ssw/config! small-label :text small-text))
-    ))
+    (if small-text     (ssw/config! small-label :text small-text))))
 
 (defn- init-progress-bar []
   (let [pb (ssw/progress-bar :min 0 :max max-value)
@@ -51,8 +50,7 @@
                                    [:fill-h] [pb "gaptop 10, width 300!"] [:fill-h "wrap"]
                                    [:fill-v "gaptop 100, span"]]
                            :size [400 :by 300]))
-    (.setFont large-label (.deriveFont (.getFont large-label) (float 16)))
-    ))
+    (.setFont large-label (.deriveFont (.getFont large-label) (float 16)))))
 
 ;; =====
 ;; Error
@@ -66,8 +64,7 @@
       (ssw/config! button-panel
                    :items (concat [(ssw/action :name "Ignore"
                                                :handler (fn [_] (show-card :main)))]
-                                  buttons)
-                   ))
+                                  buttons)))
     (show-card :error))
   
   (defn init-error []
@@ -105,8 +102,7 @@
              :card-panel cp
              :frame f})
     (init-progress-bar)
-    (init-error)
-    ))
+    (init-error)))
 
 (defn get-frame      [] (:frame @env))
 (defn get-main-panel [] (:main-panel @env))
@@ -114,6 +110,9 @@
 (defn show-progress-bar [] (show-card :progress-bar))
 (defn hide-progress-bar [] (show-card :main))
 
+;; =====
+;; Argument map
+;; =====
 (let [arg-map (atom nil)]
   (defn set-arg-map [as] (reset! arg-map as))
   
@@ -121,3 +120,34 @@
     (if (not (contains? @arg-map a))
       (log/warn "tried to access arg:" a "but it is not defined!"))
     (get @arg-map a nil)))
+
+;; =====
+;; Loading spinner
+;; =====
+(let [t (ssw/label :text "Loading")
+      l (ssw/label
+          :icon "icons/spinner.gif")
+      p (ssw-mig/mig-panel
+          :constraints ["filly"]
+          :items [[t] [l]]
+          :visible? true)]
+  (defn get-loading-spinner-panel [] p)
+  
+  (defn show-loading-spinner []
+    (ssw/config! p :visible? true))
+  
+  (defn hide-loading-spinner []
+    (ssw/config! p :visible? false))
+  
+  (defn set-loading-spinner-text [text]
+    (ssw/config! t :text text))
+  
+  (defmacro with-loading-spinner [text & body]
+    `(.start (Thread.
+               (fn []
+                 (ssw/invoke-now
+                   (set-loading-spinner-text ~text)
+                   (show-loading-spinner))
+                 ~@body
+                 (ssw/invoke-later
+                   (hide-loading-spinner)))))))
