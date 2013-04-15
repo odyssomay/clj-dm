@@ -18,13 +18,17 @@
 (defprotocol Rulepalette
   (get-rules       [this])
   (update-rule!    [this id f])
+  (add-rule!       [this rule])
   (remove-rule!    [this id])
   (move-rule-up!   [this id])
   (move-rule-down! [this id])
   (get-rule        [this id])
   (on-rule-change  [this id f])
   (on-order-change [this f])
-  (get-name        [this]))
+  (get-name        [this])
+  
+  (set-editable    [this editable?])
+  (on-set-editable [this f]))
 
 (def slider-precision 1000)
 
@@ -109,6 +113,8 @@
                 (fn [_] (update-rule!
                           rp id #(assoc % :enabled?
                                    (.isSelected enabled?)))))
+    (on-set-editable rp #(doseq [c [move-up move-down delete]]
+                           (.setVisible c %)))
     (concat [[move-up "gapleft 10"]
              [move-down]
              [enabled?] [name]]
@@ -128,6 +134,24 @@
     (on-order-change rulepalette update-view)
     p))
 
+(defn rule-name-dialog [& [previous-name previous-no-parameters?]]
+  (let [tf (ssw/text :text previous-name :columns 20)
+        cb (ssw/checkbox :text "Rule does not have any parameters"
+                         :selected? previous-no-parameters?)]
+    (when (-> (ssw/dialog
+                :content (ssw/border-panel
+                           :center tf :south cb))
+              ssw/pack!
+              ssw/show!)
+      (assoc (if (.isSelected cb)
+               {:parameterless? true}
+               {:options ""
+                :v 1.0
+                :parameterless? false})
+        :name (.getText tf)
+        :id (gensym (.getText tf))
+        :enabled? true))))
+
 (defn options-view [rulepalette]
   (let [rule-interact-num (ssw/spinner :model 2)
         rule-interact? (ssw/checkbox :text "Rule interact:"
@@ -146,8 +170,15 @@
                                  (ssw/selection rule-interact-num))))
         editable? (ssw/checkbox :text "editable"
                                 :selected? false)
-        add-rule (ssw/button :text "Add rule")]
+        add-rule (ssw/action
+                   :name "Add rule"
+                   :handler (fn [_]
+                              (if-let [rule (rule-name-dialog)]
+                                (add-rule! rulepalette rule))))]
     (ssw/listen rule-interact? :selection update-rule-interact)
+    (ssw/listen editable? :selection
+                (fn [& _]
+                  (set-editable rulepalette (.isSelected editable?))))
     (update-rule-interact)
     (ssw-mig/mig-panel
       :constraints ["gap 1"]
@@ -210,6 +241,7 @@
                           (map #(vec [(:id %) (atom %)])))
         order (atom (map first rules-no-map))
         rules (atom (into {} rules-no-map))
+        editable? (atom false)
         remove-rule
         (fn [id]
           (swap! rules dissoc id)
@@ -241,6 +273,10 @@
                 @order))
       (update-rule! [this id f]
         (swap! (get @rules id) f))
+      (add-rule! [this rule]
+        (let [id (:id rule)]
+          (swap! rules assoc (:id rule) (atom rule))
+          (swap! order conj (:id rule))))
       (remove-rule! [this id] (remove-rule id))
       (move-rule-up! [this id]
         (move-rule id :up))
@@ -252,7 +288,14 @@
                    (fn [_ _ _ new-rule] (f new-rule))))
       (on-order-change [this f]
         (add-watch order nil (fn [& _] (f))))
-      (get-name [this] (str (:name opts))))))
+      (get-name [this] (str (:name opts)))
+      
+      (set-editable [this new-editable?]
+        (reset! editable? new-editable?))
+      (on-set-editable [this f]
+        (add-watch editable? (gensym)
+                   (fn [_ _ _ e] (f e)))
+        (f @editable?)))))
 
 (defn path->rulepalette [path]
   (string->rulepalette
