@@ -39,19 +39,20 @@
       (player/open-midi-file f)
       (player/position! p))))
 
-(let [score-changed? (atom false)]
-  (defn reload-later! []
-    (reset! score-changed? true))
-  
-  (defn reload-if-changed! []
-    (when @score-changed?
-      (reload-score)
-      (update-player)
-      (reset! score-changed? false))))
+(def ^{:private true} score-changed? (atom false))
+
+(defn reload-later! []
+  (reset! score-changed? true))
 
 (defn reload-score []
   (reload-score-panel_hidden)
   (reload-later!))
+
+(defn reload-if-changed! []
+  (when @score-changed?
+    (reload-score)
+    (update-player)
+    (reset! score-changed? false)))
 
 ;; =====
 ;; Track property editor
