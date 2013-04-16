@@ -31,24 +31,27 @@
   (swap! score-panel-reloader not))
 
 (defn update-player []
-  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
-        p (player/position)]
-    (glue/save-midi-to-path (.getCanonicalPath f))
-    (player/open-midi-file f)
-    (player/position! p)))
-
-(defn reload-score []
-  (reload-score-panel_hidden)
-  (update-player))
+  (dm-global/with-loading-spinner
+    "Updating player"
+    (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
+          p (player/position)]
+      (glue/save-midi-to-path (.getCanonicalPath f))
+      (player/open-midi-file f)
+      (player/position! p))))
 
 (let [score-changed? (atom false)]
   (defn reload-later! []
     (reset! score-changed? true))
   
-  (defn reload-score-if-changed! []
-    (if @score-changed?
+  (defn reload-if-changed! []
+    (when @score-changed?
       (reload-score)
+      (update-player)
       (reset! score-changed? false))))
+
+(defn reload-score []
+  (reload-score-panel_hidden)
+  (reload-later!))
 
 ;; =====
 ;; Track property editor
@@ -361,8 +364,9 @@
                                              "growx, span"]))))))
     (player/listen-to-position
       (fn [position]
-        (draw-position/set-position-indicator
-          position-component position)))
+        (ssw/invoke-later
+          (draw-position/set-position-indicator
+            position-component position))))
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])
