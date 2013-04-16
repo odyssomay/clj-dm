@@ -17,6 +17,7 @@
               [border :as ssw-border]
               [chooser :as ssw-chooser]
               [core :as ssw]
+              [dnd :as ssw-dnd]
               [mig :as ssw-mig])
             [clojure.java.io :as jio])
   (:import javax.swing.SwingUtilities))
@@ -43,8 +44,9 @@
     (reset! score-changed? true))
   
   (defn reload-score-if-changed! []
-    (reset! score-changed? false)
-    (reload-score)))
+    (if @score-changed?
+      (reload-score)
+      (reset! score-changed? false))))
 
 ;; =====
 ;; Track property editor
@@ -433,10 +435,20 @@
 
 (defn init []
   (global/init)
-  (ssw/config! (global/get-score-panel) :items 
+  (ssw/config! (global/get-score-panel)
+               :items
                [(util/start-panel
                   "No score loaded"
                   [(ssw/action :name "Open test score"
                                :handler open-test-score)
                    (ssw/action :name "Open from disk..."
-                               :handler choose-and-open-score)])]))
+                               :handler choose-and-open-score)])]
+               :transfer-handler
+               [:import
+                [ssw-dnd/file-list-flavor
+                 (fn [{:keys [data]}]
+                   (let [f (first data)]
+                     (if (re-matches #".*\.midi?$" (.getName f))
+                       (load-score-from-midi-file f)
+                       (load-score-from-file f))))]]
+               ))
