@@ -199,28 +199,46 @@
   (let [state (atom (merge {:scale 1 :scale-x 1
                             :track (calc/calculate-track track)}
                            opts))
+        temporary-scale-x (atom nil)
+        temporary-scale (atom nil)
         state-listeners (atom [])
         image-atom (atom (create-image @state))
         update-image (fn [] (reset! image-atom (create-image @state)))
         get-track #(:track @state)
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
-              (.drawImage g @image-atom 0 0 nil)
-              (when-let [hnote (:highlighted-note @state)]
-                (highlight-note g hnote @state)))
+              (let [g (.create g)]
+                (when-let [scale-x @temporary-scale-x]
+                  (.scale g (double (/ scale-x (:scale-x @state))) 1.0))
+                (when-let [scale @temporary-scale]
+                  (.scale g scale scale))
+                (.drawImage g @image-atom 0 0 nil)
+                (when-let [hnote (:highlighted-note @state)]
+                  (highlight-note g hnote @state))))
             (getPreferredSize []
               (let [t (get-track)]
                 (java.awt.Dimension.
                   (get-track-component-width @state)
-                  (* (:scale @state) (calc/get-height t))))))]
+                  (* (:scale @state) (calc/get-height t))))))
+        fire-state-listeners
+        (fn []
+          (doseq [f @state-listeners]
+            (f)))]
     (add-watch state (gensym)
                (fn [_ _ _ state]
                  (update-image)
-                 (doseq [f @state-listeners]
-                   (f))))
+                 (fire-state-listeners)))
+    (add-watch temporary-scale nil
+               (fn [& _]
+                 (fire-state-listeners)))
+    (add-watch temporary-scale-x nil
+               (fn [& _]
+                 (fire-state-listeners)))
     {:view c
      :state state
-     :state-listeners state-listeners}))
+     :state-listeners state-listeners
+     :temporary-scale temporary-scale
+     :temporary-scale-x temporary-scale-x}))
 
 ;; =====
 ;; API
@@ -238,12 +256,18 @@
                          (:track new-state))
                  (f)))))
 
+(defn set-temporary-scale-x [component-m scale-x]
+  (reset! (:temporary-scale-x component-m) (max 0.01 scale-x)))
 (defn set-scale-x [component-m scale-x]
-  (swap! (:state component-m) assoc :scale-x (max 0.01 scale-x)))
+  (swap! (:state component-m) assoc :scale-x (max 0.01 scale-x))
+  (reset! (:temporary-scale-x component-m) nil))
 (defn get-scale-x [component-m] (:scale-x @(:state component-m)))
 
+(defn set-temporary-scale [component-m scale]
+  (reset! (:temporary-scale component-m) scale))
 (defn set-scale [component-m scale]
-  (swap! (:state component-m) assoc :scale scale))
+  (swap! (:state component-m) assoc :scale scale)
+  (reset! (:temporary-scale component-m) nil))
 (defn get-scale [component-m] (:scale @(:state component-m)))
 
 (defn get-view [component-m] (:view component-m))
