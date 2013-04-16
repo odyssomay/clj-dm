@@ -114,7 +114,9 @@
   (str "(" property " (nth " id " (track-list *active-score*)))"))
 
 (defn get-track-synth-program-list [id]
-  (map str (.copyToArray (glue/eval-dm (str "(program-list " (property-acc id "synth") ")")))))
+  (map str (-> (str "(program-list " (property-acc id "synth") ")")
+               .glue/eval-dm
+               .copyToArray)))
 
 (defn get-track-property [id property]
   (case property
@@ -134,7 +136,6 @@
                 :bool (clj->value value)
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
-                :mip (do ;(println (glue/eval-dm (str "(program-name-to-number \"" value "\")")))
-                       (read-string (re-find #"[0-9]+" value)))
+                :mip (read-string (re-find #"[0-9]+" value))
                 :native (str value))]
     (glue/eval-dm (str "(setf " (property-acc id property) " " value ")"))))
