@@ -22,9 +22,9 @@
 (defn transform-for-note [g note {:keys [scale-x]}] 
   (if (:rest note)
     (condp <= (:nlength note)
-      1    (do (.translate g (double (* (/ (:x-offset note) 2) scale-x)) (+ line-separation 4.5))
+      1    (do (.translate g 0.0 (+ line-separation 4.5))
                (.scale g 0.3 0.25))
-      1/2  (do (.translate g (double (* (/ (:x-offset note) 2) scale-x)) (double line-separation))
+      1/2  (do (.translate g 0.0 (double line-separation))
                (.scale g 0.3 0.25)) 
       1/4  (do (.translate g 0 4))
       1/8  (do (.translate g 0 8)
