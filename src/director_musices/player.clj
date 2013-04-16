@@ -31,9 +31,10 @@
 ;; Position
 ;; =====
 (defn position [& [s]]
-  (when-let [s (or s (get-sequencer))]
+  (if-let [s (or s (get-sequencer))]
     (/ (.getTickPosition s)
-       (.getTickLength s))))
+       (.getTickLength s))
+    0))
 
 ;; Listener
 
@@ -69,7 +70,7 @@
   (when (sequencer-ready?)
     (if (< (- (.getTickLength @sequencer) (.getTickPosition @sequencer)) 10)
       (.setTickPosition @sequencer 0))
-    (.start @sequencer)
+    (.start (Thread. (.start @sequencer)))
     true))
 
 (defn stop! []
