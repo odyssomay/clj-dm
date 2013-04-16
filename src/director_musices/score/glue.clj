@@ -115,14 +115,18 @@
 
 (defn get-track-synth-program-list [id]
   (map str (-> (str "(program-list " (property-acc id "synth") ")")
-               .glue/eval-dm
+               glue/eval-dm
                .copyToArray)))
 
 (defn get-track-property [id property]
-  (case property
-    "synth" (first (get-defined-synths))
-    "active-p" (value->clj (glue/eval-dm (property-acc id property)))
-    (.javaInstance (glue/eval-dm (property-acc id property)))))
+  (let [value (case property
+                "synth" (first (get-defined-synths))
+                "active-p" (value->clj (glue/eval-dm (property-acc id property)))
+                (-> (property-acc id property)
+                    glue/eval-dm
+                    .javaInstance))]
+    (if (instance? org.armedbear.lisp.Nil value)
+      nil value)))
 
 (defn set-track-property [id property value]
   (let [type (case property
