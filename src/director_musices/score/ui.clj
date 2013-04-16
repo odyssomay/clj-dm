@@ -316,6 +316,7 @@
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
+        temporary-scale-x (atom 1)
         position-components (atom [])
         p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
         s-p (ssw/scrollable p :border nil)
@@ -323,19 +324,29 @@
         (for [i (range (glue/get-track-count))]
           (let [sv (score-view i)
                 sc (:score-component sv)
-                offs draw-track/first-note-offset]
+                offs draw-track/first-note-offset
+                was-dragged? (atom false)]
             (ssw/listen (draw-track/get-view sc) 
                         :mouse-pressed
-                        (fn [e] 
+                        (fn [e]
+                          (reset! was-dragged? false)
                           (reset! mouse-position-x-start (.getX e))
                           (reset! initial-scale-x (draw-track/get-scale-x sc)))
                         :mouse-dragged
-                        (fn [e] 
-                          (reset! new-scale-x
+                        (fn [e]
+                          (reset! was-dragged? true)
+                          (reset! temporary-scale-x
                                   (* @initial-scale-x
                                      (/ (- (.getX e) offs)
                                         (- @mouse-position-x-start offs)
-                                        )))))
+                                        ))))
+                        :mouse-released
+                        (fn [e]
+                          (if @was-dragged?
+                            (reset! new-scale-x @temporary-scale-x))))
+            (add-watch temporary-scale-x
+                       (gensym) (fn [_ _ _ scale-x]
+                                  (draw-track/set-temporary-scale-x sc scale-x)))
             (add-watch new-scale-x
                        (gensym) (fn [_ _ _ scale-x]
                                   (draw-track/set-scale-x sc scale-x)))
