@@ -31,9 +31,11 @@
   (swap! score-panel-reloader not))
 
 (defn update-player []
-  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")]
+  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
+        p (player/position)]
     (glue/save-midi-to-path (.getCanonicalPath f))
-    (player/open-midi-file f)))
+    (player/open-midi-file f)
+    (player/position! p)))
 
 (defn reload-score []
   (reload-score-panel_hidden)
