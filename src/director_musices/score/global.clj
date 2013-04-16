@@ -22,6 +22,9 @@
   
   (defn get-score-panel [] @score-panel-atom)
   
+  (defn temporary-scale! [scale]
+    )
+  
   (defn scale! [scale]
     (reset! scale-atom scale)
     (doseq [f @scale-watchers] (f scale)))

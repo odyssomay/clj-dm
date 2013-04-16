@@ -129,10 +129,15 @@
                  :snap-to-ticks? true
                  :paint-ticks? true
                  :size [200 :by 30]
-                 :listen [:change (fn [e]
-                                    (score-global/scale!
-                                      (double (/ (.getValue (.getSource e))
-                                                 100))))])]))
+                 :listen [:change
+                          (fn [e]
+                            (let [s (.getSource e)
+                                  value (double (/ (.getValue (.getSource e))
+                                                   100))]
+                              (if (.getValueIsAdjusting s)
+                                (score-global/temporary-scale! value)
+                                (score-global/scale! value))))])
+     ]))
 
 (defn toolbar []
   (ssw-mig/mig-panel
