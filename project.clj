@@ -9,7 +9,6 @@
                  [kitfox/svgsalamander "1.0"]
                  [org.clojure/tools.cli "0.2.2"]
                  [com.taoensso/timbre "1.5.2"]]
+  :jvm-opts ["-Xmx500M"]
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.2"]]}
-             :jar {:main director-musices.main}
-             }
-  )
+             :jar {:main director-musices.main}})
