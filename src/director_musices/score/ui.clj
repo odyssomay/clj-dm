@@ -82,11 +82,13 @@
     :min 0 :max 100}
    {:display-name "Pan"
     :property "midi-pan"
+    :value 64
     :type :slider :min 0 :max 127
     :spacing 32 :minor-spacing 8
     :snap? true}
    {:display-name "Volume"
     :property "midi-initial-volume"
+    :value 0
     :type :slider :min -39 :max 0
     :spacing 13 :minor-spacing 13
     :snap? false}
@@ -94,7 +96,8 @@
 
 (defn track-property-editor [id property-map]
   (let [{:keys [type property display-name]} property-map
-        value (glue/get-track-property id property)
+        value (or (glue/get-track-property id property)
+                  (:value property-map))
         c (case type
             :bool (ssw/checkbox :selected? value
                                 :halign :right)
