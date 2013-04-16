@@ -259,7 +259,10 @@
 (defn get-note-component-position [tc note]
   (let [scale (get-scale tc)
         scale-x (get-scale-x tc)
-        {:keys [absolute-x-offset y-offset]} note]
+        {:keys [absolute-x-offset y-offset]} note
+        y-offset (if (:rest note)
+                   (* 3 line-separation)
+                   y-offset)]
     [(* scale (+ first-note-offset
                  (* scale-x absolute-x-offset)))
      (* scale (- y-offset (calc/get-lowest (get-track tc))))]))
