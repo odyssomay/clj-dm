@@ -22,32 +22,37 @@
   (log/info "loading dm from" path)
   (parse-dm-paths-file (slurp path)))
 
-(let [dm-init? (atom nil)]
-  (defn init-dm []
-    (when-not @dm-init?
-      (log/info "initing dm")
-      (global/update-progress-bar :large-text "Loading files"
-                                  :indeterminate? false
-                                  :percent-done 0)
-      (global/show-progress-bar)
-      (let [d (resource "dm/paths")
-            paths-file (if-let [p (global/get-arg :dm-path)]
-                         (let [f (java.io.File. p "paths")]
-                           (if (.exists f)
-                             f
-                             (do (log/warn "'paths' file was not found in" p 
-                                           ", using in-built.")
-                               nil))))
-            paths (read-dm-paths-file (if paths-file paths-file d))]
-        (apply load-multiple-abcl-with-progress
-               {:percent-done #(global/update-progress-bar :percent-done %)
-                :current-file #(global/update-progress-bar :small-text %)
-                :base-dir (if paths-file (java.io.File.
-                                           (global/get-arg :dm-path)))}
-               paths)
-        (global/hide-progress-bar)
-        (reset! dm-init? true)
-        ))))
+(def ^{:private true} dm-init? (atom false))
+
+(defn init-dm []
+  (when-not @dm-init?
+    (log/info "initing dm")
+    (global/update-progress-bar :large-text "Loading files"
+                                :indeterminate? false
+                                :percent-done 0)
+    (global/show-progress-bar)
+    (let [d (resource "dm/paths")
+          paths-file (if-let [p (global/get-arg :dm-path)]
+                       (let [f (java.io.File. p "paths")]
+                         (if (.exists f)
+                           f
+                           (do (log/warn "'paths' file was not found in" p 
+                                         ", using in-built.")
+                             nil))))
+          paths (read-dm-paths-file (if paths-file paths-file d))]
+      (apply load-multiple-abcl-with-progress
+             {:percent-done #(global/update-progress-bar :percent-done %)
+              :current-file #(global/update-progress-bar :small-text %)
+              :base-dir (if paths-file (java.io.File.
+                                         (global/get-arg :dm-path)))}
+             paths)
+      (global/hide-progress-bar)
+      (reset! dm-init? true))))
+
+(defn reload-dm []
+  (reset! dm-init? false)
+  (reload-abcl)
+  (init-dm))
     
 (defn eval-dm [s]
   (init-dm)

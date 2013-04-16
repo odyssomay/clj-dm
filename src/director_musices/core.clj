@@ -59,6 +59,6 @@
     (log/info "Using tmp directory" (util/tmp-dir))
     (.setLocationRelativeTo fr nil)
     (ssw/show! fr)
-    (util/thread (glue/init-dm))))
+    (util/thread (glue/reload-dm))))
 
 (defn reload-ui [] (director-musices "--no-exit"))

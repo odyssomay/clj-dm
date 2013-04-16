@@ -20,14 +20,15 @@
         (org.armedbear.lisp.Interpreter/createInstance)
         (org.armedbear.lisp.Interpreter/getInstance))))
 
-(let [thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)
+(let [thread-pool (atom (java.util.concurrent.Executors/newFixedThreadPool 1))
       res (atom nil)
-      error (atom false)]
+      error (atom false)
+      get-thread-pool (fn [] @thread-pool)]
   (defn eval-abcl [s]
     (reset! res nil)
     (reset! error nil)
     (.invokeAll
-      thread-pool
+      (get-thread-pool)
       [(fn []
          (try
            (reset! res (.eval @interpreter 
@@ -36,12 +37,15 @@
                                             s ")")))
            (catch Throwable e
              (reset! error e)
-             (abcl-error e)))
-         )])
+             (abcl-error e))))])
     (if @error (throw @error) @res))
   
+  (defn reload-abcl []
+    (.shutdown (get-thread-pool))
+    (reset! thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)))
+  
   (defn repl []
-    (.start (Thread. (fn [] (.invokeAll thread-pool 
+    (.start (Thread. (fn [] (.invokeAll (get-thread-pool)
                                         [#(.run @interpreter)]))))))
 
 (declare abcl-path)
