@@ -8,17 +8,17 @@
             [seesaw.core :as ssw]))
 
 (defn abcl-error [e]
-  (.printStackTrace e)
-  (global/show-error
-    :text "The back end crashed."
-    :buttons [(ssw/action :name "Restart")]))
+  (log/error e "CL failed with:")
+  (global/show-info-panel
+    :error "Operation failed. See Help->Log for info."))
 
-(def interpreter
-  (future
-    (do (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
-          (.dispose i))
-        (org.armedbear.lisp.Interpreter/createInstance)
-        (org.armedbear.lisp.Interpreter/getInstance))))
+(defn get-new-interpreter []
+  (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
+    (.dispose i))
+  (org.armedbear.lisp.Interpreter/createInstance)
+  (org.armedbear.lisp.Interpreter/getInstance))
+
+(def interpreter (atom (get-new-interpreter)))
 
 (let [thread-pool (atom (java.util.concurrent.Executors/newFixedThreadPool 1))
       res (atom nil)
@@ -33,16 +33,17 @@
          (try
            (reset! res (.eval @interpreter 
                               (str "(let ((*debugger-hook*
-                                            #'sys::%debugger-hook-function)) "
+                                            #'sys::%debugger-hook-function)) (/ 1 0) "
                                             s ")")))
            (catch Throwable e
              (reset! error e)
              (abcl-error e))))])
-    (if @error (throw @error) @res))
+    @res)
   
   (defn reload-abcl []
     (.shutdown (get-thread-pool))
-    (reset! thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1)))
+    (reset! thread-pool (java.util.concurrent.Executors/newFixedThreadPool 1))
+    (reset! interpreter (get-new-interpreter)))
   
   (defn repl []
     (.start (Thread. (fn [] (.invokeAll (get-thread-pool)
