@@ -52,18 +52,22 @@
           notes))
 
 (defn partition-notes [notes]
-  (reduce (fn [notes note]
-            (if (= (:phrase-mark note) :phrase-start)
-              (conj notes {:start note})
-              (if (and (:start (peek notes))
-                       (not (:end (peek notes))))
-                (conj (pop notes)
-                      (assoc (peek notes)
-                        :end note))
-                (conj notes
-                      {:end note}))))
-          []
-          notes))
+  (let [{phrase-starts :phrase-start
+         phrase-ends :phrase-end}
+        (group-by :phrase-mark notes)
+        cps (count phrase-starts)
+        cpe (count phrase-ends)
+        ;; make sure the collections
+        ;; are of equal size
+        phrase-starts (concat phrase-starts
+                              (repeat (max 0 (- cpe cps))
+                                      nil))
+        phrase-ends (concat phrase-ends
+                            (repeat (max 0 (- cps cpe))
+                                    nil))]
+    ;; and group them together!
+    (map (fn [start end] {:start start :end end})
+         phrase-starts phrase-ends)))
 
 (defn sort-phrases [notes]
   (let [filtered (filter #(or (:phrase-start %)
