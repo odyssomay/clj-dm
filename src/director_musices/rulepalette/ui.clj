@@ -99,11 +99,11 @@
   (let [{:keys [name parameterless? enabled? v options id]} rule
         name (cstr/capitalize (cstr/replace name "-" " "))
         enabled? (ssw/checkbox :selected? enabled?)
-        move-up (util/button-label #(move-rule-up! rp id)
+        move-up (util/button-label (fn [_] (move-rule-up! rp id))
                                    :icon "icons/up.png")
-        move-down (util/button-label #(move-rule-down! rp id)
+        move-down (util/button-label (fn [_] (move-rule-down! rp id))
                                      :icon "icons/down.png")
-        delete (util/button-label #(remove-rule! rp id)
+        delete (util/button-label (fn [_] (remove-rule! rp id))
                                   :icon "icons/delete.png")]
     (ssw/listen enabled? :selection
                 (fn [_] (update-rule!

@@ -93,7 +93,7 @@
         bg (.getBackground l)]
     (ssw/config! l :border 3)
     (ssw/listen l :mouse-clicked
-                (fn [_] (on-click)))
+                (fn [_] (on-click l)))
     (ssw/listen l :mouse-entered
                 (fn [_] (ssw/config! l :background "#AAA")))
     (ssw/listen l :mouse-exited
