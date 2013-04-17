@@ -165,12 +165,16 @@
     (.drawRect gc -1 -1 11 10)
     ))
 
-(defn paint [g state]
+(defn paint [img g state]
   (let [gc (.create g)
         scale (:scale state)
         scale-x (:scale-x state)
         track (:track state)
         notes (calc/get-notes track)]
+    (let [w (.getWidth img)
+          h (.getHeight img)]
+      (.setColor g java.awt.Color/white)
+      (.fillRect g 0 0 w h))
     (ssw-graphics/anti-alias gc)
     (.setColor gc java.awt.Color/black)
     (.scale gc scale scale)
@@ -189,12 +193,15 @@
 
 (defn create-image [state]
   (let [track (:track state)
+        ba (byte-array (map byte [0 63 127]))
+        icm (java.awt.image.IndexColorModel.
+              2 3 ba ba ba)
         img (java.awt.image.BufferedImage.
-              (get-track-component-width state)
-              (get-track-component-height state)
-              java.awt.image.BufferedImage/TYPE_INT_ARGB)
+              (int (get-track-component-width state))
+              (int (get-track-component-height state))
+              java.awt.image.BufferedImage/TYPE_BYTE_INDEXED)
         g (.getGraphics img)]
-    (paint g state)
+    (paint img g state)
     img))
 
 (defn track-component [track & {:as opts}] 
