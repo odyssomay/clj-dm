@@ -4,6 +4,7 @@
               [global :as global]
               [glue :as glue])
             (director-musices
+              [global :as dm-global]
               [player :as player]
               [util :as util])
             (director-musices.score
@@ -45,9 +46,12 @@
              ))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction]
-  (glue/apply-rules (rules->string (get-rules rulepalette))
-                    syncrule rule-interaction)
-  (score-ui/reload-score))
+  (dm-global/show-info-panel :loading "Applying rulepalette")
+  (util/thread
+    (glue/apply-rules (rules->string (get-rules rulepalette))
+                      syncrule rule-interaction)
+    (score-ui/reload-score)
+    (dm-global/hide-info-panel)))
 
 (defn- parameter-view [rp rule]
   (let [{:keys [v options id]} rule
