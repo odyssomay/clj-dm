@@ -52,7 +52,18 @@
                     :background (if (= value ::empty)
                                   :red
                                   :white))
-        delete (ssw/label :icon "icons/delete.png")]
+        delete
+        (util/button-label
+          (fn [delete]
+            (swap! view-items
+                   (fn [items]
+                     (remove #(let [f (first %)]
+                                (or (= f k-label)
+                                    (= f t)
+                                    (= f delete)))
+                             items)))
+            (swap! segment-atom dissoc k))
+          :icon "icons/delete.png")]
     (ssw/listen t :document
                 (fn [& _]
                   (try
@@ -61,54 +72,42 @@
                     (ssw/config! t :background :white)
                     (catch Exception e
                       (ssw/config! t :background :red)))))
-    (ssw/listen delete :mouse-clicked
-                (fn [& _]
-                  (swap! view-items
-                         (fn [items]
-                           (remove #(let [f (first %)]
-                                      (or (= f k-label)
-                                          (= f t)
-                                          (= f delete)))
-                                   items)))
-                  (swap! segment-atom dissoc k)))
     [[k-label] [t "gapleft 5"]
      [delete "gapleft 4, wrap"]]))
 
 (defn- edit-note-add [view-items segment-atom border-color]
-  (let [add-label (ssw/label :icon "icons/add.png"
-                             :halign :center)]
-    (ssw/listen
-      add-label
-      :mouse-clicked
-      (fn [_]
-        (let [new-name (ssw/text)
-              add-new-view
-              (fn [items k]
-                (concat
-                  items
-                  (note-value-view view-items segment-atom
-                                   k ::empty border-color)))
-              remove-new-name
-              (fn [items]
-                (remove #(= (first %) new-name) items))]
-          (swap! view-items concat [[new-name "growx, wrap"]])
-          (ssw/listen
-            new-name
-            :action
-            (fn [_]
-              (let [k (keyword (ssw/text new-name))]
-                (swap! view-items
-                       (fn [items]
-                         (remove-new-name
-                           (if (= k "")
-                             items
-                             (add-new-view items k)))))
-                ;; HACK
-                (let [t (first (last (butlast @view-items)))]
-                  (ssw/request-focus! t)))))
-          (ssw/request-focus! new-name))))
-    [add-label
-     "dock south, growx, gapbottom 7"]))
+  (let [add-label
+        (util/button-label
+          (fn [_]
+            (let [new-name (ssw/text)
+                  add-new-view
+                  (fn [items k]
+                    (concat
+                      items
+                      (note-value-view view-items segment-atom
+                                       k ::empty border-color)))
+                  remove-new-name
+                  (fn [items]
+                    (remove #(= (first %) new-name) items))]
+              (swap! view-items concat [[new-name "growx, wrap"]])
+              (ssw/listen
+                new-name
+                :action
+                (fn [_]
+                  (let [k (keyword (ssw/text new-name))]
+                    (swap! view-items
+                           (fn [items]
+                             (remove-new-name
+                               (if (= k "")
+                                 items
+                                 (add-new-view items k)))))
+                    ;; HACK
+                    (let [t (first (last (butlast @view-items)))]
+                      (ssw/request-focus! t)))))
+              (ssw/request-focus! new-name)))
+          :icon "icons/add.png"
+          :halign :center)]
+    [add-label "dock south, growx, gapbottom 7"]))
 
 (defn edit-note [tc id mouse-evt reload-score]
   (let [note (draw-track/get-note-for-x tc (.getX mouse-evt))
