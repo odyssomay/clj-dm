@@ -22,11 +22,9 @@
 
 (let [thread-pool (atom (java.util.concurrent.Executors/newFixedThreadPool 1))
       res (atom nil)
-      error (atom false)
       get-thread-pool (fn [] @thread-pool)]
   (defn eval-abcl [s]
     (reset! res nil)
-    (reset! error nil)
     (.invokeAll
       (get-thread-pool)
       [(fn []
@@ -36,7 +34,6 @@
                                             #'sys::%debugger-hook-function)) "
                                             s ")")))
            (catch Throwable e
-             (reset! error e)
              (abcl-error e))))])
     @res)
   
