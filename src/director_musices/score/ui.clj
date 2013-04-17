@@ -413,6 +413,10 @@
   (load-score-from-file-with
     file glue/load-active-score-from-file))
 
+(defn load-performance-from-file [file]
+  (load-score-from-file-with
+    file glue/load-active-performance-from-file))
+
 (defn load-score-from-midi-file [file]
   (load-score-from-file-with
     file glue/load-active-score-from-midi-file))
@@ -425,6 +429,11 @@
   (ssw-chooser/choose-file
     :success-fn 
     (fn [_ f] (load-score-from-file f))))
+
+(defn choose-and-open-performance [& _]
+  (ssw-chooser/choose-file
+    :success-fn 
+    (fn [_ f] (load-performance-from-file f))))
 
 (defn choose-and-save-performance [& _]
   (if-let [f (util/new-file-dialog)]

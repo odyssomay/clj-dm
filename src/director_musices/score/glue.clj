@@ -14,6 +14,10 @@
     (str "(read-active-score-from-file \"" (inr/abcl-path path) "\")"
          "(init-music-score)")))
 
+(defn load-active-performance-from-file [path]
+  (glue/eval-dm
+    (str "(read-active-score-from-file \"" (inr/abcl-path path) "\")")))
+
 (defn save-score-to-path [path]
   (glue/eval-dm (str "(save-score-fpath \"" (inr/abcl-path path) "\")")))
 
