@@ -51,14 +51,12 @@
   (let [old-handler (Thread/getDefaultUncaughtExceptionHandler)
         new-handler (reify Thread$UncaughtExceptionHandler
                       (uncaughtException [this thread e]
-                                         ;(when print-to-err?
-                                         (.uncaughtException old-handler thread e);)
-                                         ;(global/configure-error :text (str "Error: " e))
-                                         (log/error "BLABLA")
-                                         ))]
+                        (log/error e thread)
+                        (global/show-generic-error)))]
     (Thread/setDefaultUncaughtExceptionHandler new-handler)))
 
 (defn init []
+  (override-exception-handler)
   (init-cl-log-config)
   (init-log-frame))
 
