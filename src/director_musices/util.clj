@@ -91,12 +91,15 @@
 (defn configure-button-label [l on-click]
   (let [bg (.getBackground l)]
     (ssw/config! l :border 3)
-    (ssw/listen l :mouse-clicked
-                (fn [_] (on-click l)))
-    (ssw/listen l :mouse-entered
-                (fn [_] (ssw/config! l :background "#AAA")))
-    (ssw/listen l :mouse-exited
-                (fn [_] (ssw/config! l :background bg)))
+    (ssw/listen l
+      :mouse-clicked
+      (fn [_]
+        (ssw/config! l :background bg)
+        (on-click l))
+      :mouse-entered
+      (fn [_] (ssw/config! l :background "#AAA"))
+      :mouse-exited
+      (fn [_] (ssw/config! l :background bg)))
     l))
 
 (defn button-label [on-click & options]
