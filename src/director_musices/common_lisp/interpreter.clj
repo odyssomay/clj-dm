@@ -33,7 +33,7 @@
          (try
            (reset! res (.eval @interpreter 
                               (str "(let ((*debugger-hook*
-                                            #'sys::%debugger-hook-function)) (/ 1 0) "
+                                            #'sys::%debugger-hook-function)) "
                                             s ")")))
            (catch Throwable e
              (reset! error e)
