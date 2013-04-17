@@ -159,25 +159,23 @@
                   (reload-later!)))
     c))
 
-(defn property-display [track-properties id width]
+(defn property-display [track-properties id]
   (for [property-map track-properties]
     (let [{:keys [display-name]} property-map
           c (track-property-editor id property-map)]
-      [[(ssw/label :text display-name) "gapright 5"]
-       [c (str "w " width "!, wrap")]])))
+      [[(ssw/label :text display-name) "gapright 5, w 50!"]
+       [c "wrap, w 100!"]])))
 
 (defn track-properties-view [id]
   (let [top-view (ssw-mig/mig-panel
                    :items (reduce concat
-                                  (property-display (take 2 track-properties)
-                                                    id
-                                                    50))
+                                  (property-display
+                                    (take 2 track-properties) id))
                    :constraints ["gap 1, insets 0"])
         extra-view (ssw-mig/mig-panel
                      :items (reduce concat
-                                    (property-display (drop 2 track-properties)
-                                                      id
-                                                      150))
+                                    (property-display
+                                      (drop 2 track-properties) id))
                      :constraints ["gap 1, insets 0"])
         view (ssw-mig/mig-panel
                :border (ssw-border/line-border
@@ -235,15 +233,13 @@
                   (when (SwingUtilities/isRightMouseButton evt)
                     (.show popup (.getSource evt) (.getX evt) (.getY evt)))))
     (.add view c "span")
-    (.revalidate view)
-    ))
+    (.revalidate view)))
 
 (defn ask-and-show-graph [view tc]
   (if-let [choice (ssw/input "what type?" :choices
                              (draw-graph/get-available-properties)
                              :to-string draw-graph/get-property-display-name
-                             :title "Select graph type")
-           ]
+                             :title "Select graph type")]
     (show-graph view tc choice)))
 
 (defn remove-phrase-marks [tc id note-id]
