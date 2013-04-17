@@ -124,7 +124,7 @@
 ;; =====
 ;; Loading spinner
 ;; =====
-(let [t (ssw/label :text "Loading")
+(let [t (ssw/label :text "")
       l (ssw/label
           :icon "icons/spinner.gif")
       p (ssw-mig/mig-panel
@@ -138,21 +138,14 @@
   (defn show-info-panel [type text]
     (ssw/invoke-now
       (ssw/config! p :visible? true)
-      (ssw/config! l :visible? (case type :info true false))
+      (ssw/config! l :visible? (case type
+                                 :loading true
+                                 false))
       (ssw/config! t :text text
-                   :foreground (case type :info :black :error :red))))
+                   :foreground (case type
+                                 :error :red
+                                 :black))))
   
   (defn hide-info-panel []
     (ssw/invoke-now
-      (ssw/config! p :visible? false)))
-  
-  ; (defmacro with-loading-spinner [text & body]
-  ;   `(.start (Thread.
-  ;              (fn []
-  ;                (ssw/invoke-now
-  ;                  (set-loading-spinner-text ~text)
-  ;                  (show-loading-spinner))
-  ;                ~@body
-  ;                (ssw/invoke-later
-  ;                  (hide-loading-spinner))))))
-  )
+      (ssw/config! p :visible? false))))
