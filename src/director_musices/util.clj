@@ -88,9 +88,8 @@
 (defn default-background []
   (javax.swing.UIManager/getColor "Panel.background"))
 
-(defn button-label [on-click & options]
-  (let [l (apply ssw/label options)
-        bg (.getBackground l)]
+(defn configure-button-label [l on-click]
+  (let [bg (.getBackground l)]
     (ssw/config! l :border 3)
     (ssw/listen l :mouse-clicked
                 (fn [_] (on-click l)))
@@ -99,3 +98,7 @@
     (ssw/listen l :mouse-exited
                 (fn [_] (ssw/config! l :background bg)))
     l))
+
+(defn button-label [on-click & options]
+  (let [l (apply ssw/label options)]
+    (configure-button-label l on-click)))
