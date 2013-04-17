@@ -10,8 +10,10 @@
 
 (def svg-universe (com.kitfox.svg.SVGUniverse.))
 
-(defn get-diagram [id]
-  (.getDiagram svg-universe (.toURI (resource id))))
+(def get-diagram
+  (memoize
+    (fn [id]
+      (.getDiagram svg-universe (.toURI (resource id))))))
 
 (defn draw-svg [g id]
   (try
