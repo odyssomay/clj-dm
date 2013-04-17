@@ -31,16 +31,15 @@
   (swap! score-panel-reloader not))
 
 (defn update-player []
-  (dm-global/set-loading-spinner-text "Updating player")
-  (dm-global/show-loading-spinner)
+  (dm-global/show-info-panel :loading "Updating player")
   (util/thread
+    (player/pause!)
     (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
           p (player/position)]
       (glue/save-midi-to-path (.getCanonicalPath f))
       (player/open-midi-file f)
       (player/position! p))
-    (ssw/invoke-now
-      (dm-global/hide-loading-spinner))))
+    (dm-global/hide-info-panel)))
 
 (def ^{:private true} score-changed? (atom false))
 
@@ -50,6 +49,10 @@
 (defn reload-score []
   (reload-score-panel_hidden)
   (reload-later!))
+
+(defn reload-score-and-player []
+  (reload-score)
+  (update-player))
 
 (defn reload-if-changed! []
   (when @score-changed?
@@ -396,14 +399,13 @@
 
 (defn- load-new-score-with [f & [info-text]]
   (.removeAll (global/get-score-panel))
-  (dm-global/set-loading-spinner-text "Loading score")
-  (dm-global/show-loading-spinner)
+  (dm-global/show-info-panel :loading "Loading score")
   (util/thread
     (f)
     (ssw/invoke-now
       (update-score-panel)
       (update-player)
-      (dm-global/hide-loading-spinner))))
+      (dm-global/hide-info-panel))))
 
 (defn- load-score-from-file-with [file f]
   (let [path (.getCanonicalPath file)
