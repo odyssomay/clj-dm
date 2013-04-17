@@ -335,15 +335,17 @@
 ;; =====
 ;; Menu functions
 ;; =====
+(defn load-rulepalette-from-file [f]
+  (add-rulepalette
+    (path->rulepalette (.getCanonicalPath f))))
 
 (defn open-default-rulepalette [& _]
   (add-rulepalette (default-rulepalette)))
 
 (defn choose-and-open-rulepalette [& _]
   (ssw-chooser/choose-file :success-fn 
-    (fn [_ f] 
-      (add-rulepalette
-        (path->rulepalette (.getCanonicalPath f))))))
+    (fn [_ f]
+      (load-rulepalette-from-file f))))
 
 ;; =====
 ;; Init

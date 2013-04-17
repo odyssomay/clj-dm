@@ -337,13 +337,16 @@
                           (reset! was-dragged? true)
                           (reset! temporary-scale-x
                                   (* @initial-scale-x
-                                     (/ (- (.getX e) offs)
-                                        (- @mouse-position-x-start offs)
-                                        ))))
+                                     (/ (.getX e)
+                                        @mouse-position-x-start))))
                         :mouse-released
                         (fn [e]
                           (if @was-dragged?
-                            (reset! new-scale-x @temporary-scale-x))))
+                            (reset! new-scale-x
+                                    (* @initial-scale-x
+                                       (/ (- (.getX e) offs)
+                                          (- @mouse-position-x-start offs)
+                                          ))))))
             (add-watch temporary-scale-x
                        (gensym) (fn [_ _ _ scale-x]
                                   (draw-track/set-temporary-scale-x sc scale-x)))
@@ -460,13 +463,4 @@
                   [(ssw/action :name "Open test score"
                                :handler open-test-score)
                    (ssw/action :name "Open from disk..."
-                               :handler choose-and-open-score)])]
-               :transfer-handler
-               [:import
-                [ssw-dnd/file-list-flavor
-                 (fn [{:keys [data]}]
-                   (let [f (first data)]
-                     (if (re-matches #".*\.midi?$" (.getName f))
-                       (load-score-from-midi-file f)
-                       (load-score-from-file f))))]]
-               ))
+                               :handler choose-and-open-score)])]))
