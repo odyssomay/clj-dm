@@ -133,21 +133,26 @@
           :visible? false)]
   (defn get-loading-spinner-panel [] p)
   
-  (defn show-loading-spinner []
-    (ssw/config! p :visible? true))
+  (defn get-info-panel [] p)
   
-  (defn hide-loading-spinner []
-    (ssw/config! p :visible? false))
+  (defn show-info-panel [type text]
+    (ssw/invoke-now
+      (ssw/config! p :visible? true)
+      (ssw/config! l :visible? (case type :info true false))
+      (ssw/config! t :text text
+                   :foreground (case type :info :black :error :red))))
   
-  (defn set-loading-spinner-text [text]
-    (ssw/config! t :text text))
+  (defn hide-info-panel []
+    (ssw/invoke-now
+      (ssw/config! p :visible? false)))
   
-  (defmacro with-loading-spinner [text & body]
-    `(.start (Thread.
-               (fn []
-                 (ssw/invoke-now
-                   (set-loading-spinner-text ~text)
-                   (show-loading-spinner))
-                 ~@body
-                 (ssw/invoke-later
-                   (hide-loading-spinner)))))))
+  ; (defmacro with-loading-spinner [text & body]
+  ;   `(.start (Thread.
+  ;              (fn []
+  ;                (ssw/invoke-now
+  ;                  (set-loading-spinner-text ~text)
+  ;                  (show-loading-spinner))
+  ;                ~@body
+  ;                (ssw/invoke-later
+  ;                  (hide-loading-spinner))))))
+  )
