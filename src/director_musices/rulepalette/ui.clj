@@ -109,8 +109,8 @@
   (let [{:keys [name parameterless? enabled? v options id]} rule
         name (cstr/capitalize (cstr/replace name "-" " "))
         enabled? (ssw/checkbox :selected? enabled?)
-        move-up (ssw/label :icon "icons/up_alt.png")
-        move-down (ssw/label :icon "icons/down_alt.png")
+        move-up (ssw/label :icon "icons/up.png")
+        move-down (ssw/label :icon "icons/down.png")
         delete (ssw/label :icon "icons/delete.png")]
     (configure-label move-up #(move-rule-up! rp id))
     (configure-label move-down #(move-rule-down! rp id))
