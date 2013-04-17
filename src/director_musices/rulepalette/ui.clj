@@ -95,26 +95,16 @@
         (removeUpdate [_ _] (update-options))))
     [[value-text "gapleft 3"] [slider] [options-text]]))
 
-(defn configure-label [l on-click]
-  (let [bg (.getBackground l)]
-    (ssw/config! l :border 3)
-    (ssw/listen l :mouse-clicked
-                (fn [_] (on-click)))
-    (ssw/listen l :mouse-entered
-                (fn [_] (ssw/config! l :background "#AAA")))
-    (ssw/listen l :mouse-exited
-                (fn [_] (ssw/config! l :background bg)))))
-
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
         name (cstr/capitalize (cstr/replace name "-" " "))
         enabled? (ssw/checkbox :selected? enabled?)
-        move-up (ssw/label :icon "icons/up.png")
-        move-down (ssw/label :icon "icons/down.png")
-        delete (ssw/label :icon "icons/delete.png")]
-    (configure-label move-up #(move-rule-up! rp id))
-    (configure-label move-down #(move-rule-down! rp id))
-    (configure-label delete #(remove-rule! rp id))
+        move-up (util/button-label #(move-rule-up! rp id)
+                                   :icon "icons/up.png")
+        move-down (util/button-label #(move-rule-down! rp id)
+                                     :icon "icons/down.png")
+        delete (util/button-label #(remove-rule! rp id)
+                                  :icon "icons/delete.png")]
     (ssw/listen enabled? :selection
                 (fn [_] (update-rule!
                           rp id #(assoc % :enabled?
