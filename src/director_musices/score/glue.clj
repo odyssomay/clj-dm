@@ -17,6 +17,9 @@
 (defn save-score-to-path [path]
   (glue/eval-dm (str "(save-score-fpath \"" (inr/abcl-path path) "\")")))
 
+(defn save-pdm-to-path [path]
+  (glue/eval-dm (str "(pdm-save-rule-data-fpath \"" (inr/abcl-path path) "\")")))
+
 (defn load-active-score-from-midi-file [path]
   (glue/eval-dm (str "(load-midifile-fpath \"" (inr/abcl-path path) "\")"
                      "(init-music-score)")))

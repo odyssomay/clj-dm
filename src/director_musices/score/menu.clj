@@ -18,6 +18,9 @@
      (g/a-if-score :name "Save Performance As..."
                    :handler ui/choose-and-save-performance)
      :separator
+     (g/a-if-score :name "Save pDM As..."
+                   :handler ui/choose-and-save-pdm)
+     :separator
      (ssw/action :name "Import Score from Midifile..."
                  :handler ui/choose-and-open-midi)
      (g/a-if-score :name "Export Performance to Midifile..."

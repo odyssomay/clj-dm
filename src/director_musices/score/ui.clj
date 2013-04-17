@@ -439,6 +439,15 @@
     (let [path (.getCanonicalPath f)]
       (glue/save-score-to-path path))))
 
+(defn choose-and-save-pdm [& _]
+  (if-let [f (util/new-file-dialog)]
+    (let [path (.getCanonicalPath f)]
+      (util/thread
+        (dm-global/show-info-panel
+          :loading (str "Saving pDM " (.getName f)))
+        (glue/save-pdm-to-path path)
+        (dm-global/hide-info-panel)))))
+
 (defn choose-and-open-midi [& _]
   (ssw-chooser/choose-file
     :success-fn (fn [_ f] (load-score-from-midi-file f))))
