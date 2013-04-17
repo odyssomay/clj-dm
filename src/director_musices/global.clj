@@ -148,4 +148,10 @@
   
   (defn hide-info-panel []
     (ssw/invoke-now
-      (ssw/config! p :visible? false))))
+      (ssw/config! p :visible? false)))
+  
+  (defn show-generic-error []
+    (show-info-panel
+      :error "Operation failed. See Help->Log for info."))
+  
+  )
