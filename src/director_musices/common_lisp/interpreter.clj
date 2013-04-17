@@ -9,8 +9,7 @@
 
 (defn abcl-error [e]
   (log/error e "CL failed with:")
-  (global/show-info-panel
-    :error "Operation failed. See Help->Log for info."))
+  (global/show-generic-error))
 
 (defn get-new-interpreter []
   (when-let [i (org.armedbear.lisp.Interpreter/getInstance)]
@@ -69,8 +68,7 @@
           )
         (log/error path "does not exist!")))
     (catch Exception e
-      (log/error "failed loading" path ", error:" e)
-      (.printStackTrace e))))
+      (log/error "failed loading" path ", error:" e))))
 
 (defn load-multiple-abcl [prefix fs]
   (doseq [f fs]
@@ -93,9 +91,7 @@
         (let [path (str prefix ":" f ".lsp")]
           (current-file path)
           (load-abcl path load-opts))
-        (swap! number-done-a inc)
-        ))
-    ))
+        (swap! number-done-a inc)))))
 
 (defn str->abcl [s] (eval-abcl (str "\"" s "\"")))
 
