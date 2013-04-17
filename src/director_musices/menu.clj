@@ -144,6 +144,6 @@
     :constraints ["insets 0, fill"]
     :items
     [[(toolbar*)]
-     [(global/get-loading-spinner-panel) "dock east"]]))
+     [(global/get-info-panel) "dock east"]]))
 
 (defn toolbar-panel [] (toolbar))
