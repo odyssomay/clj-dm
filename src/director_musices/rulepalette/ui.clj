@@ -42,16 +42,16 @@
                   (if (not parameterless?)
                     (str v " " options)
                     )
-                  ") ")
-             ))))
+                  ") ")))))
 
-(defn apply-rulepalette [rulepalette syncrule rule-interaction]
+(defn apply-rulepalette [rulepalette syncrule rule-interaction & [play?]]
   (dm-global/show-info-panel :loading "Applying rulepalette")
   (util/thread
     (glue/apply-rules (rules->string (get-rules rulepalette))
                       syncrule rule-interaction)
-    (score-ui/reload-score)
-    (dm-global/hide-info-panel)))
+    (.join (score-ui/reload-score-and-player))
+    (dm-global/hide-info-panel)
+    (if play? (player/start!))))
 
 (defn- parameter-view [rp rule]
   (let [{:keys [v options id]} rule
@@ -169,11 +169,12 @@
         sync-rule (ssw/combobox :model ["melodic-sync"
                                         "no-sync"
                                         "simple-mel-sync"])
-        apply-this (fn [& _] (apply-rulepalette
-                               rulepalette
-                               (ssw/selection sync-rule)
-                               (if (.isSelected rule-interact?)
-                                 (ssw/selection rule-interact-num))))
+        apply-this (fn [play?] (apply-rulepalette
+                                 rulepalette
+                                 (ssw/selection sync-rule)
+                                 (if (.isSelected rule-interact?)
+                                   (ssw/selection rule-interact-num))
+                                 play?))
         editable? (ssw/checkbox :text "editable"
                                 :selected? false)
         add-rule (ssw/action
@@ -191,13 +192,11 @@
       :items [["Apply" "span"]
               [(score-global/a-if-score
                  :name "Apply"
-                 :handler apply-this)
+                 :handler (fn [_] (apply-this false)))
                "span, growx, gapleft 7"]
               [(score-global/a-if-score
                  :name "Apply & Play"
-                 :handler (fn [_]
-                            (apply-this)
-                            (player/start!)))
+                 :handler (fn [_] (apply-this true)))
                "span, growx, gapleft 7"]
               ["Apply options" "gaptop 7, span"]
               [rule-interact? "span, gapleft 7"]
