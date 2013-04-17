@@ -31,13 +31,16 @@
   (swap! score-panel-reloader not))
 
 (defn update-player []
-  (dm-global/with-loading-spinner
-    "Updating player"
+  (dm-global/set-loading-spinner-text "Updating player")
+  (dm-global/show-loading-spinner)
+  (util/thread
     (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
           p (player/position)]
       (glue/save-midi-to-path (.getCanonicalPath f))
       (player/open-midi-file f)
-      (player/position! p))))
+      (player/position! p))
+    (ssw/invoke-now
+      (dm-global/hide-loading-spinner))))
 
 (def ^{:private true} score-changed? (atom false))
 
@@ -393,17 +396,14 @@
 
 (defn- load-new-score-with [f & [info-text]]
   (.removeAll (global/get-score-panel))
-  (dm-global/update-progress-bar
-    :indeterminate? true
-    :large-text "Loading score"
-    :small-text info-text)
-  (dm-global/show-progress-bar)
+  (dm-global/set-loading-spinner-text "Loading score")
+  (dm-global/show-loading-spinner)
   (util/thread
     (f)
     (ssw/invoke-now
       (update-score-panel)
       (update-player)
-      (dm-global/hide-progress-bar))))
+      (dm-global/hide-loading-spinner))))
 
 (defn- load-score-from-file-with [file f]
   (let [path (.getCanonicalPath file)
