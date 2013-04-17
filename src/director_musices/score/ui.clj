@@ -181,8 +181,8 @@
                :border (ssw-border/line-border
                          :thickness 0 :right 1
                          :color (java.awt.Color. 150 150 150)))
-        expand (ssw/action :name "More")
-        retract (ssw/action :name "Less")
+        expand (ssw/label :icon "icons/more.png")
+        retract (ssw/label :icon "icons/less.png")
         expand-view (fn [& _]
                       (ssw/config! view :items [[top-view "span"]
                                                 [extra-view "span"]
@@ -190,8 +190,8 @@
         retract-view (fn [& _]
                        (ssw/config! view :items [[top-view "span"]
                                                  [expand "span, align center"]]))]
-    (ssw/config! expand :handler expand-view)
-    (ssw/config! retract :handler retract-view)
+    (util/configure-button-label expand expand-view)
+    (util/configure-button-label retract retract-view)
     (retract-view)
     view))
 
