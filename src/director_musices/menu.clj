@@ -115,7 +115,7 @@
     [(ssw/action :icon (resource "icons/play.png") :tip "play"
                  :handler (fn [_]
                             (util/thread
-                              (score-ui/reload-if-changed!)
+                              (score-ui/reload-player-if-changed!)
                               (player/start!))))
      (ssw/action :icon (resource "icons/pause.png") :tip "pause"
                  :handler (fn [_] (player/pause!)))
