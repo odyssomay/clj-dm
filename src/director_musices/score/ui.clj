@@ -191,7 +191,7 @@
     (retract-view)
     view))
 
-(defn ask-and-show-property [view tc]
+(defn ask-and-show-parameter [view tc]
   (when-let [choice (ssw/input "What parameter?")]
     (let [parameter (keyword choice)
           pc (draw-parameter/parameter-component tc parameter)
@@ -279,8 +279,8 @@
                              :handler (fn [_] (edit-note/edit-note
                                                 tc id evt reload-score)))
                  :separator
-                 (ssw/action :name "Show Property..."
-                             :handler (fn [_] (ask-and-show-property
+                 (ssw/action :name "Show Parameter..."
+                             :handler (fn [_] (ask-and-show-parameter
                                                 parameter-view tc)))
                  (ssw/action :name "Show Graph..."
                              :handler (fn [_] (ask-and-show-graph view tc)))])]
