@@ -424,28 +424,45 @@
 ;; =====
 ;; Menu functions
 ;; =====
+(def score-filter ["Score files" ["mus"]])
+(def perf-filter ["Performance files" ["perf"]])
+(def midi-filter ["midi files" ["mid" "midi"]])
+(def pdm-filter ["pdm files" ["pdm"]])
 
 (defn choose-and-open-score [& _]
-  (ssw-chooser/choose-file
-    :success-fn 
-    (fn [_ f] (load-score-from-file f))))
-
-(defn choose-and-open-performance [& _]
-  (ssw-chooser/choose-file
-    :success-fn 
-    (fn [_ f] (load-performance-from-file f))))
-
-(defn choose-and-save-performance [& _]
-  (if-let [f (util/new-file-dialog)]
-    (spit f (glue/get-active-score))))
+  (if-let [f (util/choose-file
+               :title "Open Score"
+               :type :open
+               :filters [score-filter])]
+    (load-score-from-file f)))
 
 (defn choose-and-save-score [& _]
-  (if-let [f (util/new-file-dialog)]
+  (if-let [f (util/choose-file
+               :title "Save Score"
+               :type :save
+               :filters [score-filter])]
     (let [path (.getCanonicalPath f)]
       (glue/save-score-to-path path))))
 
+(defn choose-and-open-performance [& _]
+  (if-let [f (util/choose-file
+               :title "Open Performance"
+               :type :open
+               :filters [perf-filter])]
+    (load-performance-from-file f)))
+
+(defn choose-and-save-performance [& _]
+  (if-let [f (util/choose-file
+               :title "Save Performance"
+               :type :save
+               :filters [perf-filter])]
+    (spit f (glue/get-active-score))))
+
 (defn choose-and-save-pdm [& _]
-  (if-let [f (util/new-file-dialog)]
+  (if-let [f (util/choose-file
+               :title "Save pdm"
+               :type :save
+               :filters [pdm-filter])]
     (let [path (.getCanonicalPath f)]
       (util/thread
         (dm-global/show-info-panel
@@ -454,11 +471,17 @@
         (dm-global/hide-info-panel)))))
 
 (defn choose-and-open-midi [& _]
-  (ssw-chooser/choose-file
-    :success-fn (fn [_ f] (load-score-from-midi-file f))))
+  (if-let [f (util/choose-file
+               :title "Open midi"
+               :type :open
+               :filters [midi-filter])]
+    (load-score-from-midi-file f)))
 
 (defn choose-and-save-midi [& _]
-  (if-let [f (util/new-file-dialog)]
+  (if-let [f (util/choose-file
+               :title "Save midi"
+               :type :save
+               :filters [midi-filter])]
     (glue/save-midi-to-path (.getCanonicalPath f))))
 
 (defn open-test-score [& _]

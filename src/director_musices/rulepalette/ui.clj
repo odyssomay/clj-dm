@@ -336,9 +336,11 @@
   (add-rulepalette (default-rulepalette)))
 
 (defn choose-and-open-rulepalette [& _]
-  (ssw-chooser/choose-file :success-fn 
-    (fn [_ f]
-      (load-rulepalette-from-file f))))
+  (if-let [f (util/choose-file
+               :title "Open Rulepalette"
+               :type :open
+               :filters [["Rulepalette files" ["pal"]]])]
+    (load-rulepalette-from-file f)))
 
 ;; =====
 ;; Init
