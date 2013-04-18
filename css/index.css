@@ -1,0 +1,16 @@
+body { font-family: 'Open Sans', sans-serif;
+font-weight: 400;
+padding-top: 20%;
+height: 100%;
+width: 100%;
+overflow: hidden;
+}
+
+h1 { font-size: 40px;
+font-weight: 300;}
+
+#dm-image {
+	position: absolute;
+	bottom: -50px;
+	right: 50px;
+}
