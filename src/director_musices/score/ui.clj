@@ -26,7 +26,6 @@
 ;; Updating
 ;; =====
 (def score-panel-reloader (atom nil))
-
 (def ^{:private true} score-changed? (atom false))
 
 (defn- reload-score-panel_hidden []
