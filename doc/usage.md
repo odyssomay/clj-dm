@@ -99,6 +99,8 @@ it is not possible to turn it off for all parameter types).
 
 ## Rulepalette
 
+![rulepalette example](images/default-rulepalette.png)
+
 ## Player
 
 ## <a id="performance"></a>Performance
