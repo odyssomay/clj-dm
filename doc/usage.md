@@ -73,8 +73,32 @@ in this area sets the player position to that position.
 
 **The phrase marks** is shown above each musical score.
 
-## Player
+### Note editing
+
+Note editing is done either by double clicking a note, or right clicking and
+selecting *Edit note...* in the menu.
+
+![note editing example](images/note-edit.png)
+
+### Graph and parameter views
+
+Graph and parameter views do basically the same thing - they display some
+parameter of the score. The graph view does this graphically, while the 
+parameter view simply prints the values.
+
+Both are shown by right clicking the score and pressing *Show Parameter...*
+or *Show Graph...*.
+
+Either can be removed by right clicking the view and clicking *Remove graph*
+or *Remove parameter*. Special for the graph view is 'automatic scaling'.
+This can be enabled or disabled in the right click menu. The automatic scaling
+always shows all the values. With it off, some values can be cut off (note that
+it is not possible to turn it off for all parameter types).
+
+![graph and parameter view example](images/graph-parameter-view.png)
 
 ## Rulepalette
+
+## Player
 
 ## <a id="performance"></a>Performance
