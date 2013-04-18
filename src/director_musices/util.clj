@@ -3,7 +3,8 @@
   (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [clojure.string :as cstr])
   (:import javax.swing.JFileChooser
            javax.swing.filechooser.FileNameExtensionFilter))
 
@@ -19,7 +20,25 @@
           i
           (recur (inc i) (rest c)))))))
 
+;; =====
+;; Choose file
+;; =====
+(defn add-file-ending [name ending]
+  (if (.endsWith name (str "." ending))
+    name
+    (str name "." ending)))
+
 (let [fc (JFileChooser.)]
+  (defn coerce-file [f filter ending coerce?]
+    (if (or (.accept filter f) (not coerce?))
+      f
+      (if (and f ending)
+        (let [name (.getName f)
+              new-name (cstr/replace name #"\.[^\.]+$"
+                                     (str "." ending))]
+          (file (.getParentFile f)
+                new-name)))))
+  
   (defn open-choose-file [options]
     (let [parent (:parent options)
           result
@@ -27,12 +46,29 @@
             :open (.showOpenDialog fc parent)
             :save (.showSaveDialog fc parent))]
       (when (= result JFileChooser/APPROVE_OPTION)
-        (.getSelectedFile fc))))
+        (case (:type options)
+          :open (.getSelectedFile fc)
+          :save (-> fc
+                    .getSelectedFile
+                    .getCanonicalPath
+                    (add-file-ending (:file-ending options))
+                    file)))))
   
   (defn choose-file [& {:as options}]
     (let [filters (map #(FileNameExtensionFilter.
                           (first %) (into-array (second %)))
-                       (:filters options))]
+                       (:filters options))
+          current-file (if-let [f (.getSelectedFile fc)]
+                         (.getName f)
+                         "")]
+      (case (:type options)
+        :open (.setSelectedFile fc (file ""))
+        :save
+        (.setSelectedFile
+          fc (coerce-file (.getSelectedFile fc)
+                          (first filters)
+                          (:file-ending options)
+                          true)))
       (doto fc
         .resetChoosableFileFilters
         (ssw-chooser/set-file-filters filters)
