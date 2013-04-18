@@ -3,7 +3,9 @@
   (:require [seesaw 
              [core :as ssw]
              [chooser :as ssw-chooser]]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log])
+  (:import javax.swing.JFileChooser
+           javax.swing.filechooser.FileNameExtensionFilter))
 
 (defn find-i
   "Find the index of value in coll"
@@ -17,23 +19,31 @@
           i
           (recur (inc i) (rest c)))))))
 
-(defn new-file-dialog [& [parent]]
-  (let [filename (ssw/text)
-        dir (ssw/text :text (System/getProperty "user.home"))
-        panel (ssw/border-panel
-                :north filename :center dir
-                :east (ssw/action
-                        :name "browse"
-                        :handler (fn [_]
-                                   (ssw-chooser/choose-file
-                                     parent :type "Ok" :selection-mode :dirs-only
-                                     :success-fn (fn [_ f] (.setText dir (.getCanonicalPath f)))))))
-        dialog (ssw/dialog :content panel :option-type :ok-cancel
-                           :modal? true)]
-    (if parent (.setLocationRelativeTo dialog parent))
-    (.setResizable dialog false)
-    (when (-> dialog ssw/pack! ssw/show!)
-      (file (.getText dir) (.getText filename)))))
+(let [fc (JFileChooser.)]
+  (defn open-choose-file [options]
+    (let [parent (:parent options)
+          result
+          (case (:type options)
+            :open (.showOpenDialog fc parent)
+            :save (.showSaveDialog fc parent))]
+      (when (= result JFileChooser/APPROVE_OPTION)
+        (.getSelectedFile fc))))
+  
+  (defn choose-file [& {:as options}]
+    (let [filters (map #(FileNameExtensionFilter.
+                          (first %) (into-array (second %)))
+                       (:filters options))]
+      (doto fc
+        .resetChoosableFileFilters
+        (ssw-chooser/set-file-filters filters)
+        (.setFileFilter (first filters))
+        (.setDialogType
+          (case (:type options)
+            :open JFileChooser/OPEN_DIALOG
+            :save JFileChooser/SAVE_DIALOG))
+        (.setDialogTitle
+          (str (:title options))))
+      (open-choose-file options))))
 
 (defmacro with-indeterminate-progress [message & body]
   `(let [d# (ssw/frame :content (ssw/border-panel :north (ssw/label :text ~message :border 10)
