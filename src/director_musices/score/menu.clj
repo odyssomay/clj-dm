@@ -20,7 +20,7 @@
      (g/a-if-score :name "Save Performance As..."
                    :handler ui/choose-and-save-performance)
      :separator
-     (g/a-if-score :name "Save pDM As..."
+     (g/a-if-score :name "Save pdm As..."
                    :handler ui/choose-and-save-pdm)
      :separator
      (ssw/action :name "Import Score from Midifile..."

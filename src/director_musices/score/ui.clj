@@ -478,7 +478,7 @@
     (let [path (.getCanonicalPath f)]
       (util/thread
         (dm-global/show-info-panel
-          :loading (str "Saving pDM " (.getName f)))
+          :loading (str "Saving pdm " (.getName f)))
         (glue/save-pdm-to-path path)
         (dm-global/hide-info-panel)))))
 
