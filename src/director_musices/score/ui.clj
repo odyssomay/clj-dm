@@ -126,10 +126,10 @@
                         :major-tick-spacing (:spacing property-map)
                         :minor-tick-spacing (:minor-spacing property-map)
                         :snap-to-ticks? (:snap? property-map))
-            (ssw/spinner :model (ssw/spinner-model (long value)
-                                                   :from (long (:min property-map))
-                                                   :to (long (:max property-map))
-                                                   )))
+            (ssw/spinner :model (ssw/spinner-model
+                                  (long value)
+                                  :from (long (:min property-map))
+                                  :to (long (:max property-map)))))
         get-value (case type
                     :string ssw/text
                     :bool #(.isSelected %)
@@ -153,6 +153,8 @@
         (ssw/listen c
                     :mouse-entered (fn [e] (update-c true))
                     :mouse-exited (fn [e] (update-c false)))))
+    (when (= type :midi-program-list)
+      (.setSelectedIndex c (dec value)))
     (ssw/listen c listen-property
                 (fn [& _] (update-property (get-value c))
                   (reload-later!)))
