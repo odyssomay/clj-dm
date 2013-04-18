@@ -18,6 +18,13 @@
 (defn reload-score []
   (score-ui/reload-score))
 
+(defmacro run-action [text & body]
+  `(util/thread
+     (global/show-info-panel :loading ~text)
+     ~@body
+     (reload-score)
+     (global/hide-info-panel)))
+
 (def edit-menu
   (ssw/menu
     :text "Edit"
@@ -26,63 +33,63 @@
                  :handler (fn [& _] (when-let [bpm-raw (ssw/input "Set new tempo"  :title "Set tempo" 
                                                                   :value (.javaInstance (glue/eval-dm "(get-first 'mm)")))]
                                       (let [bpm (read-string bpm-raw)]
-                                        (glue/eval-dm (str "(set-tempo " bpm ")"))
-                                        (reload-score)))))
+                                        (run-action "Setting tempo"
+                                          (glue/eval-dm (str "(set-tempo " bpm ")")))))))
      (ssw/action :name "Octave"
                  :handler (fn [& _] (when-let [raw (ssw/input "Transpose octave" :title "Set octave" :value 1)]
                                       (let [o (read-string raw)]
-                                        (glue/eval-dm (str "(trans-octave " o ")"))
-                                        (reload-score)))))
+                                        (run-action "Transposing octave"
+                                          (glue/eval-dm (str "(trans-octave " o ")")))))))
      (ssw/action :name "Meter"
                  :handler (fn [& _] 
                             (let [m1 (.javaInstance (glue/eval-dm "(first (get-first 'meter))"))
                                   m2 (.javaInstance (glue/eval-dm "(second (get-first 'meter))"))]
                               (when-let [raw (ssw/input "Set meter" :title "Set meter" 
                                                         :value (str m1 "/" m2))]
-                                (let [[nm1 nm2] (map read-string (.split raw "/"))]
-                                  (glue/eval-dm (str "(set-meter " nm1 " " nm2 ")"))
-                                  (reload-score))))))
+                                (run-action "Setting meter"
+                                  (let [[nm1 nm2] (map read-string (.split raw "/"))]
+                                    (glue/eval-dm (str "(set-meter " nm1 " " nm2 ")"))))))))
      (ssw/action :name "Key"
                  :handler (fn [& _] 
                             (when-let [k (ssw/input "Set key" :title "Set key"
                                                     :value (.javaInstance (glue/eval-dm "(get-first 'key)")))]
                               (when-let [m (ssw/input "Set modus" :title "Set modus"
                                                       :value (.javaInstance (glue/eval-dm "(get-first 'modus)")))]
-                                (glue/eval-dm (str "(set-first 'key \"" k "\")"))
-                                (glue/eval-dm (str "(set-first 'modus \"" m "\")"))
-                                (reload-score)))))
+                                (run-action "Setting key"
+                                  (glue/eval-dm (str "(set-first 'key \"" k "\")"))
+                                  (glue/eval-dm (str "(set-first 'modus \"" m "\")")))))))
      :separator
      (ssw/action :name "Remove Parameter"
                  :handler (fn [& _] (when-let [raw (ssw/input "Remove parameter" :title "Remove parameter")]
                                       (let [p (read-string raw)]
-                                        (glue/eval-dm (str "(rem-all '" p ")"))
-                                        (reload-score)))))
+                                        (run-action "Removing parameter"
+                                          (glue/eval-dm (str "(rem-all '" p ")")))))))
      (ssw/action :name "Reset Soundlevel"
-                 :handler (fn [& _] (glue/eval-dm "(reset-sound-level)")
-                            (reload-score)))
+                 :handler (fn [& _]
+                            (run-action "Resetting sound level"
+                              (glue/eval-dm "(reset-sound-level)"))))
      (ssw/action :name "Rebar"
-                 :handler (fn [& _] (glue/eval-dm "(rebar)")
-                            (reload-score)))
+                 :handler (fn [& _] (run-action "Rebaring"
+                                      (glue/eval-dm "(rebar)"))))
      (ssw/action :name "Convert chord list to chord name"
-                 :handler (fn [& _] (glue/eval-dm "(convert-chord-list-to-chord-name)")
-                            (reload-score)))
+                 :handler (fn [& _] (run-action "Converting chord list to chord name"
+                                      (glue/eval-dm "(convert-chord-list-to-chord-name)"))))
      (ssw/action :name "Distribute phrase analysis"
-                 :handler (fn [& _] (glue/eval-dm "(distribute-phrase-analysis)")
-                            (reload-score)))
+                 :handler (fn [& _] (run-action "Distributing phrase analysis"
+                                      (glue/eval-dm "(distribute-phrase-analysis)"))))
      :separator
      (ssw/action :name "Print all score vars"
-                 :handler (fn [& _] (glue/eval-dm "(print-music)")
-                            (reload-score)))
+                 :handler (fn [& _] (glue/eval-dm "(print-music)")))
      (ssw/action :name "Print all score vars round"
-                 :handler (fn [& _] (glue/eval-dm "(print-music-round)")
-                            (reload-score)))
+                 :handler (fn [& _] (glue/eval-dm "(print-music-round)")))
      :separator
      (ssw/action :name "Transpose from major to minor"
-                 :handler (fn [_] (glue/eval-dm "(transpose-from-major-to-minor)")
-                              (reload-score)))
+                 :handler (fn [_] (run-action "Transposing from major to minor"
+                                    (glue/eval-dm "(transpose-from-major-to-minor)"))))
      (ssw/action :name "Transpose from minor to major"
-                 :handler (fn [_] (glue/eval-dm "(transpose-from-minor-to-major)")
-                            (reload-score)))]))
+                 :handler (fn [_] (run-action "Transposing from minor to major"
+                                    (glue/eval-dm "(transpose-from-minor-to-major)"))))
+     ]))
 
 (def help-menu
   (ssw/menu
