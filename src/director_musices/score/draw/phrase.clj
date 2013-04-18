@@ -59,50 +59,23 @@
           notes))
 
 (defn partition-notes [notes]
-  (let [{phrase-starts :phrase-start
-         phrase-ends :phrase-end}
-        (group-by :phrase-mark notes)
-        cps (count phrase-starts)
-        cpe (count phrase-ends)
-        ;; make sure the collections
-        ;; are of equal size
-        ; phrase-starts (concat phrase-starts
-        ;                       (repeat (max 0 (- cpe cps))
-        ;                               nil))
-        ; phrase-ends (concat phrase-ends
-        ;                     (repeat (max 0 (- cps cpe))
-        ;                             nil))
-        ]
-    (loop [phrase-starts phrase-starts
-           phrase-ends phrase-ends
-           out []]
-      (cond
-        (not (and phrase-ends phrase-starts))
-         out
-        (not phrase-starts)
-         (recur phrase-starts
-                (next phrase-ends)
-                (conj out {:end (first phrase-ends)}))
-        (not phrase-ends)
-         (recur (next phrase-starts)
-                phrase-ends
-                (conj out {:start (first phrase-starts)}))
-        :else
-        (let [phrase-start (first phrase-starts)
-              phrase-end (first phrase-ends)]
-          (if (< (:absolute-x-offset phrase-start)
-                 (:absolute-x-offset phrase-end))
-            (recur (next phrase-starts)
-                   (next phrase-ends)
-                   (conj out {:start phrase-start
-                              :end phrase-end}))
-            (recur phrase-starts
-                   (next phrase-ends)
-                   (conj out {:end phrase-end}))))))))
-    ;; and group them together!
-    
-    ; (map (fn [start end] {:start start :end end})
-    ;      phrase-starts phrase-ends)))
+  (let [{:keys [phrase-marks
+                phrase-starts]}
+        (reduce (fn [m note]
+                  (case (:phrase-mark note)
+                    :phrase-start (update-in m [:phrase-starts] conj note)
+                    :phrase-end (if (empty? (:phrase-starts m))
+                                  (update-in m [:phrase-marks] conj {:end note})
+                                  (-> m
+                                      (update-in [:phrase-marks] conj
+                                                 {:start (peek (:phrase-starts m))
+                                                  :end note})
+                                      (update-in [:phrase-starts] pop)))))
+                {:phrase-marks []
+                 :phrase-starts (clojure.lang.PersistentQueue/EMPTY)}
+                notes)]
+    (concat phrase-marks
+            (map #(hash-map :start %) phrase-starts))))
 
 (defn sort-phrases [notes]
   (let [filtered (filter #(or (:phrase-start %)
