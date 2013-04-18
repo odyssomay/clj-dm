@@ -6,8 +6,8 @@ width: 100%;
 overflow: hidden;
 }
 
-h1 { font-size: 40px;
-font-weight: 300;}
+h1, h2 { font-weight: 300; }
+h1 { font-size: 40px; }
 
 #dm-image {
 	position: absolute;
