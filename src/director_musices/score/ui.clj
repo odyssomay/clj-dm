@@ -439,6 +439,7 @@
   (if-let [f (util/choose-file
                :title "Save Score"
                :type :save
+               :file-ending "mus"
                :filters [score-filter])]
     (let [path (.getCanonicalPath f)]
       (glue/save-score-to-path path))))
@@ -454,6 +455,7 @@
   (if-let [f (util/choose-file
                :title "Save Performance"
                :type :save
+               :file-ending "perf"
                :filters [perf-filter])]
     (spit f (glue/get-active-score))))
 
@@ -461,6 +463,7 @@
   (if-let [f (util/choose-file
                :title "Save pdm"
                :type :save
+               :file-ending "pdm"
                :filters [pdm-filter])]
     (let [path (.getCanonicalPath f)]
       (util/thread
@@ -480,6 +483,7 @@
   (if-let [f (util/choose-file
                :title "Save midi"
                :type :save
+               :file-ending "midi"
                :filters [midi-filter])]
     (glue/save-midi-to-path (.getCanonicalPath f))))
 
