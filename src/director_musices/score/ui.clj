@@ -285,6 +285,9 @@
                              :handler (fn [_] (ask-and-show-graph view tc)))])]
     (.show popup (.getSource evt) (.getX evt) (.getY evt))))
 
+(defn redraw-component! [c]
+  (doto c .revalidate .repaint))
+
 (defn score-view [id]
   (let [opts-view (track-properties-view id)
         tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
@@ -312,6 +315,10 @@
     (global/on-scale-change #(draw-track/set-scale tc %))
     {:track-component tc
      :score-component tc
+     :repaint! (fn []
+                 (redraw-component! (draw-track/get-view tc))
+                 (redraw-component! parameter-view))
+     :parameter-view parameter-view
      :view view}))
 
 (defn update-score-panel []
@@ -365,10 +372,12 @@
           player/position!)]
     (draw-track/on-state-change
       (:track-component (first score-views))
-      #(do 
-         (doto p .revalidate .repaint)
+      #(do
+         (doseq [{:keys [repaint!]} score-views]
+           (repaint!))
+         (redraw-component! p)
          (doseq [c (.getComponents p)]
-           (doto c .revalidate .repaint))))
+           (redraw-component! c))))
     (ssw/config!
       p :items
       (concat [[(draw-position/get-view position-component)
