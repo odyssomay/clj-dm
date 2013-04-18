@@ -56,6 +56,23 @@ If you press *Open test score*, you get:
 
 ![test score example](images/test-score.png)
 
+**Track options** can be found to the left.
+Clicking the down arrow expands the options.
+Important to know about these:
+
+* If *Active* is deselected, that track will be completely disabled.
+* Pan goes from 0 (left) to 127 (right), where 64 is the center.
+
+The other settings should be mostly self-explanatory.
+
+**The position indicator** is shown in red. This shows where
+the player is currently positioned within the score.
+
+**The position setter** is shown in gray at the top. Clicking anywhere
+in this area sets the player position to that position.
+
+**The phrase marks** is shown above each musical score.
+
 ## Player
 
 ## Rulepalette
