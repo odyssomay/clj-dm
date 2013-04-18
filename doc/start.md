@@ -7,4 +7,4 @@ This is accomplished by applying a set of relatively simply
 set of rules. These rules can then be tweaked to make the
 result sound better.
 
-See [usage](usage.md).
+>> Continue reading about [usage](usage.md).
