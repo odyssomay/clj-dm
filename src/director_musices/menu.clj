@@ -107,8 +107,9 @@
     :items
     [(ssw/action :icon (resource "icons/play.png") :tip "play"
                  :handler (fn [_]
-                            (score-ui/reload-if-changed!)
-                            (player/start!)))
+                            (util/thread
+                              (score-ui/reload-if-changed!)
+                              (player/start!))))
      (ssw/action :icon (resource "icons/pause.png") :tip "pause"
                  :handler (fn [_] (player/pause!)))
      :separator

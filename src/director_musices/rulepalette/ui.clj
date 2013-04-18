@@ -49,7 +49,7 @@
   (util/thread
     (glue/apply-rules (rules->string (get-rules rulepalette))
                       syncrule rule-interaction)
-    (.join (score-ui/reload-score-and-player))
+    (score-ui/reload-score-and-player)
     (dm-global/hide-info-panel)
     (if play? (player/start!))))
 

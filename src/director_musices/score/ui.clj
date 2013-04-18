@@ -32,14 +32,13 @@
 
 (defn update-player []
   (dm-global/show-info-panel :loading "Updating player")
-  (util/thread
-    (player/pause!)
-    (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
-          p (player/position)]
-      (glue/save-midi-to-path (.getCanonicalPath f))
-      (player/open-midi-file f)
-      (player/position! p))
-    (dm-global/hide-info-panel)))
+  (player/pause!)
+  (let [f (java.io.File. (util/tmp-dir) "buffer.midi")
+        p (player/position)]
+    (glue/save-midi-to-path (.getCanonicalPath f))
+    (player/open-midi-file f)
+    (player/position! p))
+  (dm-global/hide-info-panel))
 
 (def ^{:private true} score-changed? (atom false))
 
