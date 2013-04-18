@@ -8,12 +8,11 @@
         notes (draw-track/get-notes track-component)
         scale (draw-track/get-scale track-component)
         scale-x (draw-track/get-scale-x track-component)]
-    (.translate g (int (* draw-track/first-note-offset scale)) 0)
-    (doseq [i (range (count notes))]
-      (let [note (nth notes i)
-            value (get note parameter nil)
+    (.translate g (int draw-track/first-note-offset) 0)
+    (doseq [note notes]
+      (let [value (get note parameter nil)
             value (if (number? value) (int value) value)]
-        (.translate g (double (* (:x-offset note) scale scale-x))
+        (.translate g (double (* (:x-offset note) scale-x))
                     (double 0))
         (when value
           (.drawString g (pr-str value) 0 0))))))
@@ -23,6 +22,7 @@
         scale (draw-track/get-scale track-component)
         s (.getSize c)
         fm (.getFontMetrics g)]
+    (.scale g scale scale)
     (.setColor g java.awt.Color/red)
     (.translate g 0 (int (+ (/ (.height s) 2)
                             (.getDescent fm))))
