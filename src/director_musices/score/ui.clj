@@ -204,6 +204,10 @@
                   :items
                   [(ssw/action :name "Remove parameter"
                                :handler (fn [_] (remove-parameter)))])]
+      (ssw/listen
+        c :mouse-clicked (fn [e]
+                           (if (SwingUtilities/isRightMouseButton e)
+                             (.show popup (.getSource e) (.getX e) (.getY e)))))
       (.add view c "span")
       (.revalidate view))))
 
