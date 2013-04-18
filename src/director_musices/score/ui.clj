@@ -123,6 +123,8 @@
             (ssw/slider :value value
                         :min   (:min property-map)
                         :max   (:max property-map)
+                        :paint-labels? true
+                        :paint-ticks? true
                         :major-tick-spacing (:spacing property-map)
                         :minor-tick-spacing (:minor-spacing property-map)
                         :snap-to-ticks? (:snap? property-map))
@@ -147,12 +149,6 @@
             :synth (ssw/config! (ssw/select (.getParent c) [:#program-list])
                                 :model (glue/get-track-synth-program-list id))
             nil))]
-    (when (= type :slider)
-      (let [update-c (fn [show?] (ssw/config! c :paint-labels? show? :paint-ticks? show?))]
-        (update-c false)
-        (ssw/listen c
-                    :mouse-entered (fn [e] (update-c true))
-                    :mouse-exited (fn [e] (update-c false)))))
     (when (= type :midi-program-list)
       (.setSelectedIndex c (dec value)))
     (ssw/listen c listen-property
