@@ -5,6 +5,13 @@
 
 (def phrase-height 5)
 
+(def colors
+  (cycle (map #(java.awt.Color/decode %)
+              ["#AC2400"
+               "#310075"
+               "#AC9B00"
+               "#007B35"])))
+
 (defn draw-phrases [g state]
   (let [g (.create g)
         {:keys [track-component level-map levels]} state
@@ -16,7 +23,7 @@
       (doseq [{:keys [start end]} (get level-map level)]
         (let [start-offset (* (or (:absolute-x-offset start) 0) scale-x)
               end-offset (* (or (:absolute-x-offset end) 0) scale-x)]
-          (.setColor g java.awt.Color/black)
+          (.setColor g (nth colors level))
           (if (and start end)
             (.drawLine g (+ phrase-height start-offset) 0 end-offset 0)
             (.setColor g java.awt.Color/red))
@@ -59,15 +66,43 @@
         cpe (count phrase-ends)
         ;; make sure the collections
         ;; are of equal size
-        phrase-starts (concat phrase-starts
-                              (repeat (max 0 (- cpe cps))
-                                      nil))
-        phrase-ends (concat phrase-ends
-                            (repeat (max 0 (- cps cpe))
-                                    nil))]
+        ; phrase-starts (concat phrase-starts
+        ;                       (repeat (max 0 (- cpe cps))
+        ;                               nil))
+        ; phrase-ends (concat phrase-ends
+        ;                     (repeat (max 0 (- cps cpe))
+        ;                             nil))
+        ]
+    (loop [phrase-starts phrase-starts
+           phrase-ends phrase-ends
+           out []]
+      (cond
+        (not (and phrase-ends phrase-starts))
+         out
+        (not phrase-starts)
+         (recur phrase-starts
+                (next phrase-ends)
+                (conj out {:end (first phrase-ends)}))
+        (not phrase-ends)
+         (recur (next phrase-starts)
+                phrase-ends
+                (conj out {:start (first phrase-starts)}))
+        :else
+        (let [phrase-start (first phrase-starts)
+              phrase-end (first phrase-ends)]
+          (if (< (:absolute-x-offset phrase-start)
+                 (:absolute-x-offset phrase-end))
+            (recur (next phrase-starts)
+                   (next phrase-ends)
+                   (conj out {:start phrase-start
+                              :end phrase-end}))
+            (recur phrase-starts
+                   (next phrase-ends)
+                   (conj out {:end phrase-end}))))))))
     ;; and group them together!
-    (map (fn [start end] {:start start :end end})
-         phrase-starts phrase-ends)))
+    
+    ; (map (fn [start end] {:start start :end end})
+    ;      phrase-starts phrase-ends)))
 
 (defn sort-phrases [notes]
   (let [filtered (filter #(or (:phrase-start %)
