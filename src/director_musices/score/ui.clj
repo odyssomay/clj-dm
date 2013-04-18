@@ -423,10 +423,10 @@
 ;; =====
 ;; Menu functions
 ;; =====
-(def score-filter ["Score files" ["mus"]])
-(def perf-filter ["Performance files" ["perf"]])
-(def midi-filter ["midi files" ["mid" "midi"]])
-(def pdm-filter ["pdm files" ["pdm"]])
+(def score-filter ["Score files (.mus)" ["mus"]])
+(def perf-filter ["Performance files (.perf)" ["perf"]])
+(def midi-filter ["midi files (.mid .midi)" ["mid" "midi"]])
+(def pdm-filter ["pdm files (.pdm)" ["pdm"]])
 
 (defn choose-and-open-score [& _]
   (if-let [f (util/choose-file

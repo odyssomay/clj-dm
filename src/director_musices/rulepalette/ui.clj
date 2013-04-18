@@ -339,7 +339,7 @@
   (if-let [f (util/choose-file
                :title "Open Rulepalette"
                :type :open
-               :filters [["Rulepalette files" ["pal"]]])]
+               :filters [["Rulepalette files (.pal)" ["pal"]]])]
     (load-rulepalette-from-file f)))
 
 ;; =====
