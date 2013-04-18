@@ -122,7 +122,7 @@
                :border (ssw-border/line-border
                          :color border-color
                          :thickness 1)
-               :background (util/default-background))
+               :background :white)
         dialog (ssw/frame
                  :content
                  (ssw-mig/mig-panel
@@ -134,6 +134,7 @@
                  :on-close :dispose
                  :resizable? false
                  :undecorated? true)]
+    (.setOpaque view true)
     (add-watch view-items nil
                (fn [_ _ _ items]
                  (ssw/config! view :items items)
