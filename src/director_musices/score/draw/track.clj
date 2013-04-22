@@ -211,6 +211,7 @@
         temporary-scale-x (atom nil)
         temporary-scale (atom nil)
         state-listeners (atom [])
+        track-listeners (atom [])
         image-atom (atom (create-image @state))
         update-image (fn [] (reset! image-atom (create-image @state)))
         get-track #(:track @state)
@@ -232,10 +233,17 @@
         fire-state-listeners
         (fn []
           (doseq [f @state-listeners]
+            (f)))
+        fire-track-listeners
+        (fn []
+          (doseq [f @track-listeners]
             (f)))]
     (add-watch state (gensym)
-               (fn [_ _ _ state]
+               (fn [_ _ old-state state]
                  (update-image)
+                 (if (not= (:track old-state)
+                           (:track state))
+                   (fire-track-listeners))
                  (fire-state-listeners)))
     (add-watch temporary-scale nil
                (fn [& _]
@@ -246,6 +254,7 @@
     {:view c
      :state state
      :state-listeners state-listeners
+     :track-listeners track-listeners
      :temporary-scale temporary-scale
      :temporary-scale-x temporary-scale-x}))
 
@@ -259,11 +268,7 @@
   (swap! (:state-listeners component-m) conj f))
 
 (defn on-track-change [component-m f]
-  (add-watch (:state component-m) (gensym :track-change-listener)
-             (fn [_ _ prev-state new-state]
-               (if (not= (:track prev-state)
-                         (:track new-state))
-                 (f)))))
+  (swap! (:track-listeners component-m) conj f))
 
 (defn set-temporary-scale-x [component-m scale-x]
   (reset! (:temporary-scale-x component-m) (max 0.01 scale-x)))
