@@ -240,6 +240,7 @@
             (f)))]
     (add-watch state (gensym)
                (fn [_ _ old-state state]
+                 ;; Should run in awt thread?
                  (update-image)
                  (if (not= (:track old-state)
                            (:track state))
