@@ -14,29 +14,35 @@
 
 (defn draw-phrases [g state]
   (let [g (.create g)
-        {:keys [track-component level-map levels]} state
+        {:keys [track-component level-map
+                levels max-heights]} state
         scale-x (draw-track/get-scale-x track-component)
         minlevel (reduce min levels)
         maxlevel (reduce max levels)]
     (.translate g draw-track/first-note-offset 3)
     (doseq [level levels]
-      (doseq [{:keys [start end]} (get level-map level)]
-        (let [start-offset (* (or (:absolute-x-offset start) 0) scale-x)
-              end-offset (* (or (:absolute-x-offset end) 0) scale-x)]
-          (.setColor g (nth colors level))
-          (if (and start end)
-            (.drawLine g (+ phrase-height start-offset) 0 end-offset 0)
-            (.setColor g java.awt.Color/red))
-          (if start
-            (.drawLine g
-                       start-offset phrase-height
-                       (+ start-offset phrase-height) 0))
-          (if end
-            (.drawLine g
-                       end-offset 0
-                       (+ end-offset phrase-height) phrase-height))
-          ))
-      (.translate g 0 phrase-height))))
+      (let [current-level (get level-map level)]
+        (doseq [i (range (count current-level))]
+          (let [{:keys [start end height]} (nth current-level i nil)
+                start-offset (* (or (:absolute-x-offset start) 0) scale-x)
+                end-offset (* (or (:absolute-x-offset end) 0) scale-x)
+                g (.create g)]
+            (.translate g 0 (* 2 height))
+            (.setColor g (let [c (nth colors level height)]
+                           (if (zero? (mod height 2))
+                             c (.darker c))))
+            (if (and start end)
+              (.drawLine g (+ phrase-height start-offset) 0 end-offset 0)
+              (.setColor g java.awt.Color/red))
+            (if start (.drawLine g start-offset phrase-height
+                                 (+ start-offset phrase-height)
+                                 0))
+            (if end (.drawLine g end-offset 0
+                               (+ end-offset phrase-height)
+                               phrase-height)))))
+      (.translate g 0
+                  (+ phrase-height
+                     (* 2 (get max-heights level)))))))
 
 (defn paint [c g state]
   (let [{:keys [track-component parameter]} state
@@ -77,6 +83,45 @@
     (concat phrase-marks
             (map #(hash-map :start %) phrase-starts))))
 
+(defn phrases-overlap? [phrase1 phrase2]
+  (let [{start1 :start end1 :end} phrase1
+        {start2 :start end2 :end} phrase2]
+    (if (and start1 end1 start2 end2)
+      (let [xstart1 (:absolute-x-offset start1)
+            xend1   (:absolute-x-offset end1)
+            xstart2 (:absolute-x-offset start2)
+            xend2   (:absolute-x-offset end2)]
+        (or (and (>= xstart2 xstart1)
+                 (<= xstart2 xend1))
+            (and (>= xend2 xstart1)
+                 (<= xend2 xend1)))))))
+
+(defn phrase-fits? [phrase phrases]
+  (let [phrases (filter #(= (:height %)
+                            (:height phrase))
+                        phrases)]
+    (every? #(not (phrases-overlap? % phrase))
+            phrases)))
+
+(defn find-phrase-height [phrase phrases]
+  (or (first (filter #(phrase-fits? (assoc phrase :height %)
+                                    phrases)
+                     (range 10)))
+      0))
+
+(defn add-phrase-heights [phrases]
+  (reduce (fn [phrases phrase]
+            (conj phrases
+                  (assoc phrase :height
+                    (find-phrase-height phrase phrases))))
+          [] phrases))
+
+(defn calculate-max-heights [level-map]
+  (reduce (fn [max-heights [k v]]
+            (assoc max-heights k
+              (reduce max (map :height v))))
+          {} level-map))
+
 (defn sort-phrases [notes]
   (let [filtered (filter #(or (:phrase-start %)
                               (:phrase-end %)) notes)
@@ -87,20 +132,36 @@
                               (create-level-map :phrase-end end-notes))
         sorted-level-map
         (reduce (fn [level-map [k v]]
-                  (assoc level-map k (partition-notes (sort-by :absolute-x-offset v))))
+                  (assoc level-map k
+                    (->> v
+                         (sort-by :absolute-x-offset)
+                         partition-notes
+                         add-phrase-heights)))
                 {}
                 level-map)]
     {:level-map sorted-level-map
-     :levels (sort (keys level-map))}))
+     :levels (sort (keys level-map))
+     :max-heights (calculate-max-heights sorted-level-map)}))
 
 (defn calculate-phrases [state]
   (let [{:keys [track-component]} state
         notes (draw-track/get-notes track-component)]
     (merge state (sort-phrases notes))))
 
+(defn calculate-total-height [state]
+  (assoc state :total-height
+    (reduce (fn [total-height max-height]
+              (+ total-height phrase-height (* max-height 2)))
+            0 (vals (:max-heights state)))))
+
+(defn calculate-state [state]
+  (-> state
+      calculate-phrases
+      calculate-total-height))
+
 (defn phrase-component [track-component]
   (let [state (atom (-> {:track-component track-component}
-                        calculate-phrases))
+                        calculate-state))
         c (proxy [javax.swing.JComponent] []
             (paintComponent [g]
               (let [g (.create g)
@@ -112,11 +173,10 @@
                 (.width (.getPreferredSize (draw-track/get-view
                                              track-component)))
                 (+ (* (draw-track/get-scale track-component)
-                      phrase-height
-                      (count (:levels @state)))
+                      (:total-height @state))
                    6))))]
     (draw-track/on-state-change
-      track-component (fn [] (swap! state calculate-phrases)))
+      track-component (fn [] (swap! state calculate-state)))
     {:view c
      :state state}))
 
