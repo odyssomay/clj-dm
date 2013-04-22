@@ -175,7 +175,7 @@
                 (+ (* (draw-track/get-scale track-component)
                       (:total-height @state))
                    6))))]
-    (draw-track/on-state-change
+    (draw-track/on-track-change
       track-component (fn [] (swap! state calculate-state)))
     {:view c
      :state state}))
