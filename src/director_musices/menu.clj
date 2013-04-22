@@ -64,6 +64,17 @@
                                       (let [p (read-string raw)]
                                         (run-action "Removing parameter"
                                           (glue/eval-dm (str "(rem-all '" p ")")))))))
+     (ssw/action :name "Remove all phrase marks"
+                 :handler (fn [& _]
+                            (let [d (doto (ssw/dialog :content "Are you sure?"
+                                                      :title "Remove all phrase marks confirmation"
+                                                      :option-type :ok-cancel)
+                                      (.setLocationRelativeTo (global/get-frame))
+                                      ssw/pack!)]
+                              (when-let [_ (ssw/show! d)]
+                                (run-action "Removing all phrase marks"
+                                            (glue/eval-dm (str "(rem-all 'phrase-start) (rem-all 'phrase-end)")))))))
+     :separator
      (ssw/action :name "Reset Soundlevel"
                  :handler (fn [& _]
                             (run-action "Resetting sound level"
