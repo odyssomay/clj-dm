@@ -2,7 +2,8 @@
   (:require (director-musices.score
               [edit-note :as edit-note]
               [global :as global]
-              [glue :as glue])
+              [glue :as glue]
+              [mixer :as mixer])
             (director-musices.score.draw
               [graph :as draw-graph]
               [parameter :as draw-parameter]
@@ -397,6 +398,7 @@
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [s-p])
+    (mixer/mixer reload-later!)
     p))
 
 ;; =====
