@@ -241,8 +241,6 @@
     (add-watch state (gensym)
                (fn [_ _ old-state state]
                  (ssw/invoke-now
-                   (println (.getName (Thread/currentThread)))
-                   ;; Should run in awt thread?
                    (update-image)
                    (if (not= (:track old-state)
                              (:track state))
