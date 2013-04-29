@@ -240,18 +240,20 @@
             (f)))]
     (add-watch state (gensym)
                (fn [_ _ old-state state]
-                 ;; Should run in awt thread?
-                 (update-image)
-                 (if (not= (:track old-state)
-                           (:track state))
-                   (fire-track-listeners))
-                 (fire-state-listeners)))
+                 (ssw/invoke-now
+                   (println (.getName (Thread/currentThread)))
+                   ;; Should run in awt thread?
+                   (update-image)
+                   (if (not= (:track old-state)
+                             (:track state))
+                     (fire-track-listeners))
+                   (fire-state-listeners))))
     (add-watch temporary-scale nil
-               (fn [& _]
-                 (fire-state-listeners)))
+               (fn [& _] (ssw/invoke-now
+                           (fire-state-listeners))))
     (add-watch temporary-scale-x nil
-               (fn [& _]
-                 (fire-state-listeners)))
+               (fn [& _] (ssw/invoke-now
+                           (fire-state-listeners))))
     {:view c
      :state state
      :state-listeners state-listeners
