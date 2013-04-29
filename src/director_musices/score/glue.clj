@@ -1,6 +1,8 @@
 (ns director-musices.score.glue
-  (:require [director-musices.common-lisp.interpreter :as inr]
-            [director-musices.common-lisp.glue :as glue]))
+  (:require [director-musices.util :as util]
+            (director-musices.common-lisp
+              [interpreter :as inr]
+              [glue :as glue])))
 
 ; The CL function doesn't work
 ; (defn load-active-score-from-string [string]
@@ -125,9 +127,21 @@
                glue/eval-dm
                .copyToArray)))
 
+(defn get-current-synth [id]
+  (or
+    (util/find-i
+      (.javaInstance
+        (glue/eval-dm
+          (str "(synth-symbol-to-name '"
+               (.getName
+                 (.typeOf (glue/eval-dm (property-acc id "synth"))))
+               ")")))
+      (get-defined-synths))
+    (first (get-defined-synths))))
+
 (defn get-track-property [id property]
   (let [value (case property
-                "synth" (first (get-defined-synths))
+                "synth" (get-current-synth id)
                 "active-p" (value->clj (glue/eval-dm (property-acc id property)))
                 (-> (property-acc id property)
                     glue/eval-dm
