@@ -271,7 +271,7 @@
                  (phrase-action :end '(5 6))
                  (phrase-action :end '(6))
                  :separator
-                 (ssw/action :name "Remove all phrase marks"
+                 (ssw/action :name "Remove all phrase marks on this note"
                              :handler (fn [_] (remove-phrase-marks
                                                 tc id note-id)))
                  :separator
