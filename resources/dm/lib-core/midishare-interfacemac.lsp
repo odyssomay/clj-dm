@@ -2452,9 +2452,9 @@
 
 ;;---------------------------------------------------------------------------------
 ;; 	 			**Evaluate this**
-;;---------------------------------------------------------------------------------;; ******MOVED TO MAKE-DM2 /AF*********
+;;---------------------------------------------------------------------------------;; ******MOVED TO MAKE-DM2 /AF*********
 ;(eval-when (:load-toplevel :execute)
 ;  (add-startup-action #'install-midishare-interface)
 ;  (add-quit-action #'remove-midishare-interface)
 ;  (install-midishare-interface))
-  
+  

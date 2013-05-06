@@ -793,6 +793,47 @@
                         (concatenate 'string "PE" string) ))))
       )))
 
+
+;; with accent analysis as control change messages (*10)
+(defun send-after-noton ()
+  (declare (special l startt tempo chan synt))
+  (if (and (get-dm-var 'to-midi-file?)
+           (get-dm-var 'midifile-out-save-chord-phrase?) )
+    (let ((q   (this 'q))
+          (phrase-start   (this 'phrase-start))
+          (phrase-end   (this 'phrase-end))
+          (accent-c   (this 'accent-c))
+          (accent-m   (this 'accent-m))
+          (accent-h   (this 'accent-h))
+          )
+      ;CHORD
+      (if q (newr l (list (+ (round (/ startt tempo)) 0.2) ;after noton
+                          synt chan 'meta-event-text 
+                          (if (stringp q) q (chord-note-list-to-chordname q)))))
+      ;PHRASE-START
+      (if phrase-start 
+        (let ((string ""))
+          (dolist (nr phrase-start)
+            (setq string (concatenate 'string string (prin1-to-string nr))))
+          (newr l (list (+ (round (/ startt tempo)) 0.2)
+                        synt chan 'meta-event-text
+                        (concatenate 'string "PS" string) ))))
+      ;PHRASE-END
+      (if phrase-end 
+        (let ((string ""))
+          (dolist (nr phrase-end)
+            (setq string (concatenate 'string string (prin1-to-string nr))))
+          (newr l (list (+ (round (/ startt tempo)) 0.2)
+                        synt chan 'meta-event-text
+                        (concatenate 'string "PE" string) ))))
+      (if accent-c
+           (newr l (list (+ (round (/ startt tempo)) 0.2) synt chan 'set-accent-c (round (* 10 accent-c)))) )
+      (if accent-m
+          (newr l (list (+ (round (/ startt tempo)) 0.2) synt chan 'set-accent-m (round (* 10 accent-m)))) )
+      (if accent-h
+           (newr l (list (+ (round (/ startt tempo)) 0.2) synt chan 'set-accent-h (round (* 10 accent-h)))) )
+      )))
+
 ;;eof
 
    

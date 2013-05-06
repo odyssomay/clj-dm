@@ -149,7 +149,7 @@
  ;   (setq *restore-lisp-functions* (append *restore-lisp-functions* (list 'dm-demo-open-windows))))
   (save-application "home:Director Musices Demo 2.1a" :excise-compiler t)
    )
-#+:MCL(defun save-dm-demo ()
+#+:MCL(defun save-dm-demo ()
   (if (find-menu "tools") (menu-deinstall (find-menu "tools")))
   (if (find-menu "Lisp") (menu-deinstall (find-menu "Lisp")))
   (if (not (member 'install-midishare-interface *restore-lisp-functions*))

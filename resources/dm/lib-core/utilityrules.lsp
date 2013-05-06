@@ -282,7 +282,7 @@
 (defun add-all-phrase-levels (nr)
      (each-note
       (when (this 'phrase-start)
-        (set-this 'phrase-start (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-start))) )
+        (set-this 'phrase-start (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-start))))
       (when (this 'phrase-end)
         (set-this 'phrase-end (mapcar #'(lambda (x) (+ nr x)) (this 'phrase-end))))))
 

@@ -238,19 +238,30 @@
    ;compute mean f0 for the track
    (each-note-if
     (this :peak)
+    ;(> (abs (- (this-f0) (prev-f0))) 2)
     (then
      (set-this :melsal2 (float (/ (abs (- (this-f0) (prev-f0))) 4))) ))
    (each-note-if
     (this :valley)
+   ; (> (abs (- (this-f0) (prev-f0))) 2)
     (then
      (set-this :melsal2 (float (/ (abs (- (this-f0) (prev-f0))) 12))) ))
    ))
 
+#|
 (defun mark-mel-final-combination ()
   (each-note-if
    (or (this :peak) (this :valley))
    (then
     (set-this 'accent-c (min 5 (round (* 1.5 (+ (this :melsal1) (this :melsal2))))))
+    )))
+|#
+
+(defun mark-mel-final-combination ()
+  (each-note-if
+   (or (this :peak) (this :valley))
+   (then
+    (set-this 'accent-c (min 5 (round (* 1.5 (* (this :melsal1) (this :melsal2))))))
     )))
 
 ;------------- harmonic accent -----------------------------
