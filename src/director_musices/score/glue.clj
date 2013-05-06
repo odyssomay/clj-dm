@@ -142,7 +142,12 @@
 (defn get-track-property [id property]
   (let [value (case property
                 "synth" (get-current-synth id)
-                "active-p" (value->clj (glue/eval-dm (property-acc id property)))
+                "active-p" (-> (property-acc id property)
+                               glue/eval-dm
+                               .printObject
+                               read-string
+                               value->clj
+                               boolean)
                 (-> (property-acc id property)
                     glue/eval-dm
                     .javaInstance))]
