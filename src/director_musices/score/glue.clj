@@ -50,7 +50,7 @@
 
 
 (defn value->clj [v]
-  (condp = v 
+  (condp = v
     'T true
     'NIL nil
     v))
