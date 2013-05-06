@@ -296,7 +296,7 @@
         pc (draw-phrase/phrase-component tc)
         parameter-view (ssw-mig/mig-panel :background "white"
                                           :constraints ["insets 0, gap 0"])
-        view (ssw-mig/mig-panel :items [[opts-view "dock west"]
+        view (ssw-mig/mig-panel :items [;[opts-view "dock west"]
                                         [(draw-phrase/get-view pc) "span"]
                                         [(draw-track/get-view tc) "span, id track"]
                                         [parameter-view "span"]]
@@ -323,55 +323,74 @@
      :parameter-view parameter-view
      :view view}))
 
-(defn update-score-panel []
+(defn add-scale-x-listeners [score-views]
   (let [mouse-position-x-start (atom 0)
         initial-scale-x (atom 1)
         new-scale-x (atom 1)
-        temporary-scale-x (atom 1)
-        position-components (atom [])
-        p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
+        temporary-scale-x (atom 1)]
+    (doseq [score-view score-views]
+      (let [sv score-view
+            sc (:score-component sv)
+            offs draw-track/first-note-offset
+            was-dragged? (atom false)]
+        (ssw/listen (draw-track/get-view sc) 
+                    :mouse-pressed
+                    (fn [e]
+                      (reset! was-dragged? false)
+                      (reset! mouse-position-x-start (.getX e))
+                      (reset! initial-scale-x (draw-track/get-scale-x sc)))
+                    :mouse-dragged
+                    (fn [e]
+                      (reset! was-dragged? true)
+                      (reset! temporary-scale-x
+                              (* @initial-scale-x
+                                 (/ (.getX e)
+                                    @mouse-position-x-start))))
+                    :mouse-released
+                    (fn [e]
+                      (if @was-dragged?
+                        (reset! new-scale-x
+                                (* @initial-scale-x
+                                   (/ (- (.getX e) offs)
+                                      (- @mouse-position-x-start offs)))))))
+        (add-watch temporary-scale-x
+                   (gensym) (fn [_ _ _ scale-x]
+                              (draw-track/set-temporary-scale-x sc scale-x)))
+        (add-watch new-scale-x
+                   (gensym) (fn [_ _ _ scale-x]
+                              (draw-track/set-scale-x sc scale-x)))))))
+
+(defn update-score-panel []
+  (let [p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
         s-p (ssw/scrollable p :border nil)
-        score-views
-        (for [i (range (glue/get-track-count))]
-          (let [sv (score-view i)
-                sc (:score-component sv)
-                offs draw-track/first-note-offset
-                was-dragged? (atom false)]
-            (ssw/listen (draw-track/get-view sc) 
-                        :mouse-pressed
-                        (fn [e]
-                          (reset! was-dragged? false)
-                          (reset! mouse-position-x-start (.getX e))
-                          (reset! initial-scale-x (draw-track/get-scale-x sc)))
-                        :mouse-dragged
-                        (fn [e]
-                          (reset! was-dragged? true)
-                          (reset! temporary-scale-x
-                                  (* @initial-scale-x
-                                     (/ (.getX e)
-                                        @mouse-position-x-start))))
-                        :mouse-released
-                        (fn [e]
-                          (if @was-dragged?
-                            (reset! new-scale-x
-                                    (* @initial-scale-x
-                                       (/ (- (.getX e) offs)
-                                          (- @mouse-position-x-start offs)
-                                          ))))))
-            (add-watch temporary-scale-x
-                       (gensym) (fn [_ _ _ scale-x]
-                                  (draw-track/set-temporary-scale-x sc scale-x)))
-            (add-watch new-scale-x
-                       (gensym) (fn [_ _ _ scale-x]
-                                  (draw-track/set-scale-x sc scale-x)))
-            sv))
+        score-views (map score-view (range (glue/get-track-count)))
+        mxr (mixer/mixer reload-later!)
         position-component (draw-position/position-component
                              (:track-component (first score-views)))
         position-setter-component
         (draw-position/position-setter-component
           (:track-component (first score-views))
           (:view (first score-views))
-          player/position!)]
+          player/position!)
+        view (ssw-mig/mig-panel :items [[s-p]]
+                                :constraints ["insets 0, gap 0, fill"])
+        clear-view (fn [] (.removeAll view))
+        
+        to-score (util/button-label
+                   (fn [l] (ssw/config!
+                             view :items [[s-p]]))
+                   :icon "icons/score.png"
+                   :tip "Show score")
+        mxr-view (ssw-mig/mig-panel :items [[to-score "aligny top"]
+                                            [mxr "align left, aligny top"]]
+                                    :constraints ["insets 0, fill"])
+        to-mixer (util/button-label
+                   (fn [l] (ssw/config!
+                             view :items [[(ssw/scrollable
+                                             mxr-view :border nil) "grow"]]))
+                   :icon "icons/mixer.png"
+                   :tip "Show mixer")]
+    (add-scale-x-listeners score-views)
     (draw-track/on-state-change
       (:track-component (first score-views))
       #(do
@@ -382,7 +401,8 @@
            (redraw-component! c))))
     (ssw/config!
       p :items
-      (concat [[(draw-position/get-view position-component)
+      (concat [[to-mixer "pos 0 0"]
+               [(draw-position/get-view position-component)
                 "pos 0 0 100% 100%"]
                [position-setter-component "span"]]
         (interleave (map #(vector (:view %) "span") score-views)
@@ -397,9 +417,8 @@
             position-component position))))
     (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
     (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
-    (ssw/config! (global/get-score-panel) :items [s-p])
-    (mixer/mixer reload-later!)
-    p))
+    (ssw/config! (global/get-score-panel) :items [view])
+    view))
 
 ;; =====
 ;; Loading
