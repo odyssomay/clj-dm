@@ -3,8 +3,8 @@
 * eol=lf
 *.vbs eol=crlf
 
-*.xcf -text
-*.jpeg -text
-*.jpg -text
-*.gif -text
-*.png -text
+*.xcf binary
+*.jpeg binary
+*.jpg binary
+*.gif binary
+*.png binary
