@@ -11,6 +11,14 @@
 
 (def mig ssw-mig/mig-panel)
 
+; All properties:
+; "trackname" "midi-channel"
+; "midi-initial-volume" "midi-initial-program"
+; "midi-bank-msb" "midi-bank-lsb"
+; "midi-pan" "midi-reverb" 
+; "synth" 
+; "instrument-type"
+; "track-delay"
 
 (def track-properties
   [{:display-name "Active"
