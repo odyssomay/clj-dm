@@ -32,8 +32,9 @@
 ;; =====
 (defn position [& [s]]
   (if-let [s (or s (get-sequencer))]
-    (/ (.getTickPosition s)
-       (.getTickLength s))
+    (let [length (.getTickLength s)]
+      (if (zero? length)
+        0 (/ (.getTickPosition s) length)))
     0))
 
 ;; Listener
