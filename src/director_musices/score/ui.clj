@@ -237,13 +237,13 @@
           (:track-component (first score-views))
           (:view (first score-views))
           player/position!)
-        view (ssw-mig/mig-panel :items [[s-p]]
+        view (ssw-mig/mig-panel :items [[s-p "grow"]]
                                 :constraints ["insets 0, gap 0, fill"])
         clear-view (fn [] (.removeAll view))
         
         to-score (util/button-label
                    (fn [l] (ssw/config!
-                             view :items [[s-p]]))
+                             view :items [[s-p "grow"]]))
                    :icon "icons/score.png"
                    :tip "Show score")
         mxr-view (ssw-mig/mig-panel :items [[to-score "aligny top"]
@@ -274,7 +274,8 @@
                     (take (count score-views)
                           (repeatedly #(vec [(ssw/separator
                                                :orientation :horizontal)
-                                             "growx, span"]))))))
+                                             "growx, span"]))))
+        [[:fill-v "growy"]]))
     (player/listen-to-position
       (fn [position]
         (ssw/invoke-later
