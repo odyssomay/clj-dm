@@ -74,7 +74,10 @@
 
 (defn mixer-view [id reload-later!]
   (let [prop (fn [property default]
-               (or (glue/get-track-property id property) default))
+               (let [v (glue/get-track-property id property)]
+                 (if (nil? v) default v)))
+        trackname (ssw/text (prop "trackname" id))
+        active? (ssw/checkbox :selected? (prop "active-p" true))
         volume-display (ssw/progress-bar :orientation :vertical
                                          :value 0
                                          :min 0 :max 127)
@@ -93,14 +96,18 @@
                                       :model (glue/get-track-synth-program-list id))]
                   (.setSelectedIndex c (dec (prop "midi-initial-program" 1)))
                   c)
-        p (mig :items [[(str "Track" id) "wrap"]
-                       [volume-display "growy"]
+        p (mig :items [[trackname "span, growx"]
+                       ["Active"]
+                       [active? "wrap, align right"]
+                       [volume-display "align right, growy"]
                        [volume-control "h 200!, wrap"]
                        [pan "span, w 100!"]
                        [synth "span, growx, w 100!"]
                        [program "span, growx, w 100!"]]
                :constraints [])]
-    (doseq [[c type property] [[volume-control :slider "midi-initial-volume"]
+    (doseq [[c type property] [[trackname :string "trackname"]
+                               [active? :bool "active-p"]
+                               [volume-control :slider "midi-initial-volume"]
                                [pan :slider "midi-pan"]
                                [synth :synth "synth"]
                                [program :midi-program-list "midi-initial-program"]]]
