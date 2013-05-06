@@ -111,23 +111,5 @@
                (interleave views
                            (repeatedly #(vector (ssw/separator :orientation :vertical)
                                                 "growy")))
-               :constraints ["insets 0"])
-        f (ssw/frame :content p)
-        controller-event-listener
-        (reify javax.sound.midi.ControllerEventListener
-          (controlChange [this event]
-            (if (== (.getCommand event)
-                    ShortMessage/NOTE_ON)
-              (println "note on!"))))]
-    (add-watch player/sequencer ::mixer
-               (fn [_ _ old-sequencer new-sequencer]
-                 (println "adding control listener!")
-                 (.removeControllerEventListener
-                   old-sequencer controller-event-listener)
-                 (.addControllerEventListener
-                   new-sequencer controller-event-listener)))
-    (if-let [s @player/sequencer]
-      (count (.addControllerEventListener
-               s controller-event-listener
-               (int-array (range 127)))))
-    (-> f ssw/pack! ssw/show!)))
+               :constraints ["insets 0"])]
+    p))
