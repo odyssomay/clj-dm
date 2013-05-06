@@ -158,13 +158,11 @@
   (doto c .revalidate .repaint))
 
 (defn score-view [id]
-  (let [opts-view (track-properties-view id)
-        tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
+  (let [tc (draw-track/track-component (glue/get-track id) :clef \G :scale-x 0.2)
         pc (draw-phrase/phrase-component tc)
         parameter-view (ssw-mig/mig-panel :background "white"
                                           :constraints ["insets 0, gap 0"])
-        view (ssw-mig/mig-panel :items [;[opts-view "dock west"]
-                                        [(draw-phrase/get-view pc) "span"]
+        view (ssw-mig/mig-panel :items [[(draw-phrase/get-view pc) "span"]
                                         [(draw-track/get-view tc) "span, id track"]
                                         [parameter-view "span"]]
                                 :constraints ["insets 0, gap 0"]
