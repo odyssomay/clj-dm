@@ -42,8 +42,7 @@
                   (if (not parameterless?)
                     (str v " " options))
                   ")"
-                  (if add-newline?
-                    "\n" " "))))))
+                  (if add-newline? "\n" " "))))))
 
 (defn choose-and-save-rulepalette [rulepalette]
   (if-let [f (util/choose-file
@@ -214,8 +213,7 @@
                  :name "Save As..."
                  :handler (fn [_]
                             (choose-and-save-rulepalette rulepalette)))
-               "growx, span, gapleft 7, gaptop 5"]
-              ])))
+               "growx, span, gapleft 7, gaptop 5"]])))
 
 (defn rulepalette-view [rulepalette]
   (ssw/scrollable
@@ -390,8 +388,7 @@
            (atom {:name "normalize-sl"
                   :parameterless? true
                   :enabled? true
-                  })
-           ]})
+                  })]})
 
 (defn run-rulepalette-test []
   (init)
@@ -400,5 +397,4 @@
                      ;(rulepalette-view default-rulepalette)
                      (global/get-rulepalette-panel)
                      :size [700 :by 400])]
-    (ssw/show! f)
-    ))
+    (ssw/show! f)))
