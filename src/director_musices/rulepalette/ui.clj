@@ -34,15 +34,29 @@
 
 (def slider-precision 1000)
 
-(defn rules->string [rules]
+(defn rules->string [rules & [add-newline?]]
   (apply str
          (for [{:keys [name parameterless? enabled? v options]} rules]
            (if enabled?
              (str "(" name " "
                   (if (not parameterless?)
-                    (str v " " options)
-                    )
-                  ") ")))))
+                    (str v " " options))
+                  ")"
+                  (if add-newline?
+                    "\n" " "))))))
+
+(defn choose-and-save-rulepalette [rulepalette]
+  (if-let [f (util/choose-file
+               :title "Save Rulepalette"
+               :type :save
+               :file-ending "pal"
+               :filters [["Rulepalette files (.pal)" ["pal"]]])]
+    (let [out (str "(in-package \"DM\")\n\n"
+                   "(set-dm-var 'all-rules '(\n"
+                   (rules->string (get-rules rulepalette) true)
+                   "))\n"
+                   "(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")]
+      (spit f out))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction & [play?]]
   (dm-global/show-info-panel :loading "Applying rulepalette")
@@ -178,7 +192,7 @@
                   (set-editable rulepalette (.isSelected editable?))))
     (update-rule-interact)
     (ssw-mig/mig-panel
-      :constraints ["gap 1"]
+      :constraints ["gap 3"]
       :items [["Apply" "span"]
               [(score-global/a-if-score
                  :name "Apply"
@@ -196,6 +210,11 @@
               ["Rulepalette" "gaptop 7, span"]
               [editable? "span, gapleft 7"]
               [add-rule "growx, span, gapleft 7"]
+              [(ssw/action
+                 :name "Save As..."
+                 :handler (fn [_]
+                            (choose-and-save-rulepalette rulepalette)))
+               "growx, span, gapleft 7, gaptop 5"]
               ])))
 
 (defn rulepalette-view [rulepalette]
