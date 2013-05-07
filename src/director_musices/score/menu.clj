@@ -13,6 +13,8 @@
     :items 
     [(ssw/action :name "Open Score..."
                  :handler ui/choose-and-open-score)
+     (ssw/action :name "Open Test Score"
+                 :handler ui/open-test-score)
      (ssw/action :name "Open Performance..."
                  :handler ui/choose-and-open-performance)
      (g/a-if-score :name "Save Score As..."
