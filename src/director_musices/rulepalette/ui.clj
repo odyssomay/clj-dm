@@ -241,13 +241,10 @@
     (merge {:name rule-name
             :enabled? true
             :id (gensym rule-name)}
-           (if (or (= (second l) 'T)
-                   (= (second l) 'F)
-                   (= (second l) nil))
+           (if (contains? #{'T 'F 'NIL nil} (second l))
              {:parameterless? true}
              {:v (second l)
-              :options (apply str (interpose " " (drop 2 l)))}
-             ))))
+              :options (apply str (interpose " " (drop 2 l)))}))))
 
 (defn string->rulepalette [string & {:as opts}]
   (let [raw (string->rulepalette-raw string)
