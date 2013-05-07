@@ -242,7 +242,7 @@
            (if (contains? #{'T 'F 'NIL nil} (second l))
              {:parameterless? true}
              {:v (second l)
-              :options (apply str (interpose " " (drop 2 l)))}))))
+              :options (.toLowerCase (apply str (interpose " " (drop 2 l))))}))))
 
 (defn string->rulepalette [string & {:as opts}]
   (let [raw (string->rulepalette-raw string)
