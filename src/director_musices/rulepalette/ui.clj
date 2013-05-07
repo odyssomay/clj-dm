@@ -223,7 +223,8 @@
             :enabled? true
             :id (gensym rule-name)}
            (if (or (= (second l) 'T)
-                   (= (second l) 'F))
+                   (= (second l) 'F)
+                   (= (second l) nil))
              {:parameterless? true}
              {:v (second l)
               :options (apply str (interpose " " (drop 2 l)))}
