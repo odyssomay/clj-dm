@@ -47,8 +47,9 @@
   (reset! score-changed? true))
 
 (defn reload-score []
-  (reload-score-panel_hidden)
-  (reload-later!))
+  (ssw/invoke-now
+    (reload-score-panel_hidden)
+    (reload-later!)))
 
 (defn reload-score-and-player []
   (reload-score)
