@@ -20,39 +20,6 @@
 ; "instrument-type"
 ; "track-delay"
 
-(def track-properties
-  [{:display-name "Active"
-    :property "active-p"
-    :type :bool}
-   {:display-name "Track"
-    :property "trackname"
-    :type :string}
-   {:display-name "Midi ch"
-    :property "midi-channel"
-    :min 1 :max 16}
-   {:display-name "Synth"
-    :property "synth"
-    :type :synth}
-   {:display-name "Program"
-    :property "midi-initial-program"
-    :type :midi-program-list}
-   {:display-name "Delay"
-    :property "track-delay"
-    :min 0 :max 100}
-   {:display-name "Pan"
-    :property "midi-pan"
-    :value 64
-    :type :slider :min 0 :max 127
-    :spacing 32 :minor-spacing 8
-    :snap? true}
-   {:display-name "Volume"
-    :property "midi-initial-volume"
-    :value 0
-    :type :slider :min -39 :max 0
-    :spacing 13 :minor-spacing 13
-    :snap? false}
-   ])
-
 (defn listen-and-set-property [id c type property reload-later!]
   (let [value (case type
                 :string ssw/text
