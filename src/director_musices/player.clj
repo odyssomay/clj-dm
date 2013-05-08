@@ -95,7 +95,7 @@
 
 (defn send! [midi-message]
   (when-let [s (get-sequencer)]
-    (let [r (.getReceiver s)]
+    (when-let [r @receiver]
       (.send r midi-message -1))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
