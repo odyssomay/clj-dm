@@ -27,6 +27,17 @@
 ;       (let [message (javax.sound.midi.ShortMessage.
 ;                       )]))))
 
+(defn pan-updater [pan channel]
+  (ssw/listen
+    pan :change
+    (fn [_]
+      (let [message (ShortMessage.)]
+        (.setMessage message ShortMessage/CONTROL_CHANGE
+                     (int (ssw/selection channel))
+                     10 ; meaning pan
+                     (int (ssw/selection pan)))
+        (player/send! message)))))
+
 (defn listen-and-set-property [id c type property reload-later!]
   (let [value (case type
                 :string ssw/text
@@ -102,6 +113,7 @@
           (ssw/config! :model (glue/get-track-synth-program-list id))
           (.setSelectedIndex (dec (prop "midi-initial-program" 1))))))
     ;(volume-updater volume-control)
+    (pan-updater pan channel)
     p))
 
 (defn mixer [reload-later!]
