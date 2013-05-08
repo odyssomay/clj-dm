@@ -93,6 +93,11 @@
       (pause!)
       (start!))))
 
+(defn send! [midi-message]
+  (when-let [s (get-sequencer)]
+    (let [r (.getReceiver s)]
+      (.send r midi-message -1))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; File handling
 
