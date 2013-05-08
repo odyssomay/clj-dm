@@ -484,8 +484,12 @@
 
 ;;writes a list of bytes to file
 (defun print-cnl (l outfile)
-   (dolist (byte l)
-     (write-byte byte outfile) ))
+  (dolist (byte l)
+    (let ((b (if (< byte 0)
+                 (progn (format t "WARNING: byte was ~S, setting to 0.~%" byte)
+                        0)
+                 byte)))
+      (write-byte b outfile))))
 
 ;converts a string to a list of bytes
 ;strings longer than 127 chars will be truncated
