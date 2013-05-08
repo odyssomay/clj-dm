@@ -63,21 +63,31 @@
                                       :model (glue/get-track-synth-program-list id))]
                   (.setSelectedIndex c (dec (prop "midi-initial-program" 1)))
                   c)
+        channel (ssw/spinner :model (ssw/spinner-model
+                                      (double (prop "midi-channel" (inc id)))
+                                      :from 1.0 :to 16.0))
+        track-delay (ssw/spinner :model (ssw/spinner-model
+                                          (double (prop "track-delay" 0))
+                                          :from 0.0 :to 100.0))
         p (mig :items [[trackname "span, growx"]
                        ["Active"]
                        [active? "wrap, align right"]
                        [volume-display "align right, growy"]
                        [volume-control "h 200!, wrap"]
-                       [pan "span, w 100!"]
-                       [synth "span, growx, w 100!"]
-                       [program "span, growx, w 100!"]]
+                       [pan "span, w 150!"]
+                       [synth "span, growx, w 150!"]
+                       [program "span, growx, w 150!"]
+                       ["Channel"] [channel "wrap, align right"]
+                       ["Delay"] [track-delay "wrap, align right"]]
                :constraints [])]
     (doseq [[c type property] [[trackname :string "trackname"]
                                [active? :bool "active-p"]
                                [volume-control :slider "midi-initial-volume"]
                                [pan :slider "midi-pan"]
                                [synth :synth "synth"]
-                               [program :midi-program-list "midi-initial-program"]]]
+                               [program :midi-program-list "midi-initial-program"]
+                               [channel :spinner "midi-channel"]
+                               [track-delay :spinner "track-delay"]]]
       (listen-and-set-property id c type property reload-later!))
     (ssw/listen synth :selection
       (fn [_]
