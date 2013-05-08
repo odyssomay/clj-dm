@@ -20,6 +20,13 @@
 ; "instrument-type"
 ; "track-delay"
 
+; (defn volume-updater [volume-control]
+;   (ssw/listen
+;     volume-control :change
+;     (fn [_]
+;       (let [message (javax.sound.midi.ShortMessage.
+;                       )]))))
+
 (defn listen-and-set-property [id c type property reload-later!]
   (let [value (case type
                 :string ssw/text
@@ -94,6 +101,7 @@
         (doto program
           (ssw/config! :model (glue/get-track-synth-program-list id))
           (.setSelectedIndex (dec (prop "midi-initial-program" 1))))))
+    ;(volume-updater volume-control)
     p))
 
 (defn mixer [reload-later!]
