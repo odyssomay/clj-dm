@@ -402,5 +402,5 @@
                   "No score loaded"
                   [(ssw/action :name "Open test score"
                                :handler open-test-score)
-                   (ssw/action :name "Open from disk..."
+                   (ssw/action :name "Open from file..."
                                :handler choose-and-open-score)])]))

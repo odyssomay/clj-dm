@@ -375,7 +375,7 @@
                          "No rulepalette loaded"
                          [(ssw/action :name "Open default rulepalette"
                                       :handler open-default-rulepalette) 
-                          (ssw/action :name "Open from disk..."
+                          (ssw/action :name "Open from file..."
                                       :handler choose-and-open-rulepalette)])]))
 
 ;; =====
