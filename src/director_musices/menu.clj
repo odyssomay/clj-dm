@@ -120,11 +120,12 @@
                 help-menu]))
 
 (defn start-pause-action []
-  (let [a (ssw/action :icon (resource "icons/play.png") :tip "play"
-                      :handler (fn [_]
-                                 (util/thread
-                                   (score-ui/reload-player-if-changed!)
-                                   (player/start!))))
+  (let [a (score-global/a-if-score
+            :icon (resource "icons/play.png") :tip "play"
+            :handler (fn [_]
+                       (util/thread
+                         (score-ui/reload-player-if-changed!)
+                         (player/start!))))
         play! (fn []
                 (util/thread
                   (score-ui/reload-player-if-changed!)
@@ -138,11 +139,12 @@
                               :icon (resource "icons/play.png")
                               :tip "play"))
         stop-action
-        (ssw/action :icon (resource "icons/stop.png")
-                    :handler (fn [_]
-                               (pause!)
-                               (player/stop!))
-                    :tip "stop")
+        (score-global/a-if-score
+          :icon (resource "icons/stop.png")
+          :handler (fn [_]
+                     (pause!)
+                     (player/stop!))
+          :tip "stop")
         config-action
         (ssw/action :icon (resource "icons/gear.png")
                     :handler (fn [_]
