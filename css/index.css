@@ -9,8 +9,16 @@ overflow: hidden;
 h1, h2 { font-weight: 300; }
 h1 { font-size: 40px; }
 
+#content-outer {
+	position: relative;
+}
+
 #dm-image {
 	position: absolute;
 	bottom: -50px;
 	right: 50px;
+}
+
+#content {
+	background: none;
 }
