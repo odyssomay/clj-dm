@@ -2,7 +2,7 @@
 
 ## 1.0.4
 
-* Many small implementation improvements.
+* Many implementation improvements.
 * Allow predetermined scaling of graphs.
 * Improved graph height scaling.
 * Fixed track options number issue.
