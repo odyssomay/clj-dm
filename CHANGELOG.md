@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.2
+
+* Improved display of overlapping phrases (of the same level).
+
 ## 3.0.1
 
 * Improved phrase display calculations, allowing overlapping phrases.
