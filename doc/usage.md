@@ -1,3 +1,8 @@
+---
+layout: default
+title: Director Musices - Usage
+---
+
 # Using director musices
 
 Note: *DM* is short for Director Musices.
