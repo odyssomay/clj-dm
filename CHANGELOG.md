@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.3
+
+* Switched to new rulepalette implementation.
+* Improved track option defaults
+* Improved graph scaling.
+* Added slider for score scaling.
+* Improved note selecting.
+* Fixed midi volume out of range issue.
+* Improved player timestamp.
+* Fixed graph coloring problem.
+
 ## 1.0.2
 
 * Added *Distribute phrase analysis* and score vars printing to *Edit* menu.
