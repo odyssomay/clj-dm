@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Director-Musices Changelog
+title: Director Musices Changelog
 ---
 
 # Changelog

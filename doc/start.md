@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Director-Musices documentation
+title: Director Musices documentation
 ---
 
 # Director Musices
