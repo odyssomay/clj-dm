@@ -144,22 +144,29 @@
     p))
 
 (defn rule-name-dialog [& [previous-name previous-no-parameters?]]
-  (let [tf (ssw/text :text previous-name :columns 20)
+  (let [rules ["Melodic charge"
+               "Duration contrast"]
+        rule-name-box (ssw/combobox :model rules :editable? true)
         cb (ssw/checkbox :text "Rule does not have any parameters"
                          :selected? previous-no-parameters?)]
+    (ssw/selection! rule-name-box (or previous-name (first rules)))
     (when (-> (ssw/dialog
                 :content (ssw/border-panel
-                           :center tf :south cb))
+                           :center rule-name-box
+                           :south cb)
+                :resizable? false)
               ssw/pack!
               ssw/show!)
-      (assoc (if (.isSelected cb)
-               {:parameterless? true}
-               {:options ""
-                :v 1.0
-                :parameterless? false})
-        :name (.getText tf)
-        :id (gensym (.getText tf))
-        :enabled? true))))
+      (let [rule-name (cstr/replace (cstr/trim (ssw/text rule-name-box))
+                                    #"\s+" "-")]
+        (assoc (if (.isSelected cb)
+                 {:parameterless? true}
+                 {:options ""
+                  :v 1.0
+                  :parameterless? false})
+          :name rule-name
+          :id (gensym rule-name)
+          :enabled? true)))))
 
 (defn options-view [rulepalette]
   (let [rule-interact-num (ssw/spinner :model 2)
