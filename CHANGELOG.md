@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+* Many small implementation improvements.
+* Allow predetermined scaling of graphs.
+* Improved graph height scaling.
+* Fixed track options number issue.
+
 ## 1.0.3
 
 * Switched to new rulepalette implementation.
