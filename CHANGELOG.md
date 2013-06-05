@@ -1,12 +1,15 @@
 # Changelog
 
-## 3.0.0
+## 3.0.1
 
 * Improved phrase display calculations, allowing overlapping phrases.
 * Phrase display now uses different colors for different levels.
 * Fixed issues with redrawing order (overlapping).
 * Add file filters that expects the correct file ending.
 * Add correct file ending on save.
+
+## 3.0.0
+
 * Expandable track options.
 * Added pdm file saving.
 * Faster scaling when dragging the score.
