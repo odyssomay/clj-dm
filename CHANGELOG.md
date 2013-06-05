@@ -1,8 +1,32 @@
 # Changelog
 
+## 3.0.0
+
+* Improved phrase display calculations, allowing overlapping phrases.
+* Phrase display now uses different colors for different levels.
+* Fixed issues with redrawing order (overlapping).
+* Add file filters that expects the correct file ending.
+* Add correct file ending on save.
+* Expandable track options.
+* Added pdm file saving.
+* Faster scaling when dragging the score.
+* Show small loading message in the top right.
+* Reload midi if track options changed.
+* Reload score after removing phrase marks.
+* Fixed repainting issues.
+* Automatically set clef if no clef was defined.
+* Use clef defined in track.
+* Added player position indicator (red line).
+* Added phrase display (over the score).
+* Added parameter display - *Show parameter...*
+* Fixed threading issues.
+* Improved drag to scale (on the score).
+* Fixed strange issues with line endings.
+* Improved *Edit note* dialog.
+* Improved note selecting.
+
 ## 1.0.4
 
-* Many implementation improvements.
 * Allow predetermined scaling of graphs.
 * Improved graph height scaling.
 * Fixed track options number issue.
