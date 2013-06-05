@@ -1,5 +1,12 @@
 # Changelog
 
+## Current development
+
+* Fixed midi out of range issue.
+* Added mixer that replaces the old track options.
+* Fixed threading issues.
+* Fixed phrase redrawing problems on score change.
+
 ## 3.0.2
 
 * Improved display of overlapping phrases (of the same level).
