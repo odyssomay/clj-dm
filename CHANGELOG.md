@@ -52,7 +52,7 @@
 * Improved graph scaling.
 * Added slider for score scaling.
 * Improved note selecting.
-* Fixed midi volume out of range issue.
+* Fixed midi volume out of range issue (quickfix).
 * Improved player timestamp.
 * Fixed graph coloring problem.
 
