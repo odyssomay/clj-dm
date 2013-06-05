@@ -119,44 +119,70 @@
                 edit-menu
                 help-menu]))
 
+(defn start-pause-action []
+  (let [a (ssw/action :icon (resource "icons/play.png") :tip "play"
+                      :handler (fn [_]
+                                 (util/thread
+                                   (score-ui/reload-player-if-changed!)
+                                   (player/start!))))
+        play! (fn []
+                (util/thread
+                  (score-ui/reload-player-if-changed!)
+                  (player/start!))
+                (ssw/config! a
+                             :icon (resource "icons/pause.png")
+                             :tip "pause"))
+        pause! (fn []
+                 (player/pause!)
+                 (ssw/config! a
+                              :icon (resource "icons/play.png")
+                              :tip "play"))
+        stop-action
+        (ssw/action :icon (resource "icons/stop.png")
+                    :handler (fn [_]
+                               (pause!)
+                               (player/stop!))
+                    :tip "stop")
+        config-action
+        (ssw/action :icon (resource "icons/gear.png")
+                    :handler (fn [_]
+                               (pause!)
+                               (player/choose-midi-device))
+                    :tip "Select midi device")]
+    (ssw/config!
+      a :handler (fn [_]
+                   (when-let [s (player/get-sequencer)]
+                     (if (.isRunning s)
+                       (pause!) (play!)))))
+    {:stop stop-action
+     :play a
+     :config config-action}))
+
 (defn toolbar* []
-  (ssw/toolbar
-    :floatable? false
-    :items
-    [(ssw/action :icon (resource "icons/play.png") :tip "play"
-                 :handler (fn [_]
-                            (util/thread
-                              (score-ui/reload-player-if-changed!)
-                              (player/start!))))
-     (ssw/action :icon (resource "icons/pause.png") :tip "pause"
-                 :handler (fn [_] (player/pause!)))
-     :separator
-     (ssw/action :icon (resource "icons/stop.png")
-                 :handler (fn [_] (player/stop!))
-                 :tip "stop")
-     :separator
-     (ssw/action :icon (resource "icons/gear.png")
-                 :handler (fn [_] (player/choose-midi-device))
-                 :tip "Select midi device")
-     :separator
-     "scale"
-     (ssw/slider :value 100
-                 :min 20
-                 :max 180
-                 :major-tick-spacing 40
-                 :minor-tick-spacing 10
-                 :snap-to-ticks? true
-                 :paint-ticks? true
-                 :size [200 :by 30]
-                 :listen [:change
-                          (fn [e]
-                            (let [s (.getSource e)
-                                  value (double (/ (.getValue (.getSource e))
-                                                   100))]
-                              (if (.getValueIsAdjusting s)
-                                (score-global/temporary-scale! value)
-                                (score-global/scale! value))))])
-     ]))
+  (let [{:keys [stop play config]} (start-pause-action)]
+    (ssw/toolbar
+      :floatable? false
+      :items
+      [play :separator stop
+       :separator config
+       :separator
+       "scale"
+       (ssw/slider :value 100
+                   :min 20
+                   :max 180
+                   :major-tick-spacing 40
+                   :minor-tick-spacing 10
+                   :snap-to-ticks? true
+                   :paint-ticks? true
+                   :size [200 :by 30]
+                   :listen [:change
+                            (fn [e]
+                              (let [s (.getSource e)
+                                    value (double (/ (.getValue (.getSource e))
+                                                     100))]
+                                (if (.getValueIsAdjusting s)
+                                  (score-global/temporary-scale! value)
+                                  (score-global/scale! value))))])])))
 
 (defn toolbar []
   (ssw-mig/mig-panel
