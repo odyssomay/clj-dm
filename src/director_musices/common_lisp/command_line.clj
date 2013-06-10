@@ -56,7 +56,7 @@
                          [(ssw/scrollable output) "wrap, growx, growy 100"]
                          [input "growx"]])))
 
-(defn show! []
+(defn show! [& _]
   (-> frame
       (.setLocationRelativeTo (global/get-frame)))
   (ssw/show! frame))

@@ -6,7 +6,8 @@
               [util :as util])
             [director-musices.logging :as logging]
             (director-musices.common-lisp
-              [glue :as glue])
+              [glue :as glue]
+              [command-line :as command-line])
             (director-musices.score
               [global :as score-global]
               [menu :as score-menu]
@@ -107,6 +108,8 @@
     :text "Help"
     :items
     [(ssw/action :name "Log" :handler logging/show-log-frame)
+     (ssw/action :name "Command line"
+                 :handler command-line/show!)
      :separator
      (ssw/action :name "Director-musices website"
                  :handler
