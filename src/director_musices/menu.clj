@@ -108,7 +108,7 @@
     :text "Help"
     :items
     [(ssw/action :name "Log" :handler logging/show-log-frame)
-     (ssw/action :name "Command line"
+     (ssw/action :name "Command Line"
                  :handler command-line/show!)
      :separator
      (ssw/action :name "Director-musices website"
