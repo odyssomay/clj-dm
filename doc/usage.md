@@ -87,20 +87,36 @@ selecting *Edit note...* in the menu.
 
 ### Graph and parameter views
 
-Graph and parameter views do basically the same thing - they display some
-parameter of the score. The graph view does this graphically, while the 
-parameter view simply prints the values.
+A graph view displays a value of a parameter in the score. It can be displayed
+by right clicking the score and selecting *Show Graph...*.
 
-Both are shown by right clicking the score and pressing *Show Parameter...*
-or *Show Graph...*.
+Graphs can either be automatically scaled or not.
+This can be enabled or disabled by right clicking on the graph. The automatic scaling
+always shows all the values. While disabled, some values can be cut off. This is
+useful because sometimes a very small number of values can be very large compared
+to the rest. With automatic scaling, the large numbers completely take over,
+flattening out the smaller values and making them indistinguishable from other
+small values.
 
-Either can be removed by right clicking the view and clicking *Remove graph*
-or *Remove parameter*. Special for the graph view is 'automatic scaling'.
-This can be enabled or disabled in the right click menu. The automatic scaling
-always shows all the values. With it off, some values can be cut off (note that
-it is not possible to turn it off for all parameter types).
+Parameter view has the same purpose as the graph view, but is more basic.
+It can be displayed by right clicking the score and selecting *Show Parameter...*.
+
+If you don't know what a parameter is called, it can be useful to right click
+a note in the score and selecting *Edit Note...*, the name of parameters there
+is the same as used by the parameter view. Some useful parameters are:
+
+* **dr** - the duration of notes.
+* **sl** - the soundlevel of notes.
+* **phrase-start** - start of phrases.
+* **phrase-end** - end of phrases.
+
+Both views can be removed by right clicking on them and selecting the appropriate
+item.
 
 ![graph and parameter view example](images/graph-parameter-view.png)
+
+In this image, the display of numbers with *dr* to the left is a parameter view.
+The lower graphical display is the same parameter but in a graph view.
 
 ## Rulepalette
 
