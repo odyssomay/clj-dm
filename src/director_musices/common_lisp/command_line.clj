@@ -58,8 +58,8 @@
 
 (defn show! [& _]
   (-> frame
-      (.setLocationRelativeTo (global/get-frame)))
-  (ssw/show! frame))
+      (.setLocationRelativeTo (global/get-frame))
+      ssw/show!))
 
 (defn run-test []
   (init)
