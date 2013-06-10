@@ -70,13 +70,13 @@ Important to know about these:
 
 The other settings should be mostly self-explanatory.
 
-**The position indicator** is shown in red. This shows where
+The **position indicator** is shown in red. This shows where
 the player is currently positioned within the score.
 
-**The position setter** is shown in gray at the top. Clicking anywhere
+The **position setter** is shown in gray at the top. Clicking anywhere
 in this area sets the player position to that position.
 
-**The phrase marks** is shown above each musical score.
+The **phrase marks** is shown above each musical score.
 
 ### Note editing
 
