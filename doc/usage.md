@@ -124,4 +124,11 @@ The lower graphical display is the same parameter but in a graph view.
 
 ## Player
 
+![player](images/player.png)
+
+The player is very straightforward. The music is updated automatically 
+everytime something is changed. Play/pause/stop works as usual. The gear
+allows you to change the synth used. If sound is missing, try choosing a
+different synth.
+
 ## Performance
