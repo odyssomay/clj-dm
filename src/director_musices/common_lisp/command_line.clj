@@ -57,9 +57,9 @@
                          [input "growx"]])))
 
 (defn show! [& _]
-  (-> frame
-      (.setLocationRelativeTo (global/get-frame))
-      ssw/show!))
+  (doto frame
+    (.setLocationRelativeTo (global/get-frame))
+    ssw/show!))
 
 (defn run-test []
   (init)
