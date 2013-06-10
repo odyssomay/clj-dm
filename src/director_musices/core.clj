@@ -6,9 +6,9 @@
                               [player :as player]
                               [util :as util])
             (director-musices.common-lisp
+              [command-line :as command-line]
               [glue :as glue]
-              [interpreter :as inr]
-              )
+              [interpreter :as inr])
             (director-musices.score
              [global :as score-global]
              [ui :as score-ui])
@@ -75,6 +75,7 @@
   (global/init)
   (rule-ui/init)
   (score-ui/init)
+  (command-line/init)
   (let [arg? (fn [arg] (some #(= % arg) args))
         fr (global/get-frame)]
     (ssw/config! fr
