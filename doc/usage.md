@@ -108,4 +108,4 @@ it is not possible to turn it off for all parameter types).
 
 ## Player
 
-## <a id="performance"></a>Performance
+## Performance
