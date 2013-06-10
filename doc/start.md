@@ -5,5 +5,6 @@ title: Director Musices - Documentation
 
 # Documentation
 
-[usage](usage.html).
-[changelog](changelog.html).
+* [Usage](usage.html) - getting started with director musices..
+* [Changelog](changelog.html).
+* [Implementation](implementation.html) - implementation details for developers.
