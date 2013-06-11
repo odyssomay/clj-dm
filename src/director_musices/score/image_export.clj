@@ -1,5 +1,6 @@
-(ns director_musices.score.image_export
-  (:require (director-musices.score.draw
+(ns director-musices.score.image-export
+  (:require [director-musices.util :as util]
+            (director-musices.score.draw
               [graph :as draw-graph]
               [track :as draw-track])))
 
@@ -15,8 +16,8 @@
     (export-image image f)))
 
 (defn choose-and-export-graph-to-image [gc]
-  (draw-graph/get-image gc))
+  (choose-and-export-image (draw-graph/get-image gc)))
 
 (defn choose-and-export-track-to-image [tc]
-  (draw-track/get-image tc))
+  (choose-and-export-image (draw-track/get-image tc)))
 
