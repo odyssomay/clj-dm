@@ -56,3 +56,22 @@ necessary for the handling of rulepalettes.
 
 The directory *src/director_musices/score* contains everything that is necessary
 for the handling of scores. This includes the mixer.
+
+The directory **draw** contains code that draws the score as well as associate
+components - graph view, parameter view etc.
+
+In the **draw** directory, we can find the files:
+
+**calculate.clj** performs calculations on the raw input score. These calculations
+are later used for drawing. Basically all components in *draw* uses these
+calculations.
+
+**graph.clj** draws the graph view.
+
+**parameter.clj** draws the parameter view.
+
+**phrase.clj** draws the phrases above the score.
+
+**position.clj** draws the red position indicator.
+
+**track.clj** draws the score.
