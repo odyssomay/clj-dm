@@ -3,6 +3,7 @@
               [edit-note :as edit-note]
               [global :as global]
               [glue :as glue]
+              [image-export :as image-export]
               [mixer :as mixer])
             (director-musices.score.draw
               [graph :as draw-graph]
@@ -90,9 +91,16 @@
                      :text "Automatic scaling"
                      :selected? (not custom-scale?)
                      :enabled? custom-scale?)
-        popup (ssw/popup :items [autoscale?
-                                 (ssw/action :name "Remove graph"
-                                             :handler (fn [_] (remove-graph)))])]
+        popup (ssw/popup
+                :items
+                [autoscale?
+                 (ssw/action :name "Remove graph"
+                             :handler (fn [_] (remove-graph)))
+                 :separator
+                 (ssw/action :name "Export graph to image..."
+                             :handler
+                             (fn [_] (image-export/choose-and-export-graph-to-image
+                                       gc)))])]
     (ssw/listen autoscale? :selection
                 (fn [_] (draw-graph/set-automatic-scaling
                           gc (ssw/selection autoscale?))
@@ -152,7 +160,12 @@
                              :handler (fn [_] (ask-and-show-parameter
                                                 parameter-view tc)))
                  (ssw/action :name "Show Graph..."
-                             :handler (fn [_] (ask-and-show-graph view tc)))])]
+                             :handler (fn [_] (ask-and-show-graph view tc)))
+                 :separator
+                 (ssw/action
+                   :name "Export track to image..."
+                   :handler (fn [_] (image-export/choose-and-export-track-to-image
+                                      tc)))])]
     (.show popup (.getSource evt) (.getX evt) (.getY evt))))
 
 (defn redraw-component! [c]
