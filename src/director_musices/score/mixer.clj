@@ -85,7 +85,7 @@
                                           :from 0.0 :to 100.0))
         p (mig :items [[active?] [trackname]
                        ["Volume" "gapleft 8"] [volume-control "w 150!"]
-                       ;["Pan" "gapleft 8"] [pan "w 100!"]
+                       ["Pan" "gapleft 8"] [pan "w 100!"]
                        [synth] [program]
                        ["Channel" "gapleft 8"] [channel]
                        ["Delay" "gapleft 8"] [track-delay]]
