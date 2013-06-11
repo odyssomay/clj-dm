@@ -61,13 +61,9 @@
   (let [prop (fn [property default]
                (let [v (glue/get-track-property id property)]
                  (if (nil? v) default v)))
-        trackname (ssw/text (prop "trackname" id))
+        trackname (ssw/text :text (prop "trackname" id) :columns 8)
         active? (ssw/checkbox :selected? (prop "active-p" true))
-        volume-display (ssw/progress-bar :orientation :vertical
-                                         :value 0
-                                         :min 0 :max 127)
-        volume-control (ssw/slider :orientation :vertical
-                                   :value (prop "midi-initial-volume" 0)
+        volume-control (ssw/slider :value (prop "midi-initial-volume" 0)
                                    :min -39 :max 0)
         
         pan (ssw/slider :min 0 :max 127
@@ -87,17 +83,13 @@
         track-delay (ssw/spinner :model (ssw/spinner-model
                                           (double (prop "track-delay" 0))
                                           :from 0.0 :to 100.0))
-        p (mig :items [[trackname "span, growx"]
-                       ["Active"]
-                       [active? "wrap, align right"]
-                       [volume-display "align right, growy"]
-                       [volume-control "h 200!, wrap"]
-                       [pan "span, w 150!"]
-                       [synth "span, growx, w 150!"]
-                       [program "span, growx, w 150!"]
-                       ["Channel"] [channel "wrap, align right"]
-                       ["Delay"] [track-delay "wrap, align right"]]
-               :constraints [])]
+        p (mig :items [[active?] [trackname]
+                       ["Volume" "gapleft 8"] [volume-control "w 150!"]
+                       ;["Pan" "gapleft 8"] [pan "w 100!"]
+                       [synth] [program]
+                       ["Channel" "gapleft 8"] [channel]
+                       ["Delay" "gapleft 8"] [track-delay]]
+               :constraints ["gapy 0, gapx 3, insets 0"])]
     (doseq [[c type property] [[trackname :string "trackname"]
                                [active? :bool "active-p"]
                                [volume-control :slider "midi-initial-volume"]
@@ -118,10 +110,11 @@
 
 (defn mixer [reload-later!]
   (let [views (for [id (range (glue/get-track-count))]
-                [(mixer-view id reload-later!)])
+                [(mixer-view id reload-later!) "wrap"])
         p (mig :items
-               (interleave views
-                           (repeatedly #(vector (ssw/separator :orientation :vertical)
-                                                "growy")))
-               :constraints ["insets 0"])]
+               views
+               ; (interleave views
+               ;             (repeatedly #(vector (ssw/separator :orientation :vertical)
+               ;                                  "growy")))
+               :constraints ["gap 0"])]
     p))
