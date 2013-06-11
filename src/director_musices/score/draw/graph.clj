@@ -162,7 +162,7 @@
           (draw-height-line state gc y sy long?)
           (draw-height-line state gc (- y) (- sy) long?)))))
 
-(defn paint [g state]
+(defn paint [g state draw-previous?]
   (let [{:keys [height track-view
                 track-component property]} state
         gc (.create g)
@@ -193,7 +193,7 @@
     (.translate gc 4 0)
     ;; end quickfix
     
-    (when (:prev-property-values state)
+    (when (and draw-previous? (:prev-property-values state))
       (.setColor gc (java.awt.Color. 120 120 120))
       (draw-note-property-graph gc state (:prev-property-values state)))
     (.setColor gc java.awt.Color/red)
@@ -211,7 +211,7 @@
                         update-property-values
                         update-state))
         c (proxy [javax.swing.JComponent] []
-            (paintComponent [g] (paint g @state))
+            (paintComponent [g] (paint g @state true))
             (getPreferredSize []
               (java.awt.Dimension.
                 (.width (.getPreferredSize (draw-track/get-view track-component)))
@@ -237,3 +237,14 @@
          :automatic-scaling automatic-scaling))
 (defn refresh! [tgc]
   ((:refresh! tgc)))
+
+(defn get-image [tgc]
+  (let [state @(:state tgc)
+        view (:view tgc)
+        img (java.awt.image.BufferedImage.
+              (.getWidth view)
+              (.getHeight view)
+              java.awt.image.BufferedImage/TYPE_INT_ARGB)
+        g (.getGraphics img)]
+    (paint g state false)
+    img))

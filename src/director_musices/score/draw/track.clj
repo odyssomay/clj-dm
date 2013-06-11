@@ -257,7 +257,8 @@
      :state-listeners state-listeners
      :track-listeners track-listeners
      :temporary-scale temporary-scale
-     :temporary-scale-x temporary-scale-x}))
+     :temporary-scale-x temporary-scale-x
+     :image-atom image-atom}))
 
 ;; =====
 ;; API
@@ -318,3 +319,6 @@
 
 (defn stop-note-highlight! [component-m]
   (swap! (:state component-m) dissoc :highlighted-note))
+
+(defn get-image [component-m]
+  @(:image-atom component-m))
