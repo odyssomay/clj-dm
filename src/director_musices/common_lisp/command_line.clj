@@ -30,6 +30,7 @@
     (ssw/listen input
       :action
       (fn [_]
+        (.setCaretPosition output (.getLength (.getDocument output)))
         (.append output (str "dm=> " (ssw/text input) "\n"))
         (.append output
                  (.printObject
