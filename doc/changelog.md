@@ -7,6 +7,7 @@ title: Director Musices - Changelog
 
 ## Current development
 
+* Added image exporting for tracks and graphs.
 * Added "command-line" for common-lisp development.
 * Removed pause button (play changes into pause when playing).
 * Fixed midi out of range issue.
