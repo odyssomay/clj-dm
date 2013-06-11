@@ -7,6 +7,8 @@ title: Director Musices - Changelog
 
 ## Current development
 
+* Added "command-line" for common-lisp development.
+* Removed pause button (play changes into pause when playing).
 * Fixed midi out of range issue.
 * Added mixer that replaces the old track options.
 * Fixed threading issues.
