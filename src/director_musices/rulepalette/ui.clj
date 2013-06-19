@@ -27,6 +27,7 @@
   (get-rule        [this id])
   (on-rule-change  [this id f])
   (on-order-change [this f])
+  (fire-order-change [this])
   (get-name        [this])
   
   (set-editable    [this editable?])
@@ -108,9 +109,36 @@
         (removeUpdate [_ _] (update-options))))
     [[value-text "gapleft 3"] [slider] [options-text]]))
 
+(defn rule-display-name [name]
+  (cstr/capitalize (cstr/replace name "-" " ")))
+
+(declare rule-name-dialog)
+
+(defn update-rule-name [rp rule]
+  (let [rule (get-rule rp (:id rule))
+        new-rule (rule-name-dialog (rule-display-name (:name rule))
+                                   (:parameterless? rule))]
+    (when new-rule
+      (update-rule!
+        rp (:id rule)
+        (fn [rule]
+          (merge rule
+                 (select-keys new-rule
+                              [:name :parameterless?]))))
+      (fire-order-change rp))))
+
+(defn name-label [rp rule]
+  (let [l (ssw/label (rule-display-name (:name rule)))]
+    (ssw/listen l
+      :mouse-clicked
+      (fn [e]
+        (when (== (.getClickCount e) 2)
+          (update-rule-name rp rule))))
+    l))
+
 (defn- rule-view [rp rule]
   (let [{:keys [name parameterless? enabled? v options id]} rule
-        name (cstr/capitalize (cstr/replace name "-" " "))
+        name-label (name-label rp rule)
         enabled? (ssw/checkbox :selected? enabled?)
         move-up (util/button-label (fn [_] (move-rule-up! rp id))
                                    :icon "icons/up.png")
@@ -126,7 +154,7 @@
                            (.setVisible c %)))
     (concat [[move-up "gapleft 10"]
              [move-down]
-             [enabled?] [name]]
+             [enabled?] [name-label]]
             (if parameterless?
               [[""] [""] [""]]
               (parameter-view rp rule))
@@ -150,13 +178,16 @@
         cb (ssw/checkbox :text "Rule does not have any parameters"
                          :selected? previous-no-parameters?)]
     (ssw/selection! rule-name-box (or previous-name (first rules)))
-    (when (-> (ssw/dialog
+    (when (ssw/show!
+            (doto
+              (ssw/dialog
                 :content (ssw/border-panel
                            :center rule-name-box
                            :south cb)
+                :option-type :ok-cancel
                 :resizable? false)
               ssw/pack!
-              ssw/show!)
+              (.setLocationRelativeTo (dm-global/get-frame))))
       (let [rule-name (cstr/replace (cstr/trim (ssw/text rule-name-box))
                                     #"\s+" "-")]
         (assoc (if (.isSelected cb)
@@ -305,6 +336,8 @@
                    (fn [_ _ _ new-rule] (f new-rule))))
       (on-order-change [this f]
         (add-watch order nil (fn [& _] (f))))
+      (fire-order-change [this]
+        (swap! order identity))
       (get-name [this] (str (:name opts)))
       
       (set-editable [this new-editable?]
