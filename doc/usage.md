@@ -122,6 +122,15 @@ The lower graphical display is the same parameter but in a graph view.
 
 ![rulepalette example](images/default-rulepalette.png)
 
+The rulepalette defines what rules should be applied to the score.
+Some rules have no parameters, others do. Functions with parameters
+has a number as the main parameter, and extra parameters that can be specified
+in a text field.
+
+Note that "editable" is selected to the left. If it is not, the up/down arrow
+as well as the X will not be shown. The purpose of these are what you would
+think - up/down moves the rule up or down and the X removes the rule from the list.
+
 ## Player
 
 ![player](images/player.png)
