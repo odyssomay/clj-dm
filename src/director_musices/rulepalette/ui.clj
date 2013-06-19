@@ -56,7 +56,9 @@
                    (rules->string (get-rules rulepalette) true)
                    "))\n"
                    "(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")]
-      (spit f out))))
+      (spit f out)
+      (let [c (global/get-rulepalette-container)]
+        (.setTitleAt c (.getSelectedIndex c) (.getName f))))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction & [play?]]
   (dm-global/show-info-panel :loading "Applying rulepalette")
