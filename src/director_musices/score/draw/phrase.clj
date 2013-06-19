@@ -3,7 +3,7 @@
               [track :as draw-track])
             (seesaw [graphics :as ssw-graphics])))
 
-(def phrase-height 5)
+(def phrase-height 4)
 
 (def colors
   (cycle (map #(java.awt.Color/decode %)
