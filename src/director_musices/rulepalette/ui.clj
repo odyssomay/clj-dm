@@ -421,31 +421,3 @@
                                       :handler open-default-rulepalette) 
                           (ssw/action :name "Open from file..."
                                       :handler choose-and-open-rulepalette)])]))
-
-;; =====
-;; Testing
-;; =====
-(def rulepalette-test
-  {:path nil
-   :name "Default"
-   :rules [(atom {:name "high-loud"
-                  :v 1.0 :options ""
-                  :enabled? true
-                  })
-           (atom {:name "melodic-charge"
-                  :v 1.0 :options ":amp 1 :dur 1 :vibamp 1"
-                  :enabled? true
-                  })
-           (atom {:name "normalize-sl"
-                  :parameterless? true
-                  :enabled? true
-                  })]})
-
-(defn run-rulepalette-test []
-  (init)
-  (let [f (ssw/frame :title "rulepalette test"
-                     :content ;(rulepalette-view rulepalette-test)
-                     ;(rulepalette-view default-rulepalette)
-                     (global/get-rulepalette-panel)
-                     :size [700 :by 400])]
-    (ssw/show! f)))
