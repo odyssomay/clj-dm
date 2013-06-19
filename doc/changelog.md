@@ -7,6 +7,10 @@ title: Director Musices - Changelog
 
 ## Current development
 
+* When opening a rulepalette, the new tab is automatically switched to.
+* Fixed slow rulepalette scrollbars.
+* The tab name is now changed after saving a rulepalette.
+* Added possibility of changing rule name after creation.
 * Added image exporting for tracks and graphs.
 * Added "command-line" for common-lisp development.
 * Removed pause button (play changes into pause when playing).
