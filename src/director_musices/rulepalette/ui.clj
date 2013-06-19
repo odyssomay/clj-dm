@@ -46,19 +46,23 @@
                   (if add-newline? "\n" " "))))))
 
 (defn choose-and-save-rulepalette [rulepalette]
-  (if-let [f (util/choose-file
-               :title "Save Rulepalette"
-               :type :save
-               :file-ending "pal"
-               :filters [["Rulepalette files (.pal)" ["pal"]]])]
-    (let [out (str "(in-package \"DM\")\n\n"
-                   "(set-dm-var 'all-rules '(\n"
-                   (rules->string (get-rules rulepalette) true)
-                   "))\n"
-                   "(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")]
-      (spit f out)
-      (let [c (global/get-rulepalette-container)]
-        (.setTitleAt c (.getSelectedIndex c) (.getName f))))))
+  (try
+    (if-let [f (util/choose-file
+                 :title "Save Rulepalette"
+                 :type :save
+                 :file-ending "pal"
+                 :filters [["Rulepalette files (.pal)" ["pal"]]])]
+      (let [out (str "(in-package \"DM\")\n\n"
+                     "(set-dm-var 'all-rules '(\n"
+                     (rules->string (get-rules rulepalette) true)
+                     "))\n"
+                     "(set-dm-var 'sync-rule-list '((NO-SYNC NIL) (MELODIC-SYNC T)))")]
+        (spit f out)
+        (let [c (global/get-rulepalette-container)]
+          (.setTitleAt c (.getSelectedIndex c) (.getName f)))))
+    (catch Exception e
+      (dm-global/show-generic-error)
+      (log/error e "Failed to save rulepalette"))))
 
 (defn apply-rulepalette [rulepalette syncrule rule-interaction & [play?]]
   (dm-global/show-info-panel :loading "Applying rulepalette")
