@@ -42,7 +42,7 @@
       )))
 
 (defn draw-bar [g {:keys [scale-x]}]
-  (let [x (max -5 (* -20 scale-x))]
+  (let [x (max -5 (min -1 (* -50 scale-x)))]
     (.drawLine g x 0 x (* 4 line-separation))))
 
 (defn draw-accidental [g {[_ accidental] :pitch}]
