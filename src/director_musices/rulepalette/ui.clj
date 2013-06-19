@@ -362,9 +362,11 @@
     :path path :name (.getName (file path))))
 
 (defn add-rulepalette [rulepalette]
-  (.add (global/get-rulepalette-container)
-        (get-name rulepalette)
-        (rulepalette-view rulepalette))
+  (let [c (global/get-rulepalette-container)]
+    (doto c
+      (.add (get-name rulepalette)
+            (rulepalette-view rulepalette))
+      (.setSelectedIndex (dec (.getTabCount c)))))
   (global/load-rulepalette-container))
 
 ;; =====
