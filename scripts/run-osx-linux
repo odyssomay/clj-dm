@@ -12,4 +12,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # run jar
 
-java -jar director-musices-*-standalone.jar
+java -jar director-musices.jar
