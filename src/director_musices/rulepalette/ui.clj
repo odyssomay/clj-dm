@@ -256,11 +256,14 @@
                "growx, span, gapleft 7, gaptop 5"]])))
 
 (defn rulepalette-view [rulepalette]
-  (ssw/scrollable
-    (ssw-mig/mig-panel
-      :items [[(options-view rulepalette) "dock west"]
-              [(rules-view rulepalette) "span"]])
-    :border nil))
+  (let [s (ssw/scrollable
+            (ssw-mig/mig-panel
+              :items [[(options-view rulepalette) "dock west"]
+                      [(rules-view rulepalette) "span"]])
+            :border nil)]
+    (.setUnitIncrement (.getVerticalScrollBar s) 10)
+    (.setUnitIncrement (.getHorizontalScrollBar s) 10)
+    s))
 
 ;; =====
 ;; Loading
