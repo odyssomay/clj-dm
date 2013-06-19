@@ -255,19 +255,21 @@
                                 :constraints ["insets 0, gap 0, fill"])
         clear-view (fn [] (.removeAll view))
         
-        to-score (util/button-label
+        to-score (ssw/action
+                   :handler
                    (fn [l] (ssw/config!
                              view :items [[s-p "grow"]]))
-                   :icon "icons/score.png"
+                   :name "score"
                    :tip "Show score")
         mxr-view (ssw-mig/mig-panel :items [[to-score "aligny top"]
                                             [mxr "align left, aligny top"]]
                                     :constraints ["insets 0, fill"])
-        to-mixer (util/button-label
+        to-mixer (ssw/action
+                   :handler
                    (fn [l] (ssw/config!
                              view :items [[(ssw/scrollable
                                              mxr-view :border nil) "grow"]]))
-                   :icon "icons/mixer.png"
+                   :name "mixer"
                    :tip "Show mixer")]
     (add-scale-x-listeners score-views)
     (draw-track/on-state-change
