@@ -6,3 +6,6 @@
 
 (defn reload-command-line []
   (refresh :after 'director-musices.common-lisp.command-line/run-test))
+
+(defn reload-abc-test []
+  (refresh :after 'director-musices.score.abc/run-test))
