@@ -10,14 +10,45 @@
               [command-line :as command-line])
             (director-musices.score
               [global :as score-global]
-              [menu :as score-menu]
               [ui :as score-ui])
+            [director-musices.rulepalette.ui :as rule-ui]
             (seesaw
               [core :as ssw]
               [mig :as ssw-mig])))
 
 (defn reload-score []
   (score-ui/reload-score))
+
+(defn file-menu []
+  (ssw/menu
+    :text "File"
+    :items
+    [(ssw/action :name "Open Score..."
+                 :handler score-ui/choose-and-open-score)
+     (ssw/action :name "Open Test Score"
+                 :handler score-ui/open-test-score)
+     (ssw/action :name "Open Performance..."
+                 :handler score-ui/choose-and-open-performance)
+     (score-global/a-if-score :name "Save Score As..."
+                              :handler score-ui/choose-and-save-score)
+     (score-global/a-if-score :name "Save Performance As..."
+                              :handler score-ui/choose-and-save-performance)
+     :separator
+     (score-global/a-if-score :name "Save pdm As..."
+                              :handler score-ui/choose-and-save-pdm)
+     :separator
+     (ssw/action :name "Import Score from Midifile..."
+                 :handler score-ui/choose-and-open-midi)
+     (score-global/a-if-score :name "Export Performance to Midifile..."
+                              :handler score-ui/choose-and-save-midi)
+     :separator
+     (ssw/action :name "Open Rulepalette..."
+                 :handler rule-ui/choose-and-open-rulepalette)
+     (ssw/action :name "Open Default Rulepalette"
+                 :handler rule-ui/open-default-rulepalette)
+     :separator
+     (ssw/action :name "Quit"
+                 :handler (fn [&_ ] (System/exit 0)))]))
 
 (defmacro run-action [text & body]
   `(util/thread
@@ -118,7 +149,7 @@
 
 (defn menubar []
   (ssw/menubar :items 
-               [(score-menu/file-menu)
+               [(file-menu)
                 edit-menu
                 help-menu]))
 
