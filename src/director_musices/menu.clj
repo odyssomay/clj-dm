@@ -38,7 +38,7 @@
      (score-global/a-if-score :name "Save pdm As..."
                               :handler score-ui/choose-and-save-pdm)
      :separator
-     (ssw/action :name "Import Score from Midifile..."
+     (ssw/action :name "Import Score from midi file..."
                  :handler score-ui/choose-and-open-midi)
      (score-global/a-if-score :name "Export Performance to Midifile..."
                               :handler score-ui/choose-and-save-midi)
