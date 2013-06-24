@@ -9,6 +9,7 @@
               [glue :as glue]
               [command-line :as command-line])
             (director-musices.score
+              [abc :as abc]
               [global :as score-global]
               [ui :as score-ui])
             [director-musices.rulepalette.ui :as rule-ui]
@@ -41,6 +42,9 @@
                  :handler score-ui/choose-and-open-midi)
      (score-global/a-if-score :name "Export Performance to Midifile..."
                               :handler score-ui/choose-and-save-midi)
+     :separator
+     (ssw/action :name "Import score from abc file..."
+                 :handler abc/choose-and-open-abc)
      :separator
      (ssw/action :name "Open Rulepalette..."
                  :handler rule-ui/choose-and-open-rulepalette)
