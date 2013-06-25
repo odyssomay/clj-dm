@@ -24,7 +24,7 @@
 
 (def parser-string
   "
-  S = descriptors track
+  S = descriptors (voices | track)
   descriptors = (descriptor | key | <whitespace>)+
   descriptor = #'[A-Z]:[^\\n]*'
   
@@ -32,6 +32,10 @@
   key-letter = #'[A-G]'
   key-accidental = '#' | 'b'
   major-minor = 'major' | 'm' | 'minor'
+  
+  voices = (voice | <whitespace>)+
+  voice = <'[V:'> voice-id ']' track
+  voice-id = #'\\w+'
   
   track = (note | bar | phrase-mark | <whitespace>)+
   
