@@ -62,7 +62,6 @@
 (defn parse-descriptors [descriptors]
   (let [descriptors (->> descriptors
                          rest
-                         remove-whitespace
                          (map second))
         m (into {}
                 (for [descriptor descriptors]
