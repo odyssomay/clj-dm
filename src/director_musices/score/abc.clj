@@ -71,14 +71,16 @@
     :descriptor (parse-descriptor* (second v))
     :key (parse-key (rest v))))
 
+(defn descriptors->env [m]
+  {:title (:T m)
+   :default-note-length (read-string (:L m))})
+
 (defn parse-descriptors [descriptors]
-  (let [m (->> descriptors
-               rest
-               (map parse-descriptor)
-               (into {}))
-        env {:title (:T m)
-             :default-note-length (read-string (:L m))}]
-    env))
+  (->> descriptors
+       rest
+       (map parse-descriptor)
+       (into {})
+       descriptors->env))
 
 ;;;;
 ;;;; Parse track
