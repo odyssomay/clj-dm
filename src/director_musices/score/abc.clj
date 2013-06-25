@@ -25,16 +25,21 @@
 (def parser-string
   "
   S = descriptors track
-  descriptors = (descriptor | whitespace)+
-  descriptor = #'[A-Z]:.*'
+  descriptors = (descriptor | <whitespace>)+
+  descriptor = #'[A-Z]:[^\\n]*'
   
-  track = (note | bar | phrase-mark | whitespace)+
+  key = 'K:' <spaces> key-letter key-accidental? <spaces> major-minor?
+  key-letter = #'[A-G]'
+  key-accidental = '#' | 'b'
+  major-minor = 'major' | 'm' | 'minor'
+  
+  track = (note | bar | phrase-mark | <whitespace>)+
   
   bar = ('|' | thick-bar | repeat-bar) #'[0-9]'?
   thick-bar = '||' | '[|' | '|]'
   repeat-bar = '::' | '|:' | ':|'
   
-  notes = (note | whitespace)+
+  notes = (note | <whitespace>)+
   note = accidental? note-height octave? note-length?
   octave = #'[\\',]+'
   accidental = '^' | '^^' | '_' | '__' | '='
@@ -45,6 +50,7 @@
   phrase-start = '('
   phrase-end = ')'
   
+  spaces = #' *'
   whitespace = #'[\\s!]+'
   ")
 
@@ -208,8 +214,9 @@
   efe edB | d2d def | gfe edB |1 dBA ABd :|2 dBA AFD |]")
 
 (defn run-test []
-  ;(parser test-input)
+  (parser test-input)
+  ;(second (parser test-input))
   ;(parse-abc test-input)
   ;(parse-element (parser test-input))
-  (abc->dm test-input)
+  ;(abc->dm test-input)
   )
