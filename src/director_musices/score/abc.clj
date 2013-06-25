@@ -23,7 +23,7 @@
   note-height = #'[A-Za-z]'
   note-length = #'/{0,2}[0-9]'
   
-  whitespace = #'\\s+'
+  whitespace = #'[\\s!]+'
   ")
 
 (def parser (insta/parser parser-string))
