@@ -60,7 +60,12 @@
 ;;;; Parse descriptors
 
 (defn parse-key [k]
-  [nil nil])
+  (let [{:keys [key-letter key-accidental major-minor]} (into {} k)
+        major-minor (case major-minor
+                      "minor" "m"
+                      "major" nil
+                      major-minor)]
+    [:K (str key-letter key-accidental major-minor)]))
 
 (defn parse-descriptor* [descriptor]
   [(keyword (str (first descriptor)))
