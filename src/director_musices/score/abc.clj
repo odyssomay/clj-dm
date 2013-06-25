@@ -44,37 +44,60 @@
     env))
 
 (defn parse-note-length-mod [raw]
-  (case raw
-    "/" 1/2
-    "//" 1/4
-    (let [raw (if (.startsWith raw "/")
-                (str "1" raw)
-                raw)]
-      (read-string raw))))
+  (if raw
+    (case raw
+      "/" 1/2
+      "//" 1/4
+      (let [raw (if (.startsWith raw "/")
+                  (str "1" raw)
+                  raw)]
+        (read-string raw)))
+    1))
 
-(defn parse-note [env note]
+(defn parse-note-length [default note-length]
+  (* default (parse-note-length-mod note-length)))
+
+(defn parse-note-height [note-height]
+  (cond
+    (re-matches #"[A-G]" note-height)
+    (str note-height 4)
+    (re-matches #"[a-g]" note-height)
+    (str (.toUpperCase note-height) 5)
+    :else nil))
+
+(defn add-bar [note bar]
+  (if bar (concat note ['bar bar]) note))
+
+(defn add-rest [note note-height]
+  (if note-height note (concat note '[rest t])))
+
+(defn parse-note [env bar note]
   (let [{:keys [note-height] :as m} (into {} (rest note))
-        note-height
-        (cond
-          (re-matches #"[A-G]" note-height)
-           (str note-height 4)
-          (re-matches #"[a-g]" note-height)
-           (str (.toUpperCase note-height) 5)
-          :else :none)
-        note-length-mod
-        (if (:note-length m)
-          (parse-note-length-mod (:note-length m))
-          1)
-        note-length (* (:default-note-length env)
-                       note-length-mod)]
-    (list 'n (list note-height note-length))))
+        note-height (parse-note-height note-height)
+        note-length (parse-note-length (:default-note-length env)
+                                       (:note-length m))
+        note (list 'n (list note-height note-length))]
+    (-> (list 'n (list note-height note-length))
+        (add-bar bar)
+        (add-rest note-height))))
 
 (defn parse-track [env track]
-  (remove nil?
-          (for [[type :as v] (rest track)]
-            (case type
-              :note (parse-note env v)
-              nil))))
+  (->> (rest track)
+       (reduce (fn [{:keys [prev bars out] :as m} [type :as v]]
+                 (case type
+                   :note
+                   (let [bar (if (= (first prev) :bar)
+                               (inc bars) nil)
+                         note (parse-note env bar v)]
+                     {:prev v
+                      :bars (if bar bar bars)
+                      :out (conj out note)})
+                   :bar (assoc m :prev v)
+                   m))
+               {:prev nil
+                :bars 0
+                :out []})
+       :out))
 
 (defn parse-abc [string]
   (let [parsed (rest (parser string))
@@ -88,7 +111,7 @@
 
 (defn track->dm [notes]
   (reduce (fn [prev note]
-            (str prev note "\n"))
+            (str prev (pr-str note) "\n"))
           ""
           notes))
 
