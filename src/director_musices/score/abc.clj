@@ -67,6 +67,51 @@
                       major-minor)]
     [:K (str key-letter key-accidental major-minor)]))
 
+(defn key->key-modifiers [k]
+  (case k
+    ; None
+    "C" nil
+    "Am" nil
+    
+    ; Sharps
+    "G" {"F" 1}
+    "Em" (recur "G")
+    
+    "D" {"F" 1 "C" 1}
+    "Bm" (recur "D")
+    
+    "A" {"F" 1 "C" 1 "G" 1}
+    "F#m" (recur "A")
+    
+    "E" {"F" 1 "C" 1 "G" 1 "D" 1}
+    "C#m" (recur "E")
+    
+    "B" {"F" 1 "C" 1 "G" 1 "D" 1 "A" 1}
+    "G#m" (recur "B")
+    
+    "F#" {"F" 1 "C" 1 "G" 1 "D" 1 "A" 1 "E" 1}
+    "Gb" (recur "F#")
+    
+    ; Flats
+    
+    "F" {"B" -1}
+    "Dm" (recur "F")
+    
+    "Bb" {"B" -1 "E" -1}
+    "Gm" (recur "Bb")
+    
+    "Eb" {"B" -1 "E" -1 "A" -1}
+    "Cm" (recur "Eb")
+    
+    "Ab" {"B" -1 "E" -1 "A" -1 "D" -1}
+    "Fm" (recur "Ab")
+    
+    "Db" {"B" -1 "E" -1 "A" -1 "D" -1 "G" -1}
+    "Bbm" (recur "Db")
+    
+    "Ebm" {"B" -1 "E" -1 "A" -1 "D" -1 "G" -1 "C" -1}
+    "D#m" (recur "Ebm")))
+
 (defn parse-descriptor* [descriptor]
   [(keyword (str (first descriptor)))
    (subs descriptor 2)])
@@ -78,7 +123,8 @@
 
 (defn descriptors->env [m]
   {:title (:T m)
-   :default-note-length (read-string (:L m))})
+   :default-note-length (read-string (:L m))
+   :key-modifiers (key->key-modifiers (:K m))})
 
 (defn parse-descriptors [descriptors]
   (->> descriptors
