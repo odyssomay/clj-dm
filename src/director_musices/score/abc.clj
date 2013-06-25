@@ -76,7 +76,6 @@
                rest
                (map parse-descriptor)
                (into {}))
-        _ (println m)
         env {:title (:T m)
              :default-note-length (read-string (:L m))}]
     env))
