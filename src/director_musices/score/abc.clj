@@ -10,7 +10,7 @@
   descriptors = (descriptor | whitespace)+
   descriptor = #'[A-Z]:.*'
   
-  track = (note | bar | whitespace)+
+  track = (note | bar | phrase-mark | whitespace)+
   
   bar = ('|' | thick-bar | repeat-bar) #'[0-9]'?
   thick-bar = '||' | '[|' | '|]'
@@ -22,6 +22,10 @@
   accidental = '^' | '^^' | '_' | '__' | '='
   note-height = #'[A-Za-z]'
   note-length = #'/{0,2}[0-9]'
+  
+  phrase-mark = phrase-start | phrase-end
+  phrase-start = '('
+  phrase-end = ')'
   
   whitespace = #'[\\s!]+'
   ")
