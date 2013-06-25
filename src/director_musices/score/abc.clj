@@ -86,13 +86,22 @@
 (defn parse-note-length [default note-length]
   (* default (parse-note-length-mod note-length)))
 
-(defn parse-note-height [note-height]
-  (cond
-    (re-matches #"[A-G]" note-height)
-    (str note-height 4)
-    (re-matches #"[a-g]" note-height)
-    (str (.toUpperCase note-height) 5)
-    :else nil))
+(defn parse-octave [octave]
+  (reduce (fn [out octave-char]
+            (case octave-char
+              \' (inc out)
+              \, (dec out)
+              out))
+          0 octave))
+
+(defn parse-note-height [note-height octave]
+  (if (re-matches #"[A-Ga-g]" note-height)
+    (let [octave (parse-octave octave)
+          note-height (+ (if (re-matches #"[A-G]" note-height)
+                           4 5)
+                         octave)
+          letter (.toUpperCase note-height)]
+      (str letter note-height))))
 
 (defn add-bar [note bar]
   (if bar (concat note ['bar bar]) note))
@@ -101,8 +110,8 @@
   (if note-height note (concat note '[rest t])))
 
 (defn parse-note [env bar note]
-  (let [{:keys [note-height] :as m} (into {} (rest note))
-        note-height (parse-note-height note-height)
+  (let [{:keys [note-height octave] :as m} (into {} (rest note))
+        note-height (parse-note-height note-height octave)
         note-length (parse-note-length (:default-note-length env)
                                        (:note-length m))
         note (list 'n (list note-height note-length))]
