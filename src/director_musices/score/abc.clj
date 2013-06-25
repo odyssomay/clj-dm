@@ -5,6 +5,9 @@
             [clojure.java.io :as jio]
             [instaparse.core :as insta]))
 
+;;;;
+;;;; Prepare string
+
 (defn remove-comments [string]
   (cstr/replace string #"%.*?(\n|$)" "\n"))
 
@@ -15,6 +18,9 @@
   (-> string
       remove-comments
       concat-backslash-lines))
+
+;;;;
+;;;; String parser
 
 (def parser-string
   "
@@ -44,6 +50,9 @@
 
 (def parser (insta/parser parser-string))
 
+;;;;
+;;;; Parse descriptors
+
 (defn remove-whitespace [elements]
   (remove (fn [[type]] (= type :whitespace)) elements))
 
@@ -59,6 +68,9 @@
         env {:title (:T m)
              :default-note-length (read-string (:L m))}]
     env))
+
+;;;;
+;;;; Parse track
 
 (defn parse-note-length-mod [raw]
   (if raw
