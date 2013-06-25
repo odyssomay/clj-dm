@@ -87,7 +87,6 @@
   (* default (parse-note-length-mod note-length)))
 
 (defn parse-accidental [accidental]
-  (println accidental)
   (case accidental
     "^" "#"
     "^^" "##"
