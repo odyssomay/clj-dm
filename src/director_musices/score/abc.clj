@@ -97,10 +97,10 @@
 (defn parse-note-height [note-height octave]
   (if (re-matches #"[A-Ga-g]" note-height)
     (let [octave (parse-octave octave)
+          letter (.toUpperCase note-height)
           note-height (+ (if (re-matches #"[A-G]" note-height)
                            4 5)
-                         octave)
-          letter (.toUpperCase note-height)]
+                         octave)]
       (str letter note-height))))
 
 (defn add-bar [note bar]
