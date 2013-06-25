@@ -150,13 +150,24 @@
 (defn parse-note-length [default note-length]
   (* default (parse-note-length-mod note-length)))
 
-(defn parse-accidental [accidental]
+(defn parse-accidental* [accidental]
   (case accidental
-    "^" "#"
-    "^^" "##"
-    "_" "b"
-    "__" "bb"
-    nil))
+    "^"  1
+    "^^" 2
+    "_"  -1
+    "__" -2
+    0))
+
+(defn parse-accidental [env note-height accidental]
+  (let [value (+ (get-in env [:key-modifiers (.toUpperCase note-height)]
+                         0)
+                 (parse-accidental* accidental))]
+    (case value
+      1 "#"
+      2 "##"
+      -1 "b"
+      -2 "bb"
+      nil)))
 
 (defn parse-octave [octave]
   (reduce (fn [out octave-char]
@@ -166,15 +177,15 @@
               out))
           0 octave))
 
-(defn parse-note-height [note-height accidental octave]
+(defn parse-note-height [env note-height accidental octave]
   (if (re-matches #"[A-Ga-g]" note-height)
     (let [octave (parse-octave octave)
+          accidental (parse-accidental env note-height accidental)
           letter (.toUpperCase note-height)
           note-height (+ (if (re-matches #"[A-G]" note-height)
                            4 5)
                          octave)]
-      (str letter (parse-accidental accidental)
-           note-height))))
+      (str letter accidental note-height))))
 
 (defn add-bar [note bar]
   (if bar (concat note ['bar bar]) note))
@@ -184,7 +195,7 @@
 
 (defn parse-note [env bar note]
   (let [{:keys [accidental note-height octave] :as m} (into {} (rest note))
-        note-height (parse-note-height note-height accidental octave)
+        note-height (parse-note-height env note-height accidental octave)
         note-length (parse-note-length (:default-note-length env)
                                        (:note-length m))
         note (list 'n (list note-height note-length))]
