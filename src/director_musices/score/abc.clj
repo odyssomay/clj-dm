@@ -59,14 +59,24 @@
 ;;;;
 ;;;; Parse descriptors
 
+(defn parse-key [k]
+  [nil nil])
+
+(defn parse-descriptor* [descriptor]
+  [(keyword (str (first descriptor)))
+   (subs descriptor 2)])
+
+(defn parse-descriptor [v]
+  (case (first v)
+    :descriptor (parse-descriptor* (second v))
+    :key (parse-key (rest v))))
+
 (defn parse-descriptors [descriptors]
-  (let [descriptors (->> descriptors
-                         rest
-                         (map second))
-        m (into {}
-                (for [descriptor descriptors]
-                  [(keyword (str (first descriptor)))
-                   (subs descriptor 2)]))
+  (let [m (->> descriptors
+               rest
+               (map parse-descriptor)
+               (into {}))
+        _ (println m)
         env {:title (:T m)
              :default-note-length (read-string (:L m))}]
     env))
@@ -210,9 +220,9 @@
   efe edB | d2d def | gfe edB |1 dBA ABd :|2 dBA AFD |]")
 
 (defn run-test []
-  (parser test-input)
+  ;(parser test-input)
   ;(second (parser test-input))
-  ;(parse-abc test-input)
+  (parse-abc test-input)
   ;(parse-element (parser test-input))
   ;(abc->dm test-input)
   )
