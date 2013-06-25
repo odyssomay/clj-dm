@@ -25,10 +25,10 @@
 (def parser-string
   "
   S = descriptors track
-  descriptors = (descriptor | <whitespace>)+
+  descriptors = (descriptor | key | <whitespace>)+
   descriptor = #'[A-Z]:[^\\n]*'
   
-  key = 'K:' <spaces> key-letter key-accidental? <spaces> major-minor?
+  key = <('K:' spaces)> key-letter key-accidental? <spaces> major-minor?
   key-letter = #'[A-G]'
   key-accidental = '#' | 'b'
   major-minor = 'major' | 'm' | 'minor'
