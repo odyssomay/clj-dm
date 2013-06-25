@@ -17,7 +17,8 @@
   repeat-bar = '::' | '|:' | ':|'
   
   notes = (note | whitespace)+
-  note = accidental? note-height note-length?
+  note = accidental? note-height octave? note-length?
+  octave = #'[\\',]+'
   accidental = '^' | '^^' | '_' | '__' | '='
   note-height = #'[A-Za-z]'
   note-length = #'/{0,2}[0-9]'
