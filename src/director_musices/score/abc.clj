@@ -1,8 +1,20 @@
 (ns director-musices.score.abc
   (:require [director-musices.util :as util]
             [director-musices.score.ui :as ui]
+            [clojure.string :as cstr]
             [clojure.java.io :as jio]
             [instaparse.core :as insta]))
+
+(defn remove-comments [string]
+  (cstr/replace string #"%.*?(\n|$)" "\n"))
+
+(defn concat-backslash-lines [string]
+  (cstr/replace string #"\\[ \t]*\n" ""))
+
+(defn prepare-input [string]
+  (-> string
+      remove-comments
+      concat-backslash-lines))
 
 (def parser-string
   "
@@ -105,7 +117,8 @@
        :out))
 
 (defn parse-abc [string]
-  (let [parsed (rest (parser string))
+  (let [string (prepare-input string)
+        parsed (rest (parser string))
         env (parse-descriptors (first parsed))
         track (parse-track env (second parsed))]
     {:env env
