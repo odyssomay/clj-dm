@@ -59,9 +59,6 @@
 ;;;;
 ;;;; Parse descriptors
 
-(defn remove-whitespace [elements]
-  (remove (fn [[type]] (= type :whitespace)) elements))
-
 (defn parse-descriptors [descriptors]
   (let [descriptors (->> descriptors
                          rest
