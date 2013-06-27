@@ -244,8 +244,8 @@
         score-views (map score-view (range (glue/get-track-count)))
         mxr (mixer/mixer reload-later!)
         s-p (ssw/top-bottom-split
-              (util/scrollable mxr)
-              (util/scrollable p)
+              (ssw/config! (util/scrollable mxr) :minimum-size [0 :by 0])
+              (ssw/config! (util/scrollable p) :minimum-size [0 :by 0])
               :divider-location 0
               :one-touch-expandable? true
               :border nil)
