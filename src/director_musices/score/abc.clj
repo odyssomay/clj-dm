@@ -29,7 +29,7 @@
   descriptor = #'[A-Z]:[^\\n]*'
   
   key = <('K:' spaces)> key-letter key-accidental? <spaces> major-minor?
-  key-letter = #'[A-G]'
+  key-letter = #'[A-G]|(none)'
   key-accidental = '#' | 'b'
   major-minor = 'major' | 'm' | 'minor'
   
@@ -76,6 +76,7 @@
     ; None
     "C" nil
     "Am" nil
+    "none" nil
     
     ; Sharps
     "G" {"F" 1}
