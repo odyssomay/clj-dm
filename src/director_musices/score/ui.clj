@@ -272,11 +272,7 @@
       (concat [[(draw-position/get-view position-component)
                 "pos 0 0 100% 100%"]
                [position-setter-component "span"]]
-        (interleave (map #(vector (:view %) "span") score-views)
-                    (take (count score-views)
-                          (repeatedly #(vec [(ssw/separator
-                                               :orientation :horizontal)
-                                             "growx, span"]))))
+        (map #(vector (:view %) "span") score-views)
         [[:fill-v "growy"]]))
     (player/listen-to-position
       (fn [position]
