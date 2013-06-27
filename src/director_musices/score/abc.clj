@@ -158,7 +158,10 @@
     1))
 
 (defn parse-note-length [default note-length]
-  (* default (parse-note-length-mod note-length)))
+  (let [value (* default (parse-note-length-mod note-length))]
+    (if (ratio? value)
+      value
+      (int value))))
 
 (defn parse-accidental* [accidental]
   (case accidental
