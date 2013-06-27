@@ -241,9 +241,14 @@
 
 (defn update-score-panel []
   (let [p (ssw-mig/mig-panel :constraints ["insets 0, gap 0"])
-        s-p (ssw/scrollable p :border nil)
         score-views (map score-view (range (glue/get-track-count)))
         mxr (mixer/mixer reload-later!)
+        s-p (ssw/top-bottom-split
+              (util/scrollable mxr)
+              (util/scrollable p)
+              :divider-location 0
+              :one-touch-expandable? true
+              :border nil)
         position-component (draw-position/position-component
                              (:track-component (first score-views)))
         position-setter-component
@@ -252,25 +257,7 @@
           (:view (first score-views))
           player/position!)
         view (ssw-mig/mig-panel :items [[s-p "grow"]]
-                                :constraints ["insets 0, gap 0, fill"])
-        clear-view (fn [] (.removeAll view))
-        
-        to-score (ssw/action
-                   :handler
-                   (fn [l] (ssw/config!
-                             view :items [[s-p "grow"]]))
-                   :name "score"
-                   :tip "Show score")
-        mxr-view (ssw-mig/mig-panel :items [[to-score "aligny top"]
-                                            [mxr "align left, aligny top"]]
-                                    :constraints ["insets 0, fill"])
-        to-mixer (ssw/action
-                   :handler
-                   (fn [l] (ssw/config!
-                             view :items [[(ssw/scrollable
-                                             mxr-view :border nil) "grow"]]))
-                   :name "mixer"
-                   :tip "Show mixer")]
+                                :constraints ["insets 0, gap 0, fill"])]
     (add-scale-x-listeners score-views)
     (draw-track/on-state-change
       (:track-component (first score-views))
@@ -282,8 +269,7 @@
            (redraw-component! c))))
     (ssw/config!
       p :items
-      (concat [[to-mixer "pos 0 0"]
-               [(draw-position/get-view position-component)
+      (concat [[(draw-position/get-view position-component)
                 "pos 0 0 100% 100%"]
                [position-setter-component "span"]]
         (interleave (map #(vector (:view %) "span") score-views)
@@ -297,8 +283,6 @@
         (ssw/invoke-later
           (draw-position/set-position-indicator
             position-component position))))
-    (.setUnitIncrement (.getVerticalScrollBar s-p) 10)
-    (.setUnitIncrement (.getHorizontalScrollBar s-p) 20)
     (ssw/config! (global/get-score-panel) :items [view])
     view))
 

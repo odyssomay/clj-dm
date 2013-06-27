@@ -151,3 +151,9 @@
 (defn button-label [on-click & options]
   (let [l (apply ssw/label options)]
     (configure-button-label l on-click)))
+
+(defn scrollable [component]
+  (let [s (ssw/scrollable component :border nil)]
+    (.setUnitIncrement (.getVerticalScrollBar s) 10)
+    (.setUnitIncrement (.getHorizontalScrollBar s) 20)
+    s))
