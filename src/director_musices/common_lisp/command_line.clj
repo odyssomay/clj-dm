@@ -7,9 +7,8 @@
   (:import java.awt.event.KeyEvent))
 
 (def cl-panel (ssw-mig/mig-panel))
-(def frame (ssw/dialog :content cl-panel
-                       :size [500 :by 500]
-                       :options []))
+(def frame (ssw/frame :content cl-panel
+                      :size [500 :by 500]))
 
 (defn init []
   (let [history (atom '(""))
