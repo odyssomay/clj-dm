@@ -159,6 +159,7 @@
                "active-p" :bool
                "trackname" :string
                "instrument-type" :string
+               "midi-channel" :int
                "midi-initial-program" :mip
                "synth" :synth
                :native)
@@ -167,5 +168,6 @@
                 :string (str "\"" value "\"")
                 :synth (str "(make-synth \"" value "\")")
                 :mip (read-string (re-find #"[0-9]+" value))
+                :int (str (int value))
                 :native (str value))]
     (glue/eval-dm (str "(setf " (property-acc id property) " " value ")"))))
