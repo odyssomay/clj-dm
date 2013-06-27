@@ -25,7 +25,7 @@
 (def parser-string
   "
   S = descriptors (voices | track)
-  descriptors = (descriptor | key | <whitespace>)+
+  descriptors = (descriptor | key | voice-descriptor | <whitespace>)+
   descriptor = #'[A-Z]:[^\\n]*'
   
   key = <('K:' spaces)> key-letter key-accidental? <spaces> major-minor?
@@ -33,8 +33,9 @@
   key-accidental = '#' | 'b'
   major-minor = 'major' | 'm' | 'minor'
   
+  voice-descriptor = <('V:' spaces)> voice-id <#'[^\\n]*'>
   voices = (voice | <whitespace>)+
-  voice = <'[V:'> voice-id ']' track
+  voice = <'[V:'> voice-id <']'> track
   voice-id = #'\\w+'
   
   track = (note | bar | phrase-mark | <whitespace>)+
@@ -72,8 +73,10 @@
     [:K (str key-letter key-accidental major-minor)]))
 
 (defn key->key-modifiers [k]
+  (println k)
   (case k
     ; None
+    nil nil
     "C" nil
     "Am" nil
     "none" nil
@@ -124,17 +127,19 @@
 (defn parse-descriptor [v]
   (case (first v)
     :descriptor (parse-descriptor* (second v))
-    :key (parse-key (rest v))))
+    :key (parse-key (rest v))
+    nil))
 
 (defn descriptors->env [m]
   {:title (:T m)
-   :default-note-length (read-string (:L m))
+   :default-note-length (read-string (or (:L m) "1/8"))
    :key-modifiers (key->key-modifiers (:K m))})
 
 (defn parse-descriptors [descriptors]
   (->> descriptors
        rest
        (map parse-descriptor)
+       (remove nil?)
        (into {})
        descriptors->env))
 
@@ -226,18 +231,57 @@
                 :out []})
        :out))
 
+(defn voice->map [voice]
+  {:voice-id (second (first voice))
+   :track (rest (second voice))})
+
+(defn merge-voices [m voice]
+  (let [id (:voice-id voice)
+        prev-voice (get m id nil)]
+    (assoc m id (concat prev-voice (:track voice)))))
+
+(defn voice-order [voices]
+  (->> voices
+       (map :voice-id)
+       (reduce (fn [{:keys [out prev-ids] :as m} voice-id]
+                 (if (contains? prev-ids voice-id)
+                   m
+                   {:out (conj out voice-id)
+                    :prev-ids (conj prev-ids voice-id)}))
+               {:out [] :prev-ids #{}})
+       :out))
+
+(defn parse-voice [env voice]
+  (parse-track env voice))
+
+(defn parse-voices* [env voices]
+  (let [voices (->> voices
+                    (map rest)
+                    (map voice->map))
+        voice-order (voice-order voices)
+        tracks (->> voices
+                    (reduce merge-voices {}))]
+    (for [voice-id voice-order]
+      (parse-voice env (get tracks voice-id)))))
+
+(defn parse-voices [env raw]
+  (let [track-or-voices (first raw)]
+    (if (= (first track-or-voices) :track)
+      [(parse-track env track-or-voices)]
+      (parse-voices* env (rest track-or-voices)))))
+
 (defn parse-abc [string]
   (let [string (prepare-input string)
         parsed (rest (parser string))
         env (parse-descriptors (first parsed))
-        track (parse-track env (second parsed))]
+        voices (parse-voices env (rest parsed))]
     {:env env
-     :track track}))
+     :voices voices}))
 
 ;;;;
 ;;;; Create string output
 
-(defn track->dm [notes]
+(defn notes->dm [notes]
   (reduce (fn [prev note]
             (str prev (pr-str note) "\n"))
           ""
@@ -253,9 +297,12 @@
  :synth \"SBlive\"
 ")
 
+(defn track->dm [notes]
+  (str track-default (notes->dm notes) "\n"))
+
 (defn abc->dm [string]
   (let [parsed (parse-abc string)]
-    (str track-default (track->dm (:track parsed)))))
+    (apply str (map track->dm (:voices parsed)))))
 
 ;;;;
 ;;;; Menu
@@ -287,10 +334,35 @@
   efe edB | dBA ABd | efe edB | gdB ABd |
   efe edB | d2d def | gfe edB |1 dBA ABd :|2 dBA AFD |]")
 
+(def test-voices-input
+  "X:1
+  T:Zocharti Loch
+  C:Louis Lewandowski (1821-1894)
+  M:C
+  Q:1/4=76
+  %%score (T1 T2) (B1 B2)
+  V:T1           clef=treble-8  name=\"Tenore I\"   snm=\"T.I\"
+  V:T2           clef=treble-8  name=\"Tenore II\"  snm=\"T.II\"
+  V:B1  middle=d clef=bass      name=\"Basso I\"    snm=\"B.I\"
+  V:B2  middle=d clef=bass      name=\"Basso II\"   snm=\"B.II\"
+  K:Gm
+  %            End of header, start of tune body:
+  % 1
+  [V:T1]  (B2c2 d2g2)  | f6e2      | (d2c2 d2)e2 | d4 c2z2 |
+  [V:T2]  (G2A2 B2e2)  | d6c2      | (B2A2 B2)c2 | B4 A2z2 |
+  [V:B1]       z8      | z2f2 g2a2 | b2z2 z2 e2  | f4 f2z2 |
+  [V:B2]       x8      |     x8    |      x8     |    x8   |
+  % 5
+  [V:T1]  (B2c2 d2g2)  | f8        | d3c (d2fe)  | H d6    ||
+  [V:T2]       z8      |     z8    | B3A (B2c2)  | H A6    ||
+  [V:B1]  (d2f2 b2e'2) | d'8       | g3g  g4     | H^f6    ||
+  [V:B2]       x8      | z2B2 c2d2 | e3e (d2c2)  | H d6    ||")
+
 (defn run-test []
-  ;(parser test-input)
+  ;(parser (prepare-input test-voices-input))
+  
   ;(second (parser test-input))
-  (parse-abc test-input)
+  ;(parse-abc test-input)
   ;(parse-element (parser test-input))
-  ;(abc->dm test-input)
+  (abc->dm test-voices-input)
   )
