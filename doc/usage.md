@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Director Musices - Usage
+title: Director Musices · Usage
 ---
 
 # Using director musices

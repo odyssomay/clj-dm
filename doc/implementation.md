@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Director Musices - Implementation details
+title: Director Musices · Implementation details
 ---
 
 # Implementation Details
