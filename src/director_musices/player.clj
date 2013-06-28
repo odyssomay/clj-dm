@@ -62,6 +62,7 @@
   (reset! position-listener f))
 
 (defn listen-to-running [f]
+  (f false)
   (reset! running-listener f))
 
 (defn position! [x]
