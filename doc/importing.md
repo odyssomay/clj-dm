@@ -3,6 +3,10 @@ layout: default
 title: Director Musices · Importing
 ---
 
+## Midi
+
+Midi files are imported using the menu *File->Import score from midi file...*
+
 ## Abc
 
 Abc files are imported using the menu *File->Import score from abc file...*
