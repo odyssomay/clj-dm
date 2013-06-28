@@ -209,8 +209,7 @@
   (let [{:keys [accidental note-height octave] :as m} (into {} (rest note))
         note-height (parse-note-height env note-height accidental octave)
         note-length (parse-note-length (:default-note-length env)
-                                       (:note-length m))
-        note (list 'n (list note-height note-length))]
+                                       (:note-length m))]
     (-> (list 'n (list note-height note-length))
         (add-bar bar)
         (add-rest note-height))))
