@@ -73,7 +73,6 @@
     [:K (str key-letter key-accidental major-minor)]))
 
 (defn key->key-modifiers [k]
-  (println k)
   (case k
     ; None
     nil nil
