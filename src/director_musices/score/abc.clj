@@ -216,7 +216,7 @@
         (add-rest note-height))))
 
 (defn parse-track [env track]
-  (->> (rest track)
+  (->> track
        (reduce (fn [{:keys [prev bars out] :as m} [type :as v]]
                  (case type
                    :note
@@ -269,7 +269,7 @@
 (defn parse-voices [env raw]
   (let [track-or-voices (first raw)]
     (if (= (first track-or-voices) :track)
-      [(parse-track env track-or-voices)]
+      [(parse-track env (rest track-or-voices))]
       (parse-voices* env (rest track-or-voices)))))
 
 (defn parse-abc [string]
