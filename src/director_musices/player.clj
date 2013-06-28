@@ -40,22 +40,29 @@
 ;; Listener
 
 (def position-listener (atom nil))
+(def running-listener (atom (fn [& _])))
 
 (defn fire-position-listener! [s]
   (when-let [f @position-listener]
     (f (position s))))
 
 (util/thread
-  (loop []
+  (loop [prev-running? false]
     (Thread/sleep 25)
-    (when (sequencer-ready?)
-      (let [s @sequencer]
-        (when (.isRunning s)
-          (fire-position-listener! s))))
-    (recur)))
+    (if (sequencer-ready?)
+      (let [s @sequencer
+            running? (.isRunning s)]
+        (when running? (fire-position-listener! s))
+        (when-not (= running? prev-running?)
+          (@running-listener running?))
+        (recur running?))
+      (recur prev-running?))))
 
 (defn listen-to-position [f]
   (reset! position-listener f))
+
+(defn listen-to-running [f]
+  (reset! running-listener f))
 
 (defn position! [x]
   (when (sequencer-ready?)
