@@ -158,42 +158,37 @@
                 help-menu]))
 
 (defn start-pause-action []
-  (let [a (score-global/a-if-score
-            :icon (resource "icons/play.png") :tip "play"
-            :handler (fn [_]
-                       (util/thread
-                         (score-ui/reload-player-if-changed!)
-                         (player/start!))))
-        play! (fn []
-                (util/thread
-                  (score-ui/reload-player-if-changed!)
-                  (player/start!))
-                (ssw/config! a
-                             :icon (resource "icons/pause.png")
-                             :tip "pause"))
-        pause! (fn []
-                 (player/pause!)
-                 (ssw/config! a
-                              :icon (resource "icons/play.png")
-                              :tip "play"))
+  (let [a (score-global/a-if-score)
+        show-play
+        (fn []
+          (ssw/config! a
+            :icon (resource "icons/play.png")
+            :tip "pause"
+            :handler
+            (fn [_] (util/thread
+                      (score-ui/reload-player-if-changed!)
+                      (player/start!)))))
+        show-pause
+        (fn []
+          (ssw/config! a
+            :icon (resource "icons/pause.png")
+            :tip "play"
+            :handler (fn [_] (player/pause!))))
         stop-action
         (score-global/a-if-score
           :icon (resource "icons/stop.png")
           :handler (fn [_]
-                     (pause!)
                      (player/stop!))
           :tip "stop")
         config-action
         (ssw/action :icon (resource "icons/gear.png")
                     :handler (fn [_]
-                               (pause!)
+                               (player/pause!)
                                (player/choose-midi-device))
                     :tip "Select midi device")]
-    (ssw/config!
-      a :handler (fn [_]
-                   (when-let [s (player/get-sequencer)]
-                     (if (.isRunning s)
-                       (pause!) (play!)))))
+    (player/listen-to-running
+      (fn [running?]
+        (if running? (show-pause) (show-play))))
     {:stop stop-action
      :play a
      :config config-action}))
