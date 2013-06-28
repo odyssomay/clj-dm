@@ -37,9 +37,8 @@
         (.scale g 1.15 1.15))
       )
     (cond
-      (= (:length note) 4) (do (.translate g 0.0 0.2) (.scale g 1.05 1.05)) 
-      :else (do (.scale g 0.28 0.28) (.translate g 0 -74))
-      )))
+      (= (:nlength note) 1) (do (.translate g 0.0 0.2) (.scale g 1.05 1.05))
+      :else (do (.scale g 0.28 0.28) (.translate g 0 -74)))))
 
 (defn draw-bar [g {:keys [scale-x]}]
   (let [x (max -5 (min -1 (* -50 scale-x)))]
