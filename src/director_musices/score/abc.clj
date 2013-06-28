@@ -8,6 +8,9 @@
 ;;;;
 ;;;; Prepare string
 
+(defn remove-windows-newlines [string]
+  (cstr/replace string #"(\r\n)|\r" "\n"))
+
 (defn remove-comments [string]
   (cstr/replace string #"%.*?(\n|$)" "\n"))
 
@@ -16,6 +19,7 @@
 
 (defn prepare-input [string]
   (-> string
+      remove-windows-newlines
       remove-comments
       concat-backslash-lines))
 
