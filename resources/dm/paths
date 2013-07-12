@@ -21,6 +21,7 @@ dm:lib-core
 dm
  init
 dm:rules
+ articulation
  frules1
  frules2
  Intonation
