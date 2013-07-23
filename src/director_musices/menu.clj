@@ -11,6 +11,7 @@
             (director-musices.score
               [abc :as abc]
               [global :as score-global]
+              [glue :as score-glue]
               [ui :as score-ui])
             [director-musices.rulepalette.ui :as rule-ui]
             (seesaw
@@ -115,6 +116,11 @@
                  :handler (fn [& _]
                             (run-action "Resetting sound level"
                               (glue/eval-dm "(reset-sound-level)"))))
+     (ssw/action :name "Reset Score"
+                 :tip "Resets the score to its initial state."
+                 :handler (fn [& _]
+                            (run-action "Resetting score"
+                              (glue/eval-dm "(reset-music)"))))
      (ssw/action :name "Rebar"
                  :handler (fn [& _] (run-action "Rebaring"
                                       (glue/eval-dm "(rebar)"))))
