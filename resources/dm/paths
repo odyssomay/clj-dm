@@ -24,10 +24,13 @@ dm:rules
  articulation
  frules1
  frules2
- Intonation
  FinalRitard
+ Intonation
+ noise
  Punctuation
  phrasearch
+ swing
  SyncOnMel
+ violinvibrato
  accent-analysis
  accent-rule-ebrp

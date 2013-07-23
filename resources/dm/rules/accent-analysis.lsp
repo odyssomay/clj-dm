@@ -211,6 +211,30 @@
    (then
     (set-this :valley t) )) )
 
+;; mark on all notes except repeats
+(defun mark-mel-peak-and-valley ()
+  (rem-all :peak)(rem-all :valley)
+  (each-note-if
+   (not (first?))
+   (not (last?))   
+   (not (prev 'rest))
+   (not (this 'rest))
+   ;(not (next 'rest))
+   (> (this-f0) (prev-f0))
+   ;(>= (this-f0) (next-f0))
+   (then
+    (set-this :peak t) ))
+  (each-note-if
+   (not (first?))
+   (not (last?))   
+   (not (prev 'rest))
+   (not (this 'rest))
+   ;(not (next 'rest))
+   (< (this-f0) (prev-f0))
+   ;(<= (this-f0) (next-f0))
+   (then
+    (set-this :valley t) )) )
+
 (defun mark-mel-salience-dev-from-mean ()
   (rem-all :melsal1)
   (each-track
@@ -221,16 +245,16 @@
       (incf mean-f0 (this-f0))
       (incf n-f0) )
      (setq mean-f0 (float (/ mean-f0 n-f0)))
-     (print mean-f0) 
-   (each-note-if
-    (this :peak)
-    (then
-     (set-this :melsal1 (float (/ (max 0 (- (this-f0) mean-f0)) 4))) ))
-   (each-note-if
-    (this :valley)
-    (then
-     (set-this :melsal1 (float (/ (max 0 (- mean-f0 (this-f0))) 12))) ))
-   )))
+     (print-ll "mean f0 of this track = " mean-f0) 
+     (each-note-if
+      (this :peak)
+      (then
+       (set-this :melsal1 (float (/ (max 0 (- (this-f0) mean-f0)) 4))) ))
+     (each-note-if
+      (this :valley)
+      (then
+       (set-this :melsal1 (float (/ (max 0 (- mean-f0 (this-f0))) 12))) ))
+     )))
 
 (defun mark-mel-salience-prev-interval ()
   (rem-all :melsal2)
@@ -261,8 +285,85 @@
   (each-note-if
    (or (this :peak) (this :valley))
    (then
-    (set-this 'accent-c (min 5 (round (* 1.5 (* (this :melsal1) (this :melsal2))))))
-    )))
+    (let ((sal (min 5 (round (* 1.5 (* (this :melsal1) (this :melsal2)))))))
+    (if (> sal 0) (set-this 'accent-c sal))
+      ))))
+
+;;--- new melodic accent from Richard mail 130513------
+
+;;;1.       No need to mark peaks and valleys. Start by treating all notes equal. We call that musical democracy;-)
+
+;;;2.       :melsal1 is merely the distance of each tone from the mean pitch in semitones. Always positive of course, 
+;;;         to do this you will take the "absolute value" of the difference. (Maybe we will have to divide this value by 2 
+;;;          for pitches below the mean but we can experiment with that later, first I would leave it out and see what happens.)
+
+;;;3.       :melsal2 is the size of the preceding leap in semitones. Again, the absolute value. 
+;;;         (again, we might later decide to divide by two for falling intervals. But not yet)
+
+;;;4.       Just multiply :melsal1 and :melsal2 together. The result is the melodic accent. Every tone in the whole melody gets
+;;;         a value.
+
+;;;5.       Maybe we should subtract a threshold, and if the result is negative just make it zero. 
+;;;         But I would like to see how steps 1-4 work without doing that. Might be an unnecessary complexity.
+
+#|
+(defun mark-melodic-accent-2 ()
+  (rem-all 'accent-c)
+  (rem-all :melsal1)
+  (rem-all :melsal2)
+  (rem-all :melsal3)
+  (each-track
+   ;compute mean f0 for the track
+   (let ((mean-f0 0) (n-f0 0))
+     (each-note-if
+      (this 'f0)
+      (incf mean-f0 (this-f0))
+      (incf n-f0) )
+     (setq mean-f0 (float (/ mean-f0 n-f0)))
+     (print-ll "mean f0 of this track = " mean-f0) 
+     (each-note-if
+      (not (first?))
+      (not (this 'rest))
+      (not (prev 'rest))
+      (then
+       (set-this :melsal1 (abs (- (this-f0) mean-f0)))
+       (set-this :melsal2 (abs (- (this-f0) (prev-f0))))
+       (set-this :melsal3 (* (this :melsal1) (this :melsal2)))
+       (let ((salience (round (/ (this :melsal3) 15.0))))
+         (if (> salience 0) (set-this 'accent-c salience)) )
+       )))))
+|#
+
+(defun mark-melodic-accent-2 ()
+  (rem-all 'accent-c)
+  (rem-all :melsal1)
+  (rem-all :melsal2)
+  (rem-all :melsal3)
+  (each-track
+   ;compute mean f0 for the track
+   (let ((mean-f0 0) (n-f0 0))
+     (each-note-if
+      (this 'f0)
+      (incf mean-f0 (this-f0))
+      (incf n-f0) )
+     (setq mean-f0 (float (/ mean-f0 n-f0)))
+     (print-ll "mean f0 of this track = " mean-f0) 
+     (each-note-if
+      (not (first?))
+      (not (this 'rest))
+      (not (prev 'rest))
+      (then
+       (let ((f0-dist-mean (- (this-f0) mean-f0))
+             (f0-int (- (this-f0) (prev-f0))) )
+         (if (> f0-dist-mean 0) (set-this :melsal1 f0-dist-mean))      ;above mean
+         (if (<= f0-dist-mean 0) (set-this :melsal1 (abs (* f0-dist-mean 0.7)))) ;below mean
+         (if (> f0-int 0) (set-this :melsal2 f0-int))                  ;rising interval
+         (if (<= f0-int 0) (set-this :melsal2 (abs (* f0-int 0.7)))) ) ;falling interval
+         (set-this :melsal3 (* (this :melsal1) (this :melsal2)))
+       (let ((salience (round (/ (this :melsal3) 15.0))))
+         (if (> salience 0) (set-this 'accent-c salience)) )
+       )))))
+
 
 ;------------- harmonic accent -----------------------------
 

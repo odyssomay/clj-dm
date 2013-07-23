@@ -15,6 +15,7 @@
 ;;;061003/af added bank select
 ;;;061018/af added reverb and pan
 ;;;091013/af test new media player - problems with distribution on non-english systems......
+;;;130722/af added simplified pedal: pedal-down, pedal-up
 
 (in-package :dm)
 
@@ -645,6 +646,8 @@
           (vol  (this 'vol))
           (at  (this 'at)) ;attack time
           (pedal-perf (this 'pedal-perf))
+          (pedal-down (this 'pedal-down))
+          (pedal-up (this 'pedal-up))
           (shape-rate (get-dm-var 'PLAY-TIME-SHAPE-SAMPLING-RATE))
           )
       ;(print va)
@@ -704,7 +707,11 @@
            (loop for time from 0 to (get-last-x-value pedal-perf) by shape-rate do
             (newr l (list (round (/ (+ startt time) tempo))
                           synt chan 'set-pedal-perf (get-value-at pedal-perf time) )))
-           (newr l (list (round (/ startt tempo)) synt chan 'set-pedal-perf pedal-perf)) ))
+          (newr l (list (round (/ startt tempo)) synt chan 'set-pedal-perf pedal-perf)) ))
+      (if pedal-down
+           (newr l (list (+ pedal-down (round (/ startt tempo))) synt chan 'set-pedal-perf 1)) )
+      (if pedal-up
+           (newr l (list (+ pedal-up (round (/ startt tempo))) synt chan 'set-pedal-perf 0)) )
       )))
 
 (defun send-voice-par-before-noton ()

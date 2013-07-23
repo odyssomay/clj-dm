@@ -21,6 +21,7 @@
 ;; 110416/af added Yamaha Clavinova CLP-370, all synt def now only in this file
 ;; 121202/af added Yamaha P90
 ;; 130502/af added accent analysis midi output
+;; 130712/af added disklavier e3
 
 (in-package :dm)
 
@@ -38,7 +39,8 @@
         ("Kontakt2-wind" . synt-Kontakt2-wind)
         ("Technics-SX-P30" . synt-Technics-SX-P30)
         ("Yamaha-Clavinova-CLP370" . synt-Yamaha-Clavinova-CLP370)
-        ("Yamaha-Disklavier-2" . synt-Yamaha-Disklavier-2)
+        ("Yamaha-Disklavier-e3" . synt-Yamaha-Disklavier-e3)
+        ;("Yamaha-Disklavier-2" . synt-Yamaha-Disklavier-2)
         ("Yamaha-P90" . synt-Yamaha-P90)       
         ("Proteus" . synt-Proteus)
         ;("SampleCell" . synt-SampleCell)
@@ -64,7 +66,8 @@
         "Kontakt2-wind"
         "Technics-SX-P30"
         "Yamaha-Clavinova-CLP370"
-        "Yamaha-Disklavier-2"
+        "Yamaha-Disklavier-E3"
+        ;"Yamaha-Disklavier-2"
         "Yamaha-P90"
         "Proteus"
         ;"SampleCell"
@@ -1387,6 +1390,48 @@
                              (* 0.1802 (expt vol 2)) 
                          (* 7.1447 vol) 
                          127.0)))
+ |#
+
+;----------- Yamaha Disklavier E3 -----------------------------------------------------
+
+(defclass synt-yamaha-disklavier-e3 (synt) ())
+
+(defun synt-yamaha-disklavier-e3 () 
+   (make-instance 'synt-yamaha-disklavier-e3 :program-list *program-list-general-midi*))
+
+(defmethod print-object ((self synt-yamaha-disklavier-e3) stream)
+  (format stream "(synt-disklavier-e3)") )
+
+;;y = -0.0023x3 + 0.051x2 + 3.8256x + 65.102
+(defmethod sl-to-vel ((synt synt-yamaha-disklavier-e3) sl)
+  (round (+ (* -0.0023 (expt sl 3))
+            (* 0.051 (expt sl 2)) 
+            (* 3.8256 sl) 
+            64.0) ))
+
+;; y = 3.631x + 83.064
+(defmethod set-vol ((synt synt-yamaha-disklavier-e3) vol time)
+   (setq vol (round  (+  (* 3.631 vol) 
+                         84)))
+   (midi-write-list 
+     (list (logior #xB0 (1- (channel synt)))
+       7                     
+       (cond
+           ((< vol 0) (warn "synt-yamaha-disklavier-e3 Underflow in volume") 0)
+           ((> vol 127) (warn "synt-yamaha-disklavier-e3 Overflow in volume") 127)
+           (t vol) ))
+     time ))
+
+#| for testing
+(defun foo (sl)
+  (round (+ (* -0.0023 (expt sl 3))
+            (* 0.051 (expt sl 2)) 
+            (* 3.8256 sl) 
+            64.0) ) )
+
+(defun foo (vol) 
+  (round  (+  (* 3.631 vol) 
+             84)))
  |#
 
 

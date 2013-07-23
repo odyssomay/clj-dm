@@ -8,6 +8,7 @@
 ;; 04/2001: af, added score-legato-last-note-art
 ;; 08/2001: af, removed 'set-this staccato t from the function score-legato-art1
 ;; 090422/af moved overall-articulation here
+;; 130722/af added pedalling
 
 
 (in-package "DM")
@@ -367,6 +368,39 @@
     (if (< (- (this 'dr) (this 'dro)) dr-min)
         (set-this 'dro (max 0 (- (this 'dr) dr-min))) ;set the boundary, if negative set zero
       )))))
-      
+
+
+;;--------------- simple pedalling-----------------------
+;;130722/af
+
+(defun piano-pedalling-simple (quant)
+  (let ((down? nil))
+    (each-note-if
+     (this 'pedal)
+     (then
+      (when (and (= (this 'pedal) 1) (not down?))
+        (set-this 'pedal-down (* quant 30))
+        (setq down? t) )
+      (when (and (= (this 'pedal) 0) down?)
+        (set-this 'pedal-up 0)
+        (setq down? nil) )
+      (when (and (= (this 'pedal) 1) down?)
+        (set-this 'pedal-up 0)
+        (set-this 'pedal-down (* quant 100))
+        (setq down? t) )
+      ))))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
       
       
