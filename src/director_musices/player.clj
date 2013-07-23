@@ -79,7 +79,7 @@
   (when (sequencer-ready?)
     (if (< (- (.getTickLength @sequencer) (.getTickPosition @sequencer)) 10)
       (.setTickPosition @sequencer 0))
-    (.start (Thread. (.start @sequencer)))
+    (util/thread (.start @sequencer))
     true))
 
 (defn stop! []
