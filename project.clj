@@ -6,11 +6,9 @@
                  [seesaw "1.4.3"]
                  [com.miglayout/miglayout "3.7.4"]
                  [abcl "1.1.1"]
-                 [com.kitfox.svg/svg-salamander "1.0"]
+                 [svg-salamander "1.0"]
                  [org.clojure/tools.cli "0.2.2"]
                  [com.taoensso/timbre "1.5.2"]
                  [instaparse "1.2.2"]]
-  :repositories [["svg-salamander"
-                  "https://bitbucket.org/W1M0/maven/raw/tip/2/"]]
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.2"]]}
              :jar {:main director-musices.main}})
