@@ -92,6 +92,9 @@
         img (if top-note?
               img
               (condp <= (:nlength note)
+                1 img
+                1/2 img
+                1/4 img
                 1/8 "quarter"
                 1/16 "quarter"
                 1/32 "quarter"
