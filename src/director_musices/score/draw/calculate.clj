@@ -10,25 +10,41 @@
     (map #(assoc % :rest (rest? %))
          (:notes track))))
 
-(defn note-height [track note]
-  (let [p (:pitch note)
-        ;; HACK - fix for chords
-        p (if (list? p) (first p) p)
-        h (- 9
-             (case (first p)
+(defn pitch->height [track pitch]
+  (let [h (- 9
+             (case (first pitch)
                \C 0, \D 1, \E 2, \F 3
                \G 4, \A 5, \B 6)
-             (* 7 (- (read-string (str (last p))) 4)))]
+             (* 7 (- (read-string (str (last pitch))) 4)))]
     (case (:clef track)
       \G h
       \F (- h 12))))
 
+(defn note-height [track note]
+  (let [p (:pitch note)
+        p (if (list? p) (first p) p)]
+    (pitch->height track p)))
+
+(defn height->y-offset [height]
+  (* height (/ line-separation 2)))
+
 (defn note-y-offset [note]
-  (* (:height note) (/ line-separation 2)))
+  (height->y-offset (:height note)))
 
 (defn note-hollow? [note]
   (not (contains? #{1 1/2 1/4 1/8 1/16 1/32}
                   (:nlength note))))
+
+(defn note-chord [track note]
+  (let [pitches (:pitch note)]
+    (if (list? pitches)
+      (seq
+        (for [pitch (rest pitches)]
+          (let [height (pitch->height track pitch)]
+            {:pitch pitch
+             :height height
+             :y-offset (height->y-offset height)
+             :nlength (:nlength note)}))))))
 
 (defn note-data [track note]
   (if (:rest note)
@@ -36,6 +52,7 @@
     (let [note (assoc note :height (note-height track note))]
       (assoc note
         :y-offset (note-y-offset note)
+        :chord (note-chord track note)
         :hollow? (note-hollow? note)))))
 
 (defn add-absolute-lengths [notes]

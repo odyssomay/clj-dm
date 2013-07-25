@@ -80,16 +80,23 @@
     (.setComposite g (java.awt.AlphaComposite/getInstance
                        java.awt.AlphaComposite/SRC_OVER 0.5))))
 
-(defn draw-note [g note {:keys [scale] :as options}]
-  (let [img
-        (condp <= (:nlength note)
-          1 "whole"
-          1/2 "half"
-          1/4 "quarter"
-          1/8 "eighth"
-          1/16 "sixteenth"
-          1/32 "thirtysecond"
-          "thirtysecond")
+(defn draw-note [g note top-note? {:keys [scale] :as options}]
+  (let [img (condp <= (:nlength note)
+              1 "whole"
+              1/2 "half"
+              1/4 "quarter"
+              1/8 "eighth"
+              1/16 "sixteenth"
+              1/32 "thirtysecond"
+              "thirtysecond")
+        img (if top-note?
+              img
+              (condp <= (:nlength note)
+                1/8 "quarter"
+                1/16 "quarter"
+                1/32 "quarter"
+                img))
+        ; img (if (#{1/8 1/16 1/32} (:nlength note)))
         gc (.create g)]
     (if (:rest note)
       (do (transform-for-note gc note options)
@@ -112,7 +119,10 @@
         (.translate gc (double (* (:x-offset note) scale-x)) (double 0))
         (if (:bar note)
           (draw-bar gc options))
-        (draw-note gc note options)))))
+        (let [sorted-notes (sort-by :y-offset (conj (:chord note) note))]
+          (draw-note gc (first sorted-notes) true options)
+          (doseq [n (rest sorted-notes)]
+            (draw-note gc n false options)))))))
 
 (defn draw-clef [g clef]
   (let [gc (.create g)]
