@@ -10,7 +10,7 @@ title: Director Musices · Changelog
 * Added support for chords - multiple notes at the same position in one track.
 * Added menu item *Edit->Reset Performance* that resets the performance (score) to before any rulepalettes were loaded.
 * Fixed whole note scaling that would previously make whole notes appear as dots.
-* Added experimental [abc]http://en.wikipedia.org/wiki/ABC_notation) importing. See [importing](importing.html) for more info.
+* Added experimental [abc](http://en.wikipedia.org/wiki/ABC_notation) importing. See [importing](importing.html) for more info.
 * When opening a rulepalette, the new tab is automatically switched to.
 * Fixed slow rulepalette scrollbars.
 * The tab name is now changed after saving a rulepalette.
