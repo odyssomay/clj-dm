@@ -48,6 +48,7 @@
   (set-dur-from-tempo)
   (mark-bar)
   (convert-old-note-format)
+  (convert-note-value-to-dots)
   ;(convert-chord)
   (if (get-dm-var 'init-music-include-dynamics)
      (set-dynamics 1))
@@ -169,6 +170,7 @@
               )))
   (set-dur-from-tempo)
   (mark-bar)
+  (convert-note-value-to-dots)
   ;(convert-chord)
   (if (get-dm-var 'init-music-include-dynamics) (set-dynamics 1))
   ;(set-first 'va 0)
@@ -710,6 +712,7 @@
 ;; a simple utility for converting notevalues from midifile to the old format
 ;; do not consider composite notevalues i.e. a list of notevalues
 ;; or double dotted
+;; working only with old format with consed note list
 (defun midinotevalue-to-notevalue ()
   (each-note-if
    (listp (cdr (this 'n)))
@@ -750,6 +753,19 @@
 
 (defun old-to-new-note (note)
   (list (car note) (/ 1 (cdr note))) )
+
+;; convert ex 3/8 to 1/4 and mark dot 1
+;; 130727/af
+(defun convert-note-value-to-dots ()
+   (each-note-if
+    (listp (cdr (this 'n)))  ;new notation
+    (= 3 (numerator (cadr (this 'n)))) ;dotted
+    (member (denominator (cadr (this 'n))) '(2 4 8 16 32 64)) ;allowed division
+    (then
+     (set-this 'n (list (car (this 'n)) (/ 1 (/ (denominator (cadr (this 'n))) 2))))
+     (set-this 'dot 1)
+     )))
+     
 
                    
 ;;

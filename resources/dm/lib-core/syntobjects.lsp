@@ -39,7 +39,7 @@
         ("Kontakt2-wind" . synt-Kontakt2-wind)
         ("Technics-SX-P30" . synt-Technics-SX-P30)
         ("Yamaha-Clavinova-CLP370" . synt-Yamaha-Clavinova-CLP370)
-        ("Yamaha-Disklavier-e3" . synt-Yamaha-Disklavier-e3)
+        ("Yamaha-Disklavier-E3" . synt-Yamaha-Disklavier-e3)
         ;("Yamaha-Disklavier-2" . synt-Yamaha-Disklavier-2)
         ("Yamaha-P90" . synt-Yamaha-P90)       
         ("Proteus" . synt-Proteus)
