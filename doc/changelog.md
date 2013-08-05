@@ -5,6 +5,16 @@ title: Director Musices · Changelog
 
 # Changelog
 
+## 3.1.2
+
+* Added pitch difference graph (for singing).
+* Fixed rule option reading issue where *nil* in the options would not appear in the ui.
+* Fixed rule parameterless detection.
+
+## 3.1.1
+
+* Added accent rules. 
+
 ## 3.1.0
 
 * Added support for chords - multiple notes at the same position in one track.
