@@ -286,7 +286,7 @@
     (merge {:name rule-name
             :enabled? true
             :id (gensym rule-name)}
-           (if (contains? #{'T 'F 'NIL nil} (second l))
+           (if (contains? #{'T 'F 'NIL nil 't 'f} (second l))
              {:parameterless? true}
              {:v (second l)
               :options (.toLowerCase (apply str (interpose " " (drop 2 l))))}))))
