@@ -16,8 +16,11 @@
                         (- (/ (:dr %) (:ndr %))
                            1))
                 :range 31
-                :interval 3
-                }})
+                :interval 3}
+   :dc {:display "Pitch difference (in cent)"
+        :fn :dc
+        :range 51
+        :interval 5}})
 
 (defn get-available-properties [] (keys properties))
 (defn get-property-display-name [property]
