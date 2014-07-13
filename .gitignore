@@ -12,3 +12,4 @@ lein.bat
 # ignore lein stuff
 target
 .lein*
+.nrepl-port
