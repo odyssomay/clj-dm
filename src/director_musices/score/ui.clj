@@ -331,6 +331,7 @@
 (defn choose-and-save-score [& _]
   (if-let [f (util/choose-file
                :title "Save Score"
+               :filename (global/get-score-path)
                :type :save
                :file-ending "mus"
                :filters [score-filter])]
@@ -347,6 +348,7 @@
 (defn choose-and-save-performance [& _]
   (if-let [f (util/choose-file
                :title "Save Performance"
+               :filename (global/get-score-path)
                :type :save
                :file-ending "perf"
                :filters [perf-filter])]
@@ -355,6 +357,7 @@
 (defn choose-and-save-pdm [& _]
   (if-let [f (util/choose-file
                :title "Save pdm"
+               :filename (global/get-score-path)
                :type :save
                :file-ending "pdm"
                :filters [pdm-filter])]
@@ -375,6 +378,7 @@
 (defn choose-and-save-midi [& _]
   (if-let [f (util/choose-file
                :title "Save midi"
+               :filename (global/get-score-path)
                :type :save
                :file-ending "midi"
                :filters [midi-filter])]

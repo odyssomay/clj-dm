@@ -51,6 +51,7 @@
                  :title "Save Rulepalette"
                  :type :save
                  :file-ending "pal"
+                 :filename (get-name rulepalette)
                  :filters [["Rulepalette files (.pal)" ["pal"]]])]
       (let [out (str "(in-package \"DM\")\n\n"
                      "(set-dm-var 'all-rules '(\n"

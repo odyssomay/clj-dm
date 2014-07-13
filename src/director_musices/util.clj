@@ -57,15 +57,13 @@
   (defn choose-file [& {:as options}]
     (let [filters (map #(FileNameExtensionFilter.
                           (first %) (into-array (second %)))
-                       (:filters options))
-          current-file (if-let [f (.getSelectedFile fc)]
-                         (.getName f)
-                         "")]
+                       (:filters options))]
       (case (:type options)
         :open (.setSelectedFile fc (file ""))
         :save
         (.setSelectedFile
-          fc (coerce-file (.getSelectedFile fc)
+          fc (coerce-file (or (file (:filename options))
+                              (.getSelectedFile fc))
                           (first filters)
                           (:file-ending options)
                           true)))
